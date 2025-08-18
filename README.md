@@ -42,31 +42,33 @@ This package provides a clean interface for AI agents to communicate with the Le
 ## 🚀 Core Features
 
 - **Real-time streaming** via Centrifugo
-- **Backend communication** with Lexia
+- **Backend communication** with Lexia API
 - **Response formatting** for Lexia compatibility
 - **Data validation** with Pydantic models
-- **Error handling** and notifications
-- **FastAPI integration** with standard endpoints
-- **Environment variable management**
-- **API key handling**
+- **Error handling** and logging
+- **FastAPI integration** with standard endpoints (optional)
+- **Dynamic configuration** from request data
+- **Graceful fallback** when web dependencies aren't available
 
 ## 📁 Package Structure
 
 ```
 lexia/
-├── __init__.py             # Clean exports only
-├── models.py               # Lexia data models
+├── __init__.py             # Package exports with optional web imports
+├── models.py               # Lexia data models (ChatMessage, ChatResponse, Variable)
 ├── response_handler.py     # Response creation utilities
-├── unified_handler.py      # Single communication interface
+├── unified_handler.py      # Main communication interface
 ├── api_client.py           # HTTP communication with Lexia backend
 ├── centrifugo_client.py    # Real-time updates via Centrifugo
 ├── utils.py                # Platform utilities
-├── web/                    # FastAPI web framework utilities
+├── web/                    # FastAPI web framework utilities (optional)
 │   ├── __init__.py
 │   ├── app_factory.py
 │   └── endpoints.py
 └── requirements.txt        # Package dependencies
 ```
+
+**Note**: The `web/` module is optional and will gracefully fall back if FastAPI dependencies aren't available.
 
 ## 🚀 Usage Examples
 
@@ -116,11 +118,14 @@ lexia = LexiaHandler()
 # Stream AI response chunks
 lexia.stream_chunk(data, content)
 
-# Complete AI response
+# Complete AI response (handles all Lexia communication)
 lexia.complete_response(data, full_response)
 
 # Send error messages
 lexia.send_error(data, error_message)
+
+# Update Centrifugo configuration dynamically
+lexia.update_centrifugo_config(stream_url, stream_token)
 ```
 
 ### Data Models
@@ -129,9 +134,9 @@ Lexia's expected data formats:
 ```python
 from lexia import ChatMessage, ChatResponse, Variable
 
-# ChatMessage - Lexia's request format
+# ChatMessage - Lexia's request format with all required fields
 # ChatResponse - Lexia's expected response format  
-# Variable - Environment variables from Lexia
+# Variable - Environment variables from Lexia request
 ```
 
 ### Response Handler
@@ -139,10 +144,20 @@ Create Lexia-compatible responses:
 
 ```python
 from lexia import create_success_response
+from lexia.response_handler import create_complete_response
 
+# Create immediate success response
 response = create_success_response(
     response_uuid="uuid123",
     thread_id="thread456"
+)
+
+# Create complete response with usage info (used internally by LexiaHandler)
+complete_response = create_complete_response(
+    response_uuid="uuid123",
+    thread_id="thread456",
+    content="Full AI response",
+    usage_info={"prompt_tokens": 10, "completion_tokens": 50}
 )
 ```
 
@@ -184,7 +199,8 @@ async def process_message(data: ChatMessage):
         lexia.complete_response(data, response)
         
     except Exception as e:
-        lexia.send_error(data, str(e))
+        # Handle errors appropriately
+        print(f"Error processing message: {e}")
 
 # Add all standard Lexia endpoints
 add_standard_endpoints(
@@ -204,7 +220,7 @@ if __name__ == "__main__":
 ```
 Your AI Agent → LexiaHandler → Lexia Platform
      ↓              ↓              ↓
-  OpenAI/LLM   Communication   Real-time + Backend
+  AI/LLM Logic   Communication   Real-time + Backend
 ```
 
 Your AI agent focuses on AI logic, this package handles all Lexia communication complexity behind a clean interface.
@@ -283,6 +299,7 @@ def test_lexia_handler():
     assert hasattr(handler, 'stream_chunk')
     assert hasattr(handler, 'complete_response')
     assert hasattr(handler, 'send_error')
+    assert hasattr(handler, 'update_centrifugo_config')
 
 if __name__ == "__main__":
     pytest.main([__file__])
@@ -326,6 +343,7 @@ make publish
 3. **Platform Agnostic**: Your AI agent doesn't know about Lexia internals
 4. **Minimal Dependencies**: Only what's absolutely necessary
 5. **Easy Testing**: Simple, focused components
+6. **Dynamic Configuration**: Adapts to request-specific settings
 
 ## 🚀 Benefits
 
@@ -335,6 +353,7 @@ make publish
 - **Professional structure** - clean, organized code
 - **Fast development** - no complex integrations to manage
 - **Drop-in replacement** - copy folder and start using immediately
+- **Dynamic configuration** - adapts to different Lexia environments
 
 ## 📞 Support
 
@@ -346,7 +365,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Please feel free to submit a Pull Request. See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
 ## 📚 Documentation
 
