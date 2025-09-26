@@ -18,7 +18,7 @@ def read_requirements():
 
 setup(
     name="lexia",
-    version="1.1.0",
+    version="1.2.0",
     author="Lexia Team",
     author_email="support@lexiaplatform.com",
     description="Clean, minimal package for Lexia platform integration",
