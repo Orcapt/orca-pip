@@ -48,6 +48,8 @@ This package provides a clean interface for AI agents to communicate with the Le
 - **Error handling** and logging
 - **FastAPI integration** with standard endpoints (optional)
 - **Dynamic configuration** from request data
+- **Header forwarding** (x-tenant, etc.) to Lexia API
+- **Easy variable access** with Variables helper class
 - **Graceful fallback** when web dependencies aren't available
 
 ## 📁 Package Structure
@@ -126,6 +128,9 @@ lexia.send_error(data, error_message)
 
 # Update Centrifugo configuration dynamically
 lexia.update_centrifugo_config(stream_url, stream_token)
+
+# Headers (like x-tenant) are automatically forwarded to Lexia API
+# No additional configuration needed - just include headers in your request
 ```
 
 ### Data Models
@@ -137,6 +142,37 @@ from lexia import ChatMessage, ChatResponse, Variable
 # ChatMessage - Lexia's request format with all required fields
 # ChatResponse - Lexia's expected response format  
 # Variable - Environment variables from Lexia request
+```
+
+### Variables Helper
+Easy access to environment variables from Lexia requests:
+
+```python
+from lexia import Variables
+
+# Create variables helper from request data
+vars = Variables(data.variables)
+
+# Get any variable by name
+openai_key = vars.get("OPENAI_API_KEY")
+anthropic_key = vars.get("ANTHROPIC_API_KEY")
+custom_var = vars.get("CUSTOM_VAR")
+
+# Convenience methods for common API keys
+openai_key = vars.get_openai_key()
+anthropic_key = vars.get_anthropic_key()
+groq_key = vars.get_groq_key()
+database_url = vars.get_database_url()
+
+# Check if variable exists
+if vars.has("OPENAI_API_KEY"):
+    key = vars.get("OPENAI_API_KEY")
+
+# Get all variable names
+all_names = vars.list_names()  # ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", ...]
+
+# Convert to dictionary
+vars_dict = vars.to_dict()  # {"OPENAI_API_KEY": "sk-...", ...}
 ```
 
 ### Response Handler
@@ -169,6 +205,7 @@ from fastapi import FastAPI
 from lexia import (
     LexiaHandler, 
     ChatMessage, 
+    Variables,
     create_lexia_app,
     add_standard_endpoints
 )
@@ -187,7 +224,23 @@ app = create_lexia_app(
 async def process_message(data: ChatMessage):
     """Your custom AI processing logic goes here."""
     try:
-        # Example: Simple echo response
+        # Easy access to environment variables
+        vars = Variables(data.variables)
+        
+        # Get API keys for different AI providers
+        openai_key = vars.get_openai_key()
+        anthropic_key = vars.get_anthropic_key()
+        
+        # Get custom variables
+        custom_config = vars.get("CUSTOM_CONFIG")
+        database_url = vars.get("DATABASE_URL")
+        
+        # Check if required variables exist
+        if not openai_key and not anthropic_key:
+            lexia.send_error(data, "No AI API key provided")
+            return
+        
+        # Example: Simple echo response (replace with your AI logic)
         response = f"AI Agent processed: {data.message}"
         
         # Stream response chunks (optional)
@@ -200,7 +253,7 @@ async def process_message(data: ChatMessage):
         
     except Exception as e:
         # Handle errors appropriately
-        print(f"Error processing message: {e}")
+        lexia.send_error(data, f"Error processing message: {e}")
 
 # Add all standard Lexia endpoints
 add_standard_endpoints(

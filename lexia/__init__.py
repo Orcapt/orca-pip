@@ -11,7 +11,7 @@ __version__ = "1.1.0"
 from .models import ChatResponse, ChatMessage, Variable
 from .response_handler import create_success_response
 from .unified_handler import LexiaHandler
-from .utils import get_variable_value, get_openai_api_key
+from .utils import get_variable_value, get_openai_api_key, Variables
 
 # Web framework utilities
 try:
@@ -19,7 +19,7 @@ try:
     __all__ = [
         'ChatResponse', 'ChatMessage', 'Variable',
         'create_success_response', 'LexiaHandler',
-        'get_variable_value', 'get_openai_api_key',
+        'get_variable_value', 'get_openai_api_key', 'Variables',
         'create_lexia_app', 'add_standard_endpoints',
         '__version__'
     ]
@@ -28,6 +28,6 @@ except ImportError:
     __all__ = [
         'ChatResponse', 'ChatMessage', 'Variable',
         'create_success_response', 'LexiaHandler',
-        'get_variable_value', 'get_openai_api_key',
+        'get_variable_value', 'get_openai_api_key', 'Variables',
         '__version__'
     ]
