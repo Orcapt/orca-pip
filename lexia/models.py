@@ -5,7 +5,7 @@ Lexia Models
 Pydantic models for Lexia API communication.
 """
 
-from typing import Optional, List, Any
+from typing import Optional, List, Any, Dict
 from pydantic import BaseModel
 
 
@@ -40,6 +40,7 @@ class ChatMessage(BaseModel):
     project_files: Optional[Any] = None
     stream_url: Optional[str] = None
     stream_token: Optional[str] = None
+    headers: Optional[Dict[str, str]] = None
 
 
 class ChatResponse(BaseModel):

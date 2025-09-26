@@ -70,12 +70,19 @@ class LexiaHandler:
                 }
             }
         
+        # Extract headers from request data
+        request_headers = {}
+        if hasattr(data, 'headers') and data.headers:
+            request_headers.update(data.headers)
+            logger.info(f"Extracted headers from request: {request_headers}")
+        
         logger.info(f"=== SENDING TO LEXIA API ===")
         logger.info(f"URL: {data.url}")
+        logger.info(f"Headers: {request_headers}")
         logger.info(f"Data: {backend_data}")
         
-        # Send to Lexia backend
-        response = self.api.post(data.url, backend_data)
+        # Send to Lexia backend with headers
+        response = self.api.post(data.url, backend_data, headers=request_headers)
         
         logger.info(f"=== LEXIA API RESPONSE ===")
         logger.info(f"Status Code: {response.status_code}")
@@ -108,9 +115,10 @@ class LexiaHandler:
             
         #     logger.info(f"=== SENDING UPDATE TO LEXIA API ===")
         #     logger.info(f"Update URL: {data.url_update}")
+        #     logger.info(f"Update Headers: {request_headers}")
         #     logger.info(f"Update Data: {update_data}")
             
-        #     update_response = self.api.put(data.url_update, update_data)
+        #     update_response = self.api.put(data.url_update, update_data, headers=request_headers)
             
         #     logger.info(f"=== LEXIA UPDATE API RESPONSE ===")
         #     logger.info(f"Update Status Code: {update_response.status_code}")
