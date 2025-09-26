@@ -50,6 +50,7 @@ This package provides a clean interface for AI agents to communicate with the Le
 - **Dynamic configuration** from request data
 - **Header forwarding** (x-tenant, etc.) to Lexia API
 - **Easy variable access** with Variables helper class
+- **User memory handling** with MemoryHelper for personalized responses
 - **Graceful fallback** when web dependencies aren't available
 
 ## 📁 Package Structure
@@ -175,6 +176,40 @@ all_names = vars.list_names()  # ["OPENAI_API_KEY", "ANTHROPIC_API_KEY", ...]
 vars_dict = vars.to_dict()  # {"OPENAI_API_KEY": "sk-...", ...}
 ```
 
+### Memory Helper
+Easy access to user memory data from Lexia requests:
+
+```python
+from lexia import MemoryHelper
+
+# Create memory helper from request data
+memory = MemoryHelper(data.memory)
+
+# Get user information
+user_name = memory.get_name()
+user_goals = memory.get_goals()
+user_location = memory.get_location()
+user_interests = memory.get_interests()
+user_preferences = memory.get_preferences()
+user_experiences = memory.get_past_experiences()
+
+# Check if memory data exists
+if memory.has_name():
+    print(f"User: {memory.get_name()}")
+if memory.has_goals():
+    print(f"Goals: {memory.get_goals()}")
+if memory.has_location():
+    print(f"Location: {memory.get_location()}")
+
+# Convert to dictionary
+memory_dict = memory.to_dict()
+
+# Check if memory is empty
+if not memory.is_empty():
+    # Process user memory data
+    pass
+```
+
 ### Response Handler
 Create Lexia-compatible responses:
 
@@ -206,6 +241,7 @@ from lexia import (
     LexiaHandler, 
     ChatMessage, 
     Variables,
+    MemoryHelper,
     create_lexia_app,
     add_standard_endpoints
 )
@@ -227,6 +263,9 @@ async def process_message(data: ChatMessage):
         # Easy access to environment variables
         vars = Variables(data.variables)
         
+        # Easy access to user memory
+        memory = MemoryHelper(data.memory)
+        
         # Get API keys for different AI providers
         openai_key = vars.get_openai_key()
         anthropic_key = vars.get_anthropic_key()
@@ -235,13 +274,26 @@ async def process_message(data: ChatMessage):
         custom_config = vars.get("CUSTOM_CONFIG")
         database_url = vars.get("DATABASE_URL")
         
+        # Get user information for personalized responses
+        user_name = memory.get_name()
+        user_goals = memory.get_goals()
+        user_location = memory.get_location()
+        user_interests = memory.get_interests()
+        
         # Check if required variables exist
         if not openai_key and not anthropic_key:
             lexia.send_error(data, "No AI API key provided")
             return
         
-        # Example: Simple echo response (replace with your AI logic)
-        response = f"AI Agent processed: {data.message}"
+        # Create personalized response based on user memory
+        if memory.has_name():
+            response = f"Hello {user_name}! AI Agent processed: {data.message}"
+        else:
+            response = f"AI Agent processed: {data.message}"
+        
+        # Add user-specific context if available
+        if memory.has_goals():
+            response += f"\n\nI see your goals include: {', '.join(user_goals)}"
         
         # Stream response chunks (optional)
         for word in response.split():

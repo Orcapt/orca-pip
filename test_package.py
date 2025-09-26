@@ -11,6 +11,7 @@ from lexia import (
     LexiaHandler, 
     ChatMessage, 
     Variable, 
+    Memory,
     create_success_response,
     __version__
 )
@@ -20,7 +21,7 @@ def test_basic_imports():
     print("🧪 Testing basic imports...")
     
     try:
-        from lexia import LexiaHandler, ChatMessage, Variable
+        from lexia import LexiaHandler, ChatMessage, Variable, Memory
         print("✅ Basic imports successful")
         return True
     except ImportError as e:
@@ -58,7 +59,7 @@ def test_models():
             url_upload="",
             force_search=False,
             system_message=None,
-            memory=[],
+            memory=Memory(),
             project_system_message=None,
             first_message=False,
             project_id="",

@@ -9,6 +9,16 @@ from typing import Optional, List, Any, Dict
 from pydantic import BaseModel
 
 
+class Memory(BaseModel):
+    """Memory model for structured user memory data from Lexia request."""
+    name: str = ""
+    goals: List[str] = []
+    location: str = ""
+    interests: List[str] = []
+    preferences: List[str] = []
+    past_experiences: List[str] = []
+
+
 class Variable(BaseModel):
     """Variable model for environment variables from Lexia request."""
     name: str
@@ -33,7 +43,7 @@ class ChatMessage(BaseModel):
     force_search: bool = False
     force_code: Optional[bool] = None
     system_message: Optional[str] = None
-    memory: List = []
+    memory: Memory = Memory()
     project_system_message: Optional[str] = None
     first_message: bool = False
     project_id: str = ""
