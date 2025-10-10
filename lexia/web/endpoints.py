@@ -7,9 +7,12 @@ These can be added to any FastAPI app using add_standard_endpoints().
 """
 
 from fastapi import APIRouter, HTTPException
+from fastapi.responses import StreamingResponse
 from typing import Dict, Any, List
 import logging
 import asyncio
+import json
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +47,73 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
             "endpoints": [
                 "/api/v1/health",
                 "/api/v1/send_message",
+                "/api/v1/stream/{channel}",
                 "/docs"
             ]
+        }
+    
+    @router.get("/stream/{channel}")
+    async def stream_updates(channel: str):
+        """
+        SSE (Server-Sent Events) endpoint for dev mode streaming.
+        Frontend can connect to this to receive real-time updates.
+        """
+        from ..dev_stream_client import DevStreamClient
+        
+        async def event_generator():
+            """Generate SSE events from DevStreamClient."""
+            last_chunk_count = 0
+            
+            # Send initial connection event
+            yield f"data: {json.dumps({'event': 'connected', 'channel': channel})}\n\n"
+            
+            # Poll for updates (in real app, use proper async notifications)
+            for _ in range(300):  # 5 minutes max (300 * 1 second)
+                stream_data = DevStreamClient.get_stream(channel)
+                
+                # Send new chunks
+                current_chunk_count = len(stream_data['chunks'])
+                if current_chunk_count > last_chunk_count:
+                    new_chunks = stream_data['chunks'][last_chunk_count:]
+                    for chunk in new_chunks:
+                        yield f"data: {json.dumps({'event': 'delta', 'content': chunk})}\n\n"
+                    last_chunk_count = current_chunk_count
+                
+                # Check if finished
+                if stream_data['finished']:
+                    if stream_data['error']:
+                        yield f"data: {json.dumps({'event': 'error', 'content': stream_data['error']})}\n\n"
+                    else:
+                        yield f"data: {json.dumps({'event': 'complete', 'content': stream_data['full_response']})}\n\n"
+                    break
+                
+                await asyncio.sleep(0.1)  # Check every 100ms
+        
+        return StreamingResponse(
+            event_generator(),
+            media_type="text/event-stream",
+            headers={
+                "Cache-Control": "no-cache",
+                "Connection": "keep-alive",
+                "X-Accel-Buffering": "no"
+            }
+        )
+    
+    @router.get("/poll/{channel}")
+    async def poll_stream(channel: str):
+        """
+        Simple polling endpoint for dev mode (alternative to SSE).
+        Returns current stream state.
+        """
+        from ..dev_stream_client import DevStreamClient
+        
+        stream_data = DevStreamClient.get_stream(channel)
+        return {
+            "channel": channel,
+            "chunks_count": len(stream_data['chunks']),
+            "full_response": stream_data['full_response'],
+            "finished": stream_data['finished'],
+            "error": stream_data['error']
         }
     
     # Add the main send_message endpoint if lexia_handler is provided
@@ -53,20 +121,81 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
         from ..models import ChatMessage, ChatResponse
         from ..response_handler import create_success_response
         
-        @router.post("/send_message", response_model=ChatResponse)
+        @router.post("/send_message")
         async def send_message(data: ChatMessage):
             """Main chat endpoint - inherited from Lexia package."""
             if not data.message.strip() or not data.channel or not data.variables:
                 raise HTTPException(status_code=400, detail="Missing required fields")
             
-            # Start processing in background
-            asyncio.create_task(process_message_func(data))
+            # DEV MODE: Return streaming response directly
+            if lexia_handler.dev_mode:
+                logger.info("🔧 Dev mode: Streaming response directly")
+                
+                async def stream_generator():
+                    """Generate streaming response directly from processing."""
+                    from ..dev_stream_client import DevStreamClient
+                    
+                    # Clear any existing stream data for this channel
+                    DevStreamClient.clear_stream(data.channel)
+                    
+                    # Start processing in background
+                    task = asyncio.create_task(process_message_func(data))
+                    
+                    # Poll the DevStreamClient and yield chunks
+                    last_chunk_count = 0
+                    
+                    while True:
+                        stream_data = DevStreamClient.get_stream(data.channel)
+                        
+                        # Yield new chunks
+                        current_chunk_count = len(stream_data['chunks'])
+                        if current_chunk_count > last_chunk_count:
+                            new_chunks = stream_data['chunks'][last_chunk_count:]
+                            for chunk in new_chunks:
+                                yield chunk
+                            last_chunk_count = current_chunk_count
+                        
+                        # Check if finished
+                        if stream_data['finished']:
+                            if stream_data['error']:
+                                yield f"\n\n❌ Error: {stream_data['error']}"
+                            break
+                        
+                        # Check if task failed
+                        if task.done():
+                            try:
+                                await task
+                            except Exception as e:
+                                logger.error(f"Task failed: {e}")
+                                yield f"\n\n❌ Error: {str(e)}"
+                            break
+                        
+                        await asyncio.sleep(0.05)  # Check every 50ms
+                    
+                    # Clean up
+                    DevStreamClient.clear_stream(data.channel)
+                
+                return StreamingResponse(
+                    stream_generator(),
+                    media_type="text/plain",
+                    headers={
+                        "Cache-Control": "no-cache",
+                        "X-Accel-Buffering": "no",
+                        "Connection": "keep-alive"
+                    }
+                )
             
-            # Return immediate success response
-            return create_success_response(
-                response_uuid=data.response_uuid,
-                thread_id=data.thread_id
-            )
+            # PRODUCTION MODE: Return immediate response, process in background
+            else:
+                logger.info("🚀 Production mode: Processing in background")
+                # Start processing in background
+                asyncio.create_task(process_message_func(data))
+                
+                # Return immediate success response
+                return create_success_response(
+                    response_uuid=data.response_uuid,
+                    thread_id=data.thread_id
+                )
     
     # Add conversation history endpoints if conversation manager is provided
     if conversation_manager:
