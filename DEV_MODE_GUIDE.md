@@ -4,6 +4,8 @@
 
 Lexia now supports **Dev Mode** for local development without requiring Centrifugo. This makes it easier to develop and test AI agents locally.
 
+**🎯 KEY POINT**: Your application code (OpenAI calls, streaming logic) **stays exactly the same** in both dev and production modes. Just change one flag!
+
 ## What is Dev Mode?
 
 In production, Lexia uses **Centrifugo** for real-time WebSocket streaming to the frontend. In dev mode, Lexia uses:
@@ -64,13 +66,20 @@ python main.py --dev
 
 ### Production Mode (Centrifugo)
 ```
-AI Agent → Centrifugo Server → WebSocket → Frontend
+AI Agent (Background Task) → Centrifugo Server → WebSocket → Frontend
 ```
 
-### Dev Mode (In-Memory)
+### Dev Mode (SSE)
 ```
-AI Agent → DevStreamClient (Memory) → SSE/Polling → Frontend
+AI Agent (Background Thread) → DevStreamClient (Async Queue) → SSE → Frontend
+                  ↓
+            Console Output
 ```
+
+**Key Technical Details:**
+- **Dev Mode**: Your `process_message()` runs in a background thread (not asyncio task) to avoid blocking the event loop, allowing SSE to flush chunks immediately
+- **Production**: Runs as async background task with Centrifugo handling delivery
+- **Your code**: Identical in both modes - just call `lexia.stream_chunk(data, content)` and the package handles the rest!
 
 ## Available Endpoints in Dev Mode
 
@@ -127,48 +136,68 @@ async function pollStream(channel) {
 }
 ```
 
-## Example: server-openai-example.py
+## Example: Complete AI Agent
 
 ```python
 #!/usr/bin/env python3
 import sys
-import os
+from openai import OpenAI
+from lexia import LexiaHandler, create_lexia_app, add_standard_endpoints, Variables
 
-# Add lexia-pip to path (for local development)
-LEXIA_PIP_PATH = os.path.join(os.path.dirname(__file__), '..', 'lexia-pip')
-if os.path.exists(LEXIA_PIP_PATH):
-    sys.path.insert(0, LEXIA_PIP_PATH)
+# Detect dev/prod mode from CLI
+if '--dev' in sys.argv:
+    dev_mode = True
+elif '--prod' in sys.argv:
+    dev_mode = False
+else:
+    dev_mode = None  # Auto-detect from LEXIA_DEV_MODE env var
 
-from lexia import LexiaHandler, create_lexia_app, add_standard_endpoints
+# Initialize Lexia handler
+lexia = LexiaHandler(dev_mode=dev_mode)
 
-# Initialize in DEV MODE
-lexia = LexiaHandler(dev_mode=True)
-
-# Create app
-app = create_lexia_app(
-    title="My AI Agent",
-    version="1.0.0",
-    description="Dev Mode Enabled"
-)
+# Create FastAPI app
+app = create_lexia_app(title="My AI Agent", version="1.0.0")
 
 async def process_message(data):
-    # Your AI logic here
-    response = "Hello from dev mode!"
+    """Process message - identical code for dev and prod!"""
+    # Get API key
+    vars = Variables(data.variables)
+    api_key = vars.get("OPENAI_API_KEY")
     
-    # Stream chunks (works in both dev and production mode)
-    for word in response.split():
-        lexia.stream_chunk(data, word + " ")
+    # Call OpenAI (same code in dev/prod)
+    client = OpenAI(api_key=api_key)
+    stream = client.chat.completions.create(
+        model=data.model,
+        messages=[{"role": "user", "content": data.message}],
+        stream=True
+    )
     
-    # Complete response
-    lexia.complete_response(data, response)
+    full_response = ""
+    for chunk in stream:
+        if chunk.choices[0].delta.content:
+            content = chunk.choices[0].delta.content
+            full_response += content
+            # lexia handles dev/prod internally!
+            lexia.stream_chunk(data, content)
+    
+    # Complete (same in both modes)
+    lexia.complete_response(data, full_response)
 
 # Add endpoints
 add_standard_endpoints(app, lexia_handler=lexia, process_message_func=process_message)
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=5001)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
+
+**Run it:**
+```bash
+python main.py --dev   # Dev mode (SSE)
+python main.py --prod  # Production (Centrifugo)
+```
+
+**Your OpenAI code is IDENTICAL in both modes!** The lexia package handles all the differences internally.
 
 ## Benefits of Dev Mode
 
@@ -177,6 +206,31 @@ if __name__ == "__main__":
 3. ✅ **Easy Testing** - Test streaming locally without infrastructure
 4. ✅ **Same API** - Code works in both dev and production mode
 5. ✅ **Simple Frontend** - Use SSE or polling instead of WebSockets
+6. ✅ **No Code Changes** - Your OpenAI/AI code stays identical; only change the mode flag
+
+## Technical Implementation
+
+### How Dev Mode Avoids Event Loop Blocking
+
+In dev mode, lexia runs your `process_message()` in a **background thread** (not an async task):
+
+```python
+# Inside lexia-pip when dev_mode=True:
+bg_thread = threading.Thread(target=run_process_message, daemon=True)
+bg_thread.start()
+
+# This allows your sync OpenAI code (for chunk in stream:) to work
+# without blocking the FastAPI event loop!
+```
+
+Meanwhile, the HTTP response uses an **async queue** to receive chunks:
+```python
+# SSE generator waits on queue:
+async for event_type, content in queue:
+    yield f"data: {content}\n\n"
+```
+
+**Result**: Real-time streaming works with regular sync OpenAI code!
 
 ## Console Output in Dev Mode
 

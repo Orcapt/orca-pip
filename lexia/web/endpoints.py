@@ -13,6 +13,7 @@ import logging
 import asyncio
 import json
 import time
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -171,10 +172,23 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
                     # Small delay to ensure the connection is established
                     await asyncio.sleep(0.01)
                     
-                    # Start processing in background AFTER queue is ready
-                    logger.info(f"🔴 [INIT] Starting background task for channel: {data.channel}")
-                    task = asyncio.create_task(process_message_func(data))
-                    logger.info(f"🔴 [INIT] Background task started")
+                    # Start processing in a background THREAD to avoid blocking event loop in dev mode
+                    logger.info(f"🔴 [INIT] Starting background thread for channel: {data.channel}")
+                    def _run_in_thread():
+                        try:
+                            loop = asyncio.new_event_loop()
+                            asyncio.set_event_loop(loop)
+                            loop.run_until_complete(process_message_func(data))
+                        except Exception as e:
+                            logger.error(f"Background thread error: {e}")
+                        finally:
+                            try:
+                                loop.close()
+                            except Exception:
+                                pass
+                    bg_thread = threading.Thread(target=_run_in_thread, daemon=True)
+                    bg_thread.start()
+                    logger.info(f"🔴 [INIT] Background thread started: {bg_thread.name}")
                     
                     # Wait for chunks from the queue (TRUE REAL-TIME!)
                     chunk_buffer = ""
@@ -211,15 +225,8 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
                                     break
                                     
                             except asyncio.TimeoutError:
-                                # Check if task is still running
-                                if task.done():
-                                    try:
-                                        await task
-                                    except Exception as e:
-                                        logger.error(f"Task failed: {e}")
-                                        error_msg = f"\n\n❌ Error: {str(e)}"
-                                        yield error_msg.encode('utf-8')
-                                    break
+                                # No data yet; continue waiting
+                                pass
                     finally:
                         # Clean up
                         DevStreamClient.clear_stream(data.channel)
