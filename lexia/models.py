@@ -36,6 +36,8 @@ class ChatMessage(BaseModel):
     channel: str
     file_type: str = ""
     file_url: str = ""
+    file_base64: str = ""  # Base64 encoded file (data URI format)
+    file_name: str = ""    # Original filename
     variables: List[Variable]
     url: str
     url_update: str = ""

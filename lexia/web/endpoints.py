@@ -7,13 +7,15 @@ These can be added to any FastAPI app using add_standard_endpoints().
 """
 
 from fastapi import APIRouter, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 from typing import Dict, Any, List
 import logging
 import asyncio
 import json
 import time
 import threading
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -147,6 +149,46 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
             """Main chat endpoint - inherited from Lexia package."""
             if not data.message.strip() or not data.channel or not data.variables:
                 raise HTTPException(status_code=400, detail="Missing required fields")
+            
+            # DEV MODE: Handle base64 file upload
+            if lexia_handler.dev_mode and data.file_base64 and not data.file_url:
+                from ..utils import decode_base64_file
+                import urllib.parse
+                
+                logger.info("🔧 Dev mode: Converting file_base64 to file_url")
+                
+                try:
+                    # Decode base64 to file
+                    file_path, _ = decode_base64_file(data.file_base64, data.file_name)
+                    
+                    # Create uploads directory if it doesn't exist
+                    uploads_dir = "uploads"
+                    os.makedirs(uploads_dir, exist_ok=True)
+                    
+                    # Move file to uploads directory with original name
+                    import shutil
+                    filename = data.file_name or os.path.basename(file_path)
+                    # Sanitize filename
+                    filename = "".join(c for c in filename if c.isalnum() or c in ('.','-','_'))
+                    dest_path = os.path.join(uploads_dir, filename)
+                    
+                    # If file exists, add timestamp
+                    if os.path.exists(dest_path):
+                        name, ext = os.path.splitext(filename)
+                        filename = f"{name}_{int(time.time())}{ext}"
+                        dest_path = os.path.join(uploads_dir, filename)
+                    
+                    shutil.move(file_path, dest_path)
+                    
+                    # Create HTTP URL for local access (served by static files endpoint)
+                    # Default to localhost:5001, but could be configured
+                    port = os.environ.get('LEXIA_PORT', '5001')
+                    data.file_url = f"http://localhost:{port}/uploads/{filename}"
+                    
+                    logger.info(f"✅ Converted base64 to file_url: {data.file_url}")
+                except Exception as e:
+                    logger.error(f"Failed to convert base64 to file: {e}")
+                    raise HTTPException(status_code=400, detail=f"Failed to process file: {e}")
             
             # DEV MODE: Return streaming response directly
             if lexia_handler.dev_mode:
@@ -288,5 +330,12 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
     
     # Include the router in the app
     app.include_router(router)
+    
+    # Add static file serving for uploads (dev mode)
+    if lexia_handler and lexia_handler.dev_mode:
+        uploads_dir = "uploads"
+        os.makedirs(uploads_dir, exist_ok=True)
+        app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+        logger.info(f"📁 Dev mode: Serving static files from /{uploads_dir}")
     
     return app

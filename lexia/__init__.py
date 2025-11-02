@@ -11,7 +11,7 @@ __version__ = "1.2.7"
 from .models import ChatResponse, ChatMessage, Variable, Memory
 from .response_handler import create_success_response
 from .unified_handler import LexiaHandler
-from .utils import get_variable_value, get_openai_api_key, Variables, MemoryHelper
+from .utils import get_variable_value, get_openai_api_key, Variables, MemoryHelper, decode_base64_file
 from .dev_stream_client import DevStreamClient
 
 # Web framework utilities
@@ -20,7 +20,7 @@ try:
     __all__ = [
         'ChatResponse', 'ChatMessage', 'Variable', 'Memory',
         'create_success_response', 'LexiaHandler', 'DevStreamClient',
-        'get_variable_value', 'get_openai_api_key', 'Variables', 'MemoryHelper',
+        'get_variable_value', 'get_openai_api_key', 'Variables', 'MemoryHelper', 'decode_base64_file',
         'create_lexia_app', 'add_standard_endpoints',
         '__version__'
     ]
@@ -29,6 +29,6 @@ except ImportError:
     __all__ = [
         'ChatResponse', 'ChatMessage', 'Variable', 'Memory',
         'create_success_response', 'LexiaHandler', 'DevStreamClient',
-        'get_variable_value', 'get_openai_api_key', 'Variables', 'MemoryHelper',
+        'get_variable_value', 'get_openai_api_key', 'Variables', 'MemoryHelper', 'decode_base64_file',
         '__version__'
     ]
