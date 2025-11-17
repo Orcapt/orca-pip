@@ -108,8 +108,8 @@ dev: venv
 # Show package info
 info:
 	@echo "📋 Package Information:"
-	@echo "  Name: lexia-platform"
-	@echo "  Version: 1.1.0"
+	@echo "  Name: lexia"
+	@echo "  Version: 1.2.13"
 	@echo "  Description: Clean, minimal package for Lexia platform integration"
 	@echo "  Python: >=3.8"
 	@echo "  Dependencies: requests, pydantic"

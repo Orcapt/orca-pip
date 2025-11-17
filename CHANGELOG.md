@@ -7,12 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.2.13] - 2025-11-17
+
+### Added
+- Added `usage()` method to SessionContext for tracking LLM token usage and costs
+  - Supports prompt, completion, function_call, tool_usage token tracking
+  - Optional cost tracking with string format
+  - Optional custom labels for usage entries
+  - Automatically uses message UUID from session data
+  - Sends usage data to Lexia API `/api/internal/v1/usages` endpoint
+  - Non-blocking - doesn't fail the request if usage tracking fails
+
+### Changed
+- Enhanced `response_handler.py` to handle both dictionary and OpenAI `CompletionUsage` objects for usage_info
+- Updated package metadata and documentation for clarity
+- Fixed version consistency across README, Makefile, and package files
+- Updated license format in `pyproject.toml` to modern SPDX format (removed deprecated table format)
+- Removed deprecated "License :: OSI Approved :: MIT License" classifier from both `setup.py` and `pyproject.toml`
+- Code cleanup: removed extra blank lines in `utils.py`
+
+### Fixed
+- Updated test examples to use correct API (removed non-existent convenience methods)
+- Fixed version references in documentation examples
+
+## [1.2.12] - 2025-11-16
+
+### Fixed
+- Package fixes and improvements
+
+## [1.2.11] - 2025-11-15
+
+### Changed
+- Version bump for package release
+
 ## [1.2.8] - 2025-11-02
 
 ### Added
 - Added `sleep_time` parameter to `ChatMessage` model for configurable timing control
 - Added `force_tools` parameter to `ChatMessage` model (list of tool names like ['code', 'search', 'xyz'])
-- Added `ForceToolsHelper` class for easy access to forced tools with methods like `has()`, `has_code()`, `has_search()`, `get_all()`, etc.
+- Added `ForceToolsHelper` class for easy access to forced tools with flexible `has()` method
 
 ### Removed
 - Removed deprecated `force_search` boolean parameter (replaced by `force_tools`)

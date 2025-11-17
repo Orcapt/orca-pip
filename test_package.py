@@ -71,7 +71,7 @@ def test_models():
         
         # Test ForceToolsHelper
         tools = ForceToolsHelper(message.force_tools)
-        if tools.has_code() and tools.has_search():
+        if tools.has('code') and tools.has('search'):
             print(f"✅ ForceToolsHelper: has code and search tools")
         
         return True

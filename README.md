@@ -29,7 +29,7 @@ pip install -e .
 ## 📦 Package Information
 
 - **Package Name**: `lexia`
-- **Version**: 1.1.0
+- **Version**: 1.2.13
 - **Python**: >=3.8
 - **License**: MIT
 - **Dependencies**: requests, pydantic
@@ -161,13 +161,9 @@ vars = Variables(data.variables)
 # Get any variable by name
 openai_key = vars.get("OPENAI_API_KEY")
 anthropic_key = vars.get("ANTHROPIC_API_KEY")
+groq_key = vars.get("GROQ_API_KEY")
+database_url = vars.get("DATABASE_URL")
 custom_var = vars.get("CUSTOM_VAR")
-
-# Convenience methods for common API keys
-openai_key = vars.get_openai_key()
-anthropic_key = vars.get_anthropic_key()
-groq_key = vars.get_groq_key()
-database_url = vars.get_database_url()
 
 # Check if variable exists
 if vars.has("OPENAI_API_KEY"):
@@ -262,7 +258,7 @@ lexia = LexiaHandler()
 # Create FastAPI app
 app = create_lexia_app(
     title="My AI Agent",
-    version="1.1.0",
+    version="1.0.0",
     description="Custom AI agent with Lexia integration"
 )
 
@@ -276,11 +272,9 @@ async def process_message(data: ChatMessage):
         # Easy access to user memory
         memory = MemoryHelper(data.memory)
         
-        # Get API keys for different AI providers
-        openai_key = vars.get_openai_key()
-        anthropic_key = vars.get_anthropic_key()
-        
-        # Get custom variables
+        # Get API keys and variables
+        openai_key = vars.get("OPENAI_API_KEY")
+        anthropic_key = vars.get("ANTHROPIC_API_KEY")
         custom_config = vars.get("CUSTOM_CONFIG")
         database_url = vars.get("DATABASE_URL")
         

@@ -192,7 +192,6 @@ class ForceToolsHelper:
         """
         return tool_name in self.tools
     
-    
     def get_all(self) -> List[str]:
         """
         Get all forced tools.
@@ -264,7 +263,6 @@ class Variables:
             Variable value string or None if not found
         """
         return self._cache.get(variable_name)
-    
     
     def has(self, variable_name: str) -> bool:
         """

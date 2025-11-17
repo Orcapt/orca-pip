@@ -27,9 +27,17 @@ def create_complete_response(response_uuid: str, thread_id: str, content: str, u
         output_tokens = estimated_tokens
         total_tokens = input_tokens + output_tokens
     else:
-        input_tokens = usage_info.get('prompt_tokens', 1)
-        output_tokens = usage_info.get('completion_tokens', 1)
-        total_tokens = usage_info.get('total_tokens', input_tokens + output_tokens)
+        # Handle both dict and OpenAI CompletionUsage objects
+        if hasattr(usage_info, 'prompt_tokens'):
+            # It's an OpenAI CompletionUsage object
+            input_tokens = getattr(usage_info, 'prompt_tokens', 1)
+            output_tokens = getattr(usage_info, 'completion_tokens', 1)
+            total_tokens = getattr(usage_info, 'total_tokens', input_tokens + output_tokens)
+        else:
+            # It's a dict
+            input_tokens = usage_info.get('prompt_tokens', 1)
+            output_tokens = usage_info.get('completion_tokens', 1)
+            total_tokens = usage_info.get('total_tokens', input_tokens + output_tokens)
     
     response_data = {
         'uuid': response_uuid,

@@ -18,7 +18,7 @@ def read_requirements():
 
 setup(
     name="lexia",
-    version="1.2.12",
+    version="1.2.13",
     author="Lexia Team",
     author_email="support@lexiaplatform.com",
     description="Clean, minimal package for Lexia platform integration",
@@ -29,7 +29,6 @@ setup(
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.8",

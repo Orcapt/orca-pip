@@ -211,6 +211,80 @@ class LexiaHandler:
         def error(self, error_message: str, exception: Exception = None, trace: str = None) -> None:
             self._handler.send_error(self._data, error_message, trace=trace, exception=exception)
 
+        # Usage tracking helper
+        def usage(self, tokens, token_type: str, cost: str = None, label: str = None) -> None:
+            """
+            Track LLM token usage and costs.
+            
+            Automatically uses the message UUID from the session data.
+            
+            Args:
+                tokens: Token count (int or str)
+                token_type: Type of usage - "prompt", "completion", "input", "output", "function_call", "tool_usage", "total"
+                cost: Optional cost as string (e.g., "0.001")
+                label: Optional human-readable label (e.g., "Prompt Tokens")
+            
+            Example:
+                session.usage(150, "prompt")
+                session.usage(250, "completion", cost="0.002")
+                session.usage(50, "function_call", cost="0.04", label="DALL-E Image")
+            """
+            try:
+                from urllib.parse import urlparse
+                
+                # Get message UUID from session data
+                message_uuid = getattr(self._data, 'response_uuid', None)
+                if not message_uuid:
+                    logger.warning('⚠️ No response_uuid found in session data. Usage tracking skipped.')
+                    return
+                
+                # Extract API base URL from session data
+                # Use the existing API URL from data.url to ensure consistency
+                if hasattr(self._data, 'url') and self._data.url:
+                    parsed = urlparse(self._data.url)
+                    api_base_url = f"{parsed.scheme}://{parsed.netloc}"
+                else:
+                    # Fallback to environment variable or localhost
+                    import os
+                    api_base_url = os.environ.get('LEXIA_API_BASE_URL', 'http://localhost')
+                
+                endpoint = f"{api_base_url}/api/internal/v1/usages"
+                
+                # Prepare payload
+                payload = {
+                    'message_id': str(message_uuid),
+                    'type': str(token_type),
+                    'token': str(tokens)
+                }
+                
+                # Add optional fields
+                if cost is not None:
+                    payload['cost'] = str(cost)
+                
+                if label is not None:
+                    payload['label'] = str(label)
+                
+                logger.info('📊 Sending usage tracking to Lexia API...')
+                logger.info(f'   Endpoint: {endpoint}')
+                logger.info(f'   Message UUID: {message_uuid}')
+                logger.info(f'   Token Type: {token_type}')
+                logger.info(f'   Tokens: {tokens}')
+                if cost:
+                    logger.info(f'   Cost: {cost}')
+                if label:
+                    logger.info(f'   Label: {label}')
+                
+                # Send to API with tenant headers
+                headers = getattr(self._data, 'headers', {})
+                response = self._handler.api.post(endpoint, payload, headers=headers)
+                
+                logger.info('✅ Usage tracking sent successfully')
+                logger.info(f'   Response Status: {response.status_code}')
+                
+            except Exception as error:
+                # Non-blocking - don't fail the request if usage tracking fails
+                logger.error(f'❌ Usage tracking failed (non-critical): {error}')
+
         # Developer-friendly loading helpers
         def start_loading(self, kind: str = "thinking") -> None:
             marker = self._handler._get_loading_marker(kind, "start")
@@ -317,6 +391,80 @@ class LexiaHandler:
         # Alias for developer preference
         def pass_image(self, url: str) -> None:
             self.image(url)
+
+        # Usage tracking helper
+        def usage(self, tokens, token_type: str, cost: str = None, label: str = None) -> None:
+            """
+            Track LLM token usage and costs.
+            
+            Automatically uses the message UUID from the session data.
+            
+            Args:
+                tokens: Token count (int or str)
+                token_type: Type of usage - "prompt", "completion", "input", "output", "function_call", "tool_usage", "total"
+                cost: Optional cost as string (e.g., "0.001")
+                label: Optional human-readable label (e.g., "Prompt Tokens")
+            
+            Example:
+                session.usage(150, "prompt")
+                session.usage(250, "completion", cost="0.002")
+                session.usage(50, "function_call", cost="0.04", label="DALL-E Image")
+            """
+            try:
+                from urllib.parse import urlparse
+                
+                # Get message UUID from session data
+                message_uuid = getattr(self._data, 'response_uuid', None)
+                if not message_uuid:
+                    logger.warning('⚠️ No response_uuid found in session data. Usage tracking skipped.')
+                    return
+                
+                # Extract API base URL from session data
+                # Use the existing API URL from data.url to ensure consistency
+                if hasattr(self._data, 'url') and self._data.url:
+                    parsed = urlparse(self._data.url)
+                    api_base_url = f"{parsed.scheme}://{parsed.netloc}"
+                else:
+                    # Fallback to environment variable or localhost
+                    import os
+                    api_base_url = os.environ.get('LEXIA_API_BASE_URL', 'http://localhost')
+                
+                endpoint = f"{api_base_url}/api/internal/v1/usages"
+                
+                # Prepare payload
+                payload = {
+                    'message_id': str(message_uuid),
+                    'type': str(token_type),
+                    'token': str(tokens)
+                }
+                
+                # Add optional fields
+                if cost is not None:
+                    payload['cost'] = str(cost)
+                
+                if label is not None:
+                    payload['label'] = str(label)
+                
+                logger.info('📊 Sending usage tracking to Lexia API...')
+                logger.info(f'   Endpoint: {endpoint}')
+                logger.info(f'   Message UUID: {message_uuid}')
+                logger.info(f'   Token Type: {token_type}')
+                logger.info(f'   Tokens: {tokens}')
+                if cost:
+                    logger.info(f'   Cost: {cost}')
+                if label:
+                    logger.info(f'   Label: {label}')
+                
+                # Send to API with tenant headers
+                headers = getattr(self._data, 'headers', {})
+                response = self._handler.api.post(endpoint, payload, headers=headers)
+                
+                logger.info('✅ Usage tracking sent successfully')
+                logger.info(f'   Response Status: {response.status_code}')
+                
+            except Exception as error:
+                # Non-blocking - don't fail the request if usage tracking fails
+                logger.error(f'❌ Usage tracking failed (non-critical): {error}')
 
         # Tracing helper: wrap content with lexia tracing markers
         def tracing(self, content: str, visibility: str = "all") -> None:
@@ -595,7 +743,15 @@ class LexiaHandler:
         backend_data['conversation_id'] = data.conversation_id
         
         # Ensure required fields have proper values even if usage_info is missing
-        if not usage_info or usage_info.get('prompt_tokens', 0) == 0:
+        # Handle both dict and OpenAI CompletionUsage objects
+        prompt_tokens = 0
+        if usage_info:
+            if hasattr(usage_info, 'prompt_tokens'):
+                prompt_tokens = getattr(usage_info, 'prompt_tokens', 0)
+            else:
+                prompt_tokens = usage_info.get('prompt_tokens', 0)
+        
+        if not usage_info or prompt_tokens == 0:
             # Provide default values when usage info is missing
             backend_data['usage'] = {
                 'input_tokens': 1,  # Minimum token count
