@@ -8,10 +8,11 @@ Handles HTTP communication with external services for Lexia integration.
 import requests
 import logging
 from typing import Dict, Any
+from ..domain.interfaces import IAPIClient
 
 logger = logging.getLogger(__name__)
 
-class APIClient:
+class APIClient(IAPIClient):
     """Client for making HTTP requests to external services."""
     
     def __init__(self, default_headers: Dict[str, str] = None):

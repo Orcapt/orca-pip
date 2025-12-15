@@ -12,11 +12,12 @@ from typing import Dict, Any, Optional
 from threading import Lock
 from collections import defaultdict
 import json
+from ..domain.interfaces import IStreamClient
 
 logger = logging.getLogger(__name__)
 
 
-class DevStreamClient:
+class DevStreamClient(IStreamClient):
     """
     Development streaming client that stores messages in memory and uses async queues.
     """
@@ -34,6 +35,16 @@ class DevStreamClient:
     def __init__(self):
         """Initialize the dev stream client."""
         logger.info("🔧 Dev Stream Client initialized (no Centrifugo)")
+    
+    def update_config(self, url: str, token: str) -> None:
+        """
+        Update client configuration (no-op for dev client).
+        
+        Args:
+            url: Config URL (ignored in dev mode)
+            token: Config token (ignored in dev mode)
+        """
+        logger.debug("Dev mode: update_config called but ignored")
     
     @classmethod
     def get_stream(cls, channel: str) -> Dict[str, Any]:

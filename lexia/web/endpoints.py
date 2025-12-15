@@ -19,7 +19,12 @@ import os
 
 logger = logging.getLogger(__name__)
 
-def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, process_message_func=None):
+def add_standard_endpoints(
+    app: Any,
+    conversation_manager: Any = None,
+    lexia_handler: Any = None,
+    process_message_func: Any = None
+) -> None:
     """
     Add standard Lexia endpoints to a FastAPI application.
     
@@ -28,6 +33,14 @@ def add_standard_endpoints(app, conversation_manager=None, lexia_handler=None, p
         conversation_manager: Optional conversation manager for history endpoints
         lexia_handler: Optional LexiaHandler instance for communication
         process_message_func: Optional function to process messages (custom AI logic)
+        
+    Returns:
+        None
+        
+    Example:
+        >>> from fastapi import FastAPI
+        >>> app = FastAPI()
+        >>> add_standard_endpoints(app, lexia_handler=handler)
     """
     
     # Create router for standard endpoints

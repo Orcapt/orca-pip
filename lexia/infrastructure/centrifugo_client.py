@@ -9,10 +9,11 @@ import os
 import requests
 import logging
 from typing import Dict, Any
+from ..domain.interfaces import IStreamClient
 
 logger = logging.getLogger(__name__)
 
-class CentrifugoClient:
+class CentrifugoClient(IStreamClient):
     """Client for communicating with Centrifugo real-time messaging service."""
     
     def __init__(self, url: str = None, api_key: str = None):

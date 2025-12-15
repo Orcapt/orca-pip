@@ -2,35 +2,231 @@
 Lexia Integration Package
 ========================
 
-Clean, minimal package for Lexia platform integration.
-Contains only essential components for communication.
+Clean, organized package for Lexia platform integration.
+Refactored with Clean Architecture and SOLID principles.
+
+Architecture Layers:
+- Core: Business logic and orchestration
+- Domain: Models and interfaces  
+- Services: Business logic services
+- Infrastructure: External communication
+- Helpers: Helper classes and utilities
+- Factories: Object creation
+- Config: Centralized configuration and constants
 """
 
-__version__ = "1.2.13"
+from .config import VERSION as __version__
 
-from .models import ChatResponse, ChatMessage, Variable, Memory
-from .response_handler import create_success_response
-from .unified_handler import LexiaHandler, create_link_button_block, create_action_button_block
-from .utils import get_variable_value, get_openai_api_key, Variables, MemoryHelper, ForceToolsHelper, decode_base64_file
-from .dev_stream_client import DevStreamClient
+# Core exports
+from .core import LexiaHandler, Session
+
+# Domain models
+from .domain import ChatResponse, ChatMessage, Variable, Memory
+
+# Adapters
+from .adapters import LambdaAdapter, create_lambda_handler
+
+# Helpers and utilities
+from .helpers import create_link_button_block, create_action_button_block
+from .utils import (
+    get_variable_value,
+    get_openai_api_key,
+    Variables,
+    MemoryHelper,
+    ForceToolsHelper,
+    decode_base64_file,
+    create_success_response
+)
+
+# Infrastructure (for advanced usage)
+from .infrastructure import DevStreamClient, CentrifugoClient
+
+# Factories (for advanced usage)
+from .factories import StreamClientFactory
+
+# Services (for advanced usage and testing)
+from .services import (
+    BufferManager,
+    ButtonRenderer,
+    LoadingMarkerProvider,
+    UsageTracker,
+    TracingService,
+    ErrorHandler,
+    ResponseBuilder
+)
+
+# Patterns (for advanced usage)
+from .patterns import (
+    LexiaBuilder,
+    SessionBuilder,
+    SessionContext,
+    ResourceContext,
+    timed_operation,
+    suppress_exceptions,
+    Middleware,
+    LoggingMiddleware,
+    ValidationMiddleware,
+    TransformMiddleware,
+    MiddlewareChain,
+    MiddlewareManager,
+)
+
+# Common utilities (exceptions, decorators, logging)
+from .common import (
+    # Exceptions
+    LexiaException,
+    ConfigurationError,
+    ValidationError,
+    CommunicationError,
+    StreamError,
+    APIError,
+    BufferError,
+    # Decorators
+    retry,
+    log_execution,
+    measure_time,
+    handle_errors,
+    deprecated,
+    # Logging
+    setup_logging,
+    get_logger,
+    enable_debug_logging,
+)
+
+# Observability (Optional - for advanced users)
+try:
+    from .observability import (
+        Counter,
+        Gauge,
+        Histogram,
+        Timer,
+        MetricsCollector,
+        measure_time as measure_time_obs,
+        get_metrics_collector,
+        Profiler,
+        profile,
+        profile_async,
+        profile_block,
+        Event,
+        EventListener,
+        EventBus,
+        get_event_bus,
+        HealthStatus,
+        HealthCheck,
+        SystemMonitor,
+    )
+    _has_observability = True
+except ImportError:
+    _has_observability = False
+
+# Build __all__ list
+__all__ = [
+    # Core
+    'LexiaHandler',
+    'Session',
+    # Lambda
+    'LambdaAdapter',
+    'create_lambda_handler',
+    # Domain
+    'ChatResponse',
+    'ChatMessage',
+    'Variable',
+    'Memory',
+    # Helpers & Utils
+    'create_link_button_block',
+    'create_action_button_block',
+    'create_success_response',
+    'get_variable_value',
+    'get_openai_api_key',
+    'Variables',
+    'MemoryHelper',
+    'ForceToolsHelper',
+    'decode_base64_file',
+    # Infrastructure
+    'DevStreamClient',
+    'CentrifugoClient',
+    # Factories
+    'StreamClientFactory',
+    # Services
+    'BufferManager',
+    'ButtonRenderer',
+    'LoadingMarkerProvider',
+    'UsageTracker',
+    'TracingService',
+    'ErrorHandler',
+    'ResponseBuilder',
+    # Patterns
+    'LexiaBuilder',
+    'SessionBuilder',
+    'SessionContext',
+    'ResourceContext',
+    'timed_operation',
+    'suppress_exceptions',
+    'Middleware',
+    'LoggingMiddleware',
+    'ValidationMiddleware',
+    'TransformMiddleware',
+    'MiddlewareChain',
+    'MiddlewareManager',
+    # Exceptions
+    'LexiaException',
+    'ConfigurationError',
+    'ValidationError',
+    'CommunicationError',
+    'StreamError',
+    'APIError',
+    'BufferError',
+    # Decorators
+    'retry',
+    'log_execution',
+    'measure_time',
+    'handle_errors',
+    'deprecated',
+    # Logging
+    'setup_logging',
+    'get_logger',
+    'enable_debug_logging',
+    # Version
+    '__version__'
+]
+
+# Add observability exports if available
+if _has_observability:
+    __all__.extend([
+        'Counter',
+        'Gauge',
+        'Histogram',
+        'Timer',
+        'MetricsCollector',
+        'get_metrics_collector',
+        'Profiler',
+        'profile',
+        'profile_async',
+        'profile_block',
+        'Event',
+        'EventListener',
+        'EventBus',
+        'get_event_bus',
+        'HealthStatus',
+        'HealthCheck',
+        'SystemMonitor',
+    ])
+
+# Storage SDK
+try:
+    from .storage import LexiaStorage
+    __all__.extend([
+        'LexiaStorage',
+    ])
+except ImportError:
+    pass
 
 # Web framework utilities
 try:
     from .web import create_lexia_app, add_standard_endpoints
-    __all__ = [
-        'ChatResponse', 'ChatMessage', 'Variable', 'Memory',
-        'create_success_response', 'LexiaHandler', 'DevStreamClient',
-        'get_variable_value', 'get_openai_api_key', 'Variables', 'MemoryHelper', 'ForceToolsHelper', 'decode_base64_file',
-        'create_link_button_block', 'create_action_button_block',
-        'create_lexia_app', 'add_standard_endpoints',
-        '__version__'
-    ]
+    __all__.extend([
+        'create_lexia_app',
+        'add_standard_endpoints',
+    ])
 except ImportError:
-    # Fallback if web dependencies aren't available
-    __all__ = [
-        'ChatResponse', 'ChatMessage', 'Variable', 'Memory',
-        'create_success_response', 'LexiaHandler', 'DevStreamClient',
-        'get_variable_value', 'get_openai_api_key', 'Variables', 'MemoryHelper', 'ForceToolsHelper', 'decode_base64_file',
-        'create_link_button_block', 'create_action_button_block',
-        '__version__'
-    ]
+    pass
