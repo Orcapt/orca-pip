@@ -1,4 +1,4 @@
-# Lexia SDK
+# Orca SDK
 
 Professional Python SDK for building real-time AI agents with streaming and production-ready deployment.
 
@@ -20,16 +20,16 @@ Professional Python SDK for building real-time AI agents with streaming and prod
 ### Installation
 
 ```bash
-pip install lexia
+pip install orca
 ```
 
 ### Basic Usage
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
 # Initialize handler
-handler = LexiaHandler(dev_mode=True)
+handler = OrcaHandler(dev_mode=True)
 
 # Create session
 session = handler.begin(data)
@@ -44,9 +44,9 @@ session.close()
 ### Lambda Deployment
 
 ```python
-from lexia import LexiaHandler, LambdaAdapter
+from orca import OrcaHandler, LambdaAdapter
 
-handler = LexiaHandler()
+handler = OrcaHandler()
 adapter = LambdaAdapter()
 
 @adapter.message_handler
@@ -147,10 +147,10 @@ except Exception as e:
 
 ## Architecture
 
-Lexia SDK follows clean architecture principles with 14 distinct layers:
+Orca SDK follows clean architecture principles with 14 distinct layers:
 
 ```
-lexia/
+orca/
 ├── core/           # Core handler and session
 ├── domain/         # Interfaces and models
 ├── services/       # Business logic services
@@ -177,8 +177,8 @@ lexia/
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/lexia-sdk
-cd lexia-sdk
+git clone https://github.com/your-org/orca-sdk
+cd orca-sdk
 
 # Install dependencies
 pip install -r requirements.txt
@@ -197,7 +197,7 @@ python examples/basic_usage.py
 pytest
 
 # Run with coverage
-pytest --cov=lexia
+pytest --cov=orca
 
 # Run specific test
 pytest tests/test_handler.py
@@ -224,7 +224,7 @@ docker build -f Dockerfile.lambda -t my-agent:latest .
 3. Deploy:
 
 ```bash
-lexia ship my-agent --image my-agent:latest --env-file .env
+orca ship my-agent --image my-agent:latest --env-file .env
 ```
 
 See [Lambda Deploy Guide](LAMBDA_DEPLOY_GUIDE.md) for complete instructions.
@@ -235,10 +235,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- 📧 Email: support@lexia.ai
-- 💬 Discord: [Join our community](https://discord.gg/lexia)
-- 📚 Docs: [docs.lexia.ai](https://docs.lexia.ai)
-- 🐛 Issues: [GitHub Issues](https://github.com/your-org/lexia-sdk/issues)
+- 📧 Email: support@orca.ai
+- 💬 Discord: [Join our community](https://discord.gg/orca)
+- 📚 Docs: [docs.orca.ai](https://docs.orca.ai)
+- 🐛 Issues: [GitHub Issues](https://github.com/your-org/orca-sdk/issues)
 
 ## Contributing
 
@@ -246,8 +246,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 ## Acknowledgments
 
-Built with ❤️ by the Lexia team.
+Built with ❤️ by the Orca team.
 
 ---
 
-**Made with 🚀 by [Lexia](https://lexia.ai)**
+**Made with 🚀 by [Orca](https://orca.ai)**

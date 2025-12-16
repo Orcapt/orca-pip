@@ -1,23 +1,23 @@
 # Quick Reference
 
-Fast API reference for Lexia SDK with common usage patterns.
+Fast API reference for Orca SDK with common usage patterns.
 
 ## 📦 Installation
 
 ```bash
-pip install lexia
+pip install orca
 ```
 
 ## 🚀 Quick Start
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
 # Development mode (in-memory streaming)
-handler = LexiaHandler(dev_mode=True)
+handler = OrcaHandler(dev_mode=True)
 
 # Production mode (Centrifugo streaming)
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 ```
 
 ## 💬 Basic Usage
@@ -25,9 +25,9 @@ handler = LexiaHandler(dev_mode=False)
 ### Simple Message Flow
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-handler = LexiaHandler(dev_mode=True)
+handler = OrcaHandler(dev_mode=True)
 
 def process_message(data):
     # Start session
@@ -93,12 +93,12 @@ except Exception as e:
 
 ## 📚 Core Classes
 
-### LexiaHandler
+### OrcaHandler
 
-Main handler for all Lexia operations.
+Main handler for all Orca operations.
 
 ```python
-handler = LexiaHandler(
+handler = OrcaHandler(
     dev_mode=True,           # Enable dev mode
     stream_client=None,      # Custom stream client
     api_client=None,         # Custom API client
@@ -258,7 +258,7 @@ session.button.action(
 ### Variables
 
 ```python
-from lexia import get_variable_value, Variables
+from orca import get_variable_value, Variables
 
 # Get single variable
 api_key = get_variable_value(data.variables, "api_key")
@@ -272,7 +272,7 @@ db_url = vars.get("db_url", default="localhost")
 ### Memory Helper
 
 ```python
-from lexia import MemoryHelper
+from orca import MemoryHelper
 
 memory = MemoryHelper()
 
@@ -290,7 +290,7 @@ if memory.has("user_preference"):
 ### Environment
 
 ```python
-from lexia import get_openai_api_key
+from orca import get_openai_api_key
 
 # Get OpenAI API key from variables or env
 api_key = get_openai_api_key(data.variables)
@@ -299,7 +299,7 @@ api_key = get_openai_api_key(data.variables)
 ### Response Builder
 
 ```python
-from lexia import create_success_response
+from orca import create_success_response
 
 # Create success response
 response = create_success_response(
@@ -313,10 +313,10 @@ response = create_success_response(
 ### Builder Pattern
 
 ```python
-from lexia.patterns import LexiaBuilder
+from orca.patterns import OrcaBuilder
 
 # Build handler with fluent interface
-handler = (LexiaBuilder()
+handler = (OrcaBuilder()
     .with_dev_mode(True)
     .with_buffer_manager(custom_buffer)
     .build())
@@ -325,7 +325,7 @@ handler = (LexiaBuilder()
 ### Context Manager
 
 ```python
-from lexia.patterns import SessionContext
+from orca.patterns import SessionContext
 
 # Automatic session management
 with SessionContext(handler, data) as session:
@@ -336,11 +336,11 @@ with SessionContext(handler, data) as session:
 ### Middleware
 
 ```python
-from lexia.patterns import MiddlewareChain, LoggingMiddleware
+from orca.patterns import MiddlewareChain, LoggingMiddleware
 
 # Create middleware chain
 chain = MiddlewareChain()
-from lexia.patterns import MiddlewareManager
+from orca.patterns import MiddlewareManager
 
 manager = MiddlewareManager()
 manager.use(LoggingMiddleware())
@@ -359,9 +359,9 @@ manager.execute(process, data)
 ### Basic Lambda Handler
 
 ```python
-from lexia import LexiaHandler, LambdaAdapter
+from orca import OrcaHandler, LambdaAdapter
 
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 adapter = LambdaAdapter()
 
 @adapter.message_handler
@@ -379,9 +379,9 @@ def lambda_handler(event, context):
 ### Basic Storage Operations
 
 ```python
-from lexia import LexiaStorage
+from orca import OrcaStorage
 
-storage = LexiaStorage(
+storage = OrcaStorage(
     workspace="my-workspace",
     token="api-token",
     base_url="https://api.example.com/storage"
@@ -405,10 +405,10 @@ files = storage.list_files("my-bucket")
 ### Complete Agent Flow
 
 ```python
-from lexia import LexiaHandler, get_openai_api_key
+from orca import OrcaHandler, get_openai_api_key
 from openai import OpenAI
 
-handler = LexiaHandler(dev_mode=True)
+handler = OrcaHandler(dev_mode=True)
 
 def process_message(data):
     session = handler.begin(data)
@@ -486,7 +486,7 @@ def process_with_tracing(data):
 ### Enable Debug Logging
 
 ```python
-from lexia.common import setup_logging, enable_debug_logging
+from orca.common import setup_logging, enable_debug_logging
 import logging
 
 # Setup logging
@@ -500,7 +500,7 @@ enable_debug_logging()
 
 ```python
 # Dev mode uses in-memory streaming (no Centrifugo needed)
-handler = LexiaHandler(dev_mode=True)
+handler = OrcaHandler(dev_mode=True)
 
 # Test your agent locally
 session = handler.begin(test_data)
@@ -513,7 +513,7 @@ print(f"Full response: {response}")
 
 | Task               | Code                                                          |
 | ------------------ | ------------------------------------------------------------- |
-| Initialize handler | `handler = LexiaHandler(dev_mode=True)`                       |
+| Initialize handler | `handler = OrcaHandler(dev_mode=True)`                       |
 | Start session      | `session = handler.begin(data)`                               |
 | Stream text        | `session.stream("Hello")`                                     |
 | Close session      | `session.close()`                                             |

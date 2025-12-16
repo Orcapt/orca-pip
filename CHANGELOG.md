@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Lexia SDK will be documented in this file.
+All notable changes to Orca SDK will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -18,13 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Storage SDK**: Integrated file storage management
 
-  - `LexiaStorage` client for unified storage operations
+  - `OrcaStorage` client for unified storage operations
   - Support for bucket management, file operations, and permissions
-  - Complete API wrapper for Lexia Storage
+  - Complete API wrapper for Orca Storage
 
 - **Design Patterns**: Professional pattern implementations
 
-  - `LexiaBuilder` and `SessionBuilder` for fluent interfaces
+  - `OrcaBuilder` and `SessionBuilder` for fluent interfaces
   - Context managers for resource management
   - Middleware system with chain of responsibility
   - Type guards for runtime type safety
@@ -123,10 +123,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ```python
 # Old (1.x)
-from lexia.unified_handler import LexiaHandler
+from orca.unified_handler import OrcaHandler
 
 # New (2.x)
-from lexia import LexiaHandler
+from orca import OrcaHandler
 ```
 
 2. **Session API**:
@@ -154,8 +154,8 @@ session.button.link("Click", "https://example.com")
 #### New Features Available
 
 - Lambda deployment via `LambdaAdapter`
-- Storage management via `LexiaStorage`
-- Design patterns via `LexiaBuilder`, middleware, etc.
+- Storage management via `OrcaStorage`
+- Design patterns via `OrcaBuilder`, middleware, etc.
 
 #### Deprecated (Still Works)
 
@@ -173,6 +173,6 @@ session.button_link()    # Use: session.button.link()
 
 For questions or issues:
 
-- Email: support@lexia.ai
-- Discord: https://discord.gg/lexia
-- GitHub: https://github.com/your-org/lexia-sdk/issues
+- Email: support@orca.ai
+- Discord: https://discord.gg/orca
+- GitHub: https://github.com/your-org/orca-sdk/issues

@@ -1,6 +1,6 @@
-# Contributing to Lexia SDK
+# Contributing to Orca SDK
 
-Thank you for your interest in contributing to Lexia SDK! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to Orca SDK! This document provides guidelines and instructions for contributing.
 
 ## Code of Conduct
 
@@ -18,8 +18,8 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/lexia-sdk
-cd lexia-sdk
+git clone https://github.com/your-org/orca-sdk
+cd orca-sdk
 
 # Create virtual environment
 python -m venv venv
@@ -63,7 +63,7 @@ Use prefixes:
 pytest
 
 # Run with coverage
-pytest --cov=lexia --cov-report=html
+pytest --cov=orca --cov-report=html
 
 # Run specific test file
 pytest tests/test_handler.py
@@ -76,13 +76,13 @@ pytest -v
 
 ```bash
 # Format code with black
-black lexia/ tests/ examples/
+black orca/ tests/ examples/
 
 # Type checking with mypy
-mypy lexia/
+mypy orca/
 
 # Linting with flake8
-flake8 lexia/ tests/ examples/
+flake8 orca/ tests/ examples/
 ```
 
 ### 5. Commit Your Changes
@@ -150,7 +150,7 @@ def process_data(
 
 ### Architecture
 
-Lexia SDK follows clean architecture principles:
+Orca SDK follows clean architecture principles:
 
 1. **Domain Layer** (`domain/`)
 
@@ -189,22 +189,22 @@ Example test:
 
 ```python
 import pytest
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
 def test_handler_initialization():
     """Test that handler initializes correctly."""
-    handler = LexiaHandler(dev_mode=True)
+    handler = OrcaHandler(dev_mode=True)
     assert handler.dev_mode is True
 
 def test_handler_begin_session():
     """Test session creation."""
-    handler = LexiaHandler(dev_mode=True)
+    handler = OrcaHandler(dev_mode=True)
     # Test logic here
     pass
 
 def test_error_handling():
     """Test error handling."""
-    handler = LexiaHandler(dev_mode=True)
+    handler = OrcaHandler(dev_mode=True)
     with pytest.raises(ValueError):
         # Code that should raise error
         pass
@@ -269,10 +269,10 @@ Releases are handled by maintainers:
 
 - Open an issue for bugs or feature requests
 - Join our Discord for discussions
-- Email support@lexia.ai for other questions
+- Email support@orca.ai for other questions
 
 ## License
 
 By contributing, you agree that your contributions will be licensed under the MIT License.
 
-Thank you for contributing to Lexia SDK! 🚀
+Thank you for contributing to Orca SDK! 🚀

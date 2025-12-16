@@ -1,6 +1,6 @@
-# Lexia SDK Documentation
+# Orca SDK Documentation
 
-Complete documentation for the Lexia SDK.
+Complete documentation for the Orca SDK.
 
 ## Table of Contents
 
@@ -34,7 +34,7 @@ Complete documentation for the Lexia SDK.
 
 ## Architecture
 
-Lexia SDK follows clean architecture with these layers:
+Orca SDK follows clean architecture with these layers:
 
 1. **Core** - Handler and session management
 2. **Domain** - Interfaces and models
@@ -50,7 +50,7 @@ Lexia SDK follows clean architecture with these layers:
 
 ## Support
 
-- Email: support@lexia.ai
-- Discord: [Join our community](https://discord.gg/lexia)
-- Documentation: [docs.lexia.ai](https://docs.lexia.ai)
-- GitHub: [Issues](https://github.com/your-org/lexia-sdk/issues)
+- Email: support@orca.ai
+- Discord: [Join our community](https://discord.gg/orca)
+- Documentation: [docs.orca.ai](https://docs.orca.ai)
+- GitHub: [Issues](https://github.com/your-org/orca-sdk/issues)

@@ -26,14 +26,14 @@ def read_requirements():
         ]
 
 setup(
-    name="lexia",
+    name="orca",
     version="2.0.0",
-    author="Lexia Team",
-    author_email="support@lexiaplatform.com",
-    description="Clean, minimal package for Lexia platform integration",
+    author="Orca Team",
+    author_email="support@orcapt.com",
+    description="Clean, minimal package for Orca platform integration",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/Xalantico/lexia-pip",
+    url="https://github.com/Orcapt/orca-pip",
     packages=find_packages(),
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -68,12 +68,12 @@ setup(
     },
     include_package_data=True,
     package_data={
-        "lexia": ["*.txt", "*.md"],
+        "orca": ["*.txt", "*.md"],
     },
-    keywords="lexia, ai, chatbot, platform, integration, fastapi, real-time",
+    keywords="orca, ai, chatbot, platform, integration, fastapi, real-time",
     project_urls={
-        "Bug Reports": "https://github.com/Xalantico/lexia-pip/issues",
-        "Source": "https://github.com/Xalantico/lexia-pip",
-        "Documentation": "https://github.com/Xalantico/lexia-pip#readme",
+        "Bug Reports": "https://github.com/Orcapt/orca-pip/issues",
+        "Source": "https://github.com/Orcapt/orca-pip",
+        "Documentation": "https://github.com/Orcapt/orca-pip#readme",
     },
 )

@@ -2,17 +2,17 @@
 Lambda Usage Example
 ====================
 
-نحوه استفاده از Lexia SDK روی AWS Lambda.
+نحوه استفاده از Orca SDK روی AWS Lambda.
 
 این مثال نشون میده که چطور خیلی راحت agent خودتون رو Lambda-ready کنید.
 """
 
 # ================== مثال 1: استفاده از Decorator ==================
 
-from lexia import LexiaHandler, LambdaAdapter, ChatMessage
+from orca import OrcaHandler, LambdaAdapter, ChatMessage
 
 # Initialize handler
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 
 # Initialize adapter
 adapter = LambdaAdapter()
@@ -72,9 +72,9 @@ def lambda_handler(event, context):
 # ================== مثال 2: استفاده از Helper Function ==================
 
 """
-from lexia import LexiaHandler, create_lambda_handler, ChatMessage
+from orca import OrcaHandler, create_lambda_handler, ChatMessage
 
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 
 
 async def process_message(data: ChatMessage):
@@ -95,10 +95,10 @@ def lambda_handler(event, context):
 # ================== مثال 3: با OpenAI ==================
 
 """
-from lexia import LexiaHandler, LambdaAdapter, ChatMessage
+from orca import OrcaHandler, LambdaAdapter, ChatMessage
 from openai import OpenAI
 
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 adapter = LambdaAdapter()
 client = OpenAI()
 
@@ -150,10 +150,10 @@ def lambda_handler(event, context):
    - SQS_QUEUE_URL: اگر set باشه، requests به SQS میرن
    - اگر نباشه، direct process میشن
 
-4️⃣  Deploy با lexia-cli:
-   $ lexia ship my-agent --image my-agent:latest
+4️⃣  Deploy با orca-cli:
+   $ orca ship my-agent --image my-agent:latest
    
-   lexia-cli خودش:
+   orca-cli خودش:
    - Image رو push میکنه
    - Lambda function رو create/update میکنه
    - SQS queue رو configure میکنه

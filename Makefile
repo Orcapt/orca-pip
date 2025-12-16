@@ -2,7 +2,7 @@
 
 # Default target
 help:
-	@echo "🚀 Lexia Platform Package - Available Commands"
+	@echo "🚀 Orca Platform Package - Available Commands"
 	@echo "=============================================="
 	@echo ""
 	@echo "📦 Package Management:"
@@ -29,13 +29,13 @@ help:
 # Create virtual environment
 venv:
 	@echo "🐍 Creating virtual environment..."
-	python3 -m venv lexia_env
-	@echo "✅ Virtual environment created. Activate with: source lexia_env/bin/activate"
+	python3 -m venv orca_env
+	@echo "✅ Virtual environment created. Activate with: source orca_env/bin/activate"
 
 # Install dependencies
 deps:
 	@echo "📦 Installing dependencies..."
-	pip install -r lexia/requirements.txt
+	pip install -r orca/requirements.txt
 	pip install build twine pytest black flake8
 
 # Clean build artifacts
@@ -49,7 +49,7 @@ clean:
 # Clean everything including virtual environment
 clean-all: clean
 	@echo "🧹 Cleaning virtual environment..."
-	rm -rf lexia_env/
+	rm -rf orca_env/
 	@echo "✅ Full cleanup completed"
 
 # Build the package
@@ -67,7 +67,7 @@ install: build
 # Test package import
 test:
 	@echo "🧪 Testing package import..."
-	python -c "import lexia; from lexia import LexiaHandler; print('✅ Import successful')"
+	python -c "import orca; from orca import OrcaHandler; print('✅ Import successful')"
 
 # Run full test suite
 test-full:
@@ -77,13 +77,13 @@ test-full:
 # Format code
 format:
 	@echo "🎨 Formatting code..."
-	black lexia/ --line-length 88
+	black orca/ --line-length 88
 	@echo "✅ Code formatting completed"
 
 # Run linting
 lint:
 	@echo "🔍 Running linting checks..."
-	flake8 lexia/ --max-line-length 88 --ignore E203,W503
+	flake8 orca/ --max-line-length 88 --ignore E203,W503
 	@echo "✅ Linting completed"
 
 # Build and publish to PyPI
@@ -102,15 +102,15 @@ publish-test: build
 dev: venv
 	@echo "🔧 Setting up development environment..."
 	@echo "Please activate the virtual environment:"
-	@echo "  source lexia_env/bin/activate"
+	@echo "  source orca_env/bin/activate"
 	@echo "Then run: make deps"
 
 # Show package info
 info:
 	@echo "📋 Package Information:"
-	@echo "  Name: lexia"
+	@echo "  Name: orca"
 	@echo "  Version: 1.2.13"
-	@echo "  Description: Clean, minimal package for Lexia platform integration"
+	@echo "  Description: Clean, minimal package for Orca platform integration"
 	@echo "  Python: >=3.8"
 	@echo "  Dependencies: requests, pydantic"
 	@echo "  Optional: fastapi, uvicorn (web), pytest, black, flake8 (dev)"

@@ -9,15 +9,15 @@ Usage:
 1. Copy this file to your project root as `lambda_handler.py`
 2. Add your agent logic in the process_message function
 3. Build Docker image: `docker build -f Dockerfile.lambda -t my-agent:latest .`
-4. Deploy: `lexia ship my-agent --image my-agent:latest --env-file .env`
+4. Deploy: `orca ship my-agent --image my-agent:latest --env-file .env`
 
 That's it! 🚀
 """
 
-from lexia import LexiaHandler, LambdaAdapter
+from orca import OrcaHandler, LambdaAdapter
 
 # Initialize handler
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 
 # Initialize Lambda adapter
 adapter = LambdaAdapter()

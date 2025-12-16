@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-Test Script for Lexia Platform Package
+Test Script for Orca Platform Package
 =======================================
 
 This script tests the basic functionality of the installed package.
 """
 
 import asyncio
-from lexia import (
-    LexiaHandler, 
+from orca import (
+    OrcaHandler, 
     ChatMessage, 
     Variable, 
     Memory,
@@ -22,7 +22,7 @@ def test_basic_imports():
     print("🧪 Testing basic imports...")
     
     try:
-        from lexia import LexiaHandler, ChatMessage, Variable, Memory
+        from orca import OrcaHandler, ChatMessage, Variable, Memory
         print("✅ Basic imports successful")
         return True
     except ImportError as e:
@@ -94,13 +94,13 @@ def test_response_handler():
         print(f"❌ Response handler test failed: {e}")
         return False
 
-def test_lexia_handler():
-    """Test LexiaHandler initialization."""
-    print("🤖 Testing LexiaHandler...")
+def test_orca_handler():
+    """Test OrcaHandler initialization."""
+    print("🤖 Testing OrcaHandler...")
     
     try:
-        handler = LexiaHandler()
-        print("✅ LexiaHandler created successfully")
+        handler = OrcaHandler()
+        print("✅ OrcaHandler created successfully")
         
         # Test that required methods exist
         required_methods = ['stream_chunk', 'complete_response', 'send_error']
@@ -113,7 +113,7 @@ def test_lexia_handler():
         
         return True
     except Exception as e:
-        print(f"❌ LexiaHandler test failed: {e}")
+        print(f"❌ OrcaHandler test failed: {e}")
         return False
 
 def test_web_imports():
@@ -121,7 +121,7 @@ def test_web_imports():
     print("🌐 Testing web imports...")
     
     try:
-        from lexia.web import create_lexia_app, add_standard_endpoints
+        from orca.web import create_orca_app, add_standard_endpoints
         print("✅ Web imports successful")
         return True
     except ImportError as e:
@@ -130,7 +130,7 @@ def test_web_imports():
 
 async def main():
     """Run all tests."""
-    print("🚀 Starting Lexia Platform Package Tests")
+    print("🚀 Starting Orca Platform Package Tests")
     print("=" * 50)
     
     tests = [
@@ -138,7 +138,7 @@ async def main():
         ("Version", test_version),
         ("Data Models", test_models),
         ("Response Handler", test_response_handler),
-        ("LexiaHandler", test_lexia_handler),
+        ("OrcaHandler", test_orca_handler),
         ("Web Imports", test_web_imports),
     ]
     

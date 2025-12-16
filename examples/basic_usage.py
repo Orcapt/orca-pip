@@ -2,11 +2,11 @@
 Basic Usage Example
 ===================
 
-Demonstrates basic Lexia SDK usage patterns.
+Demonstrates basic Orca SDK usage patterns.
 """
 
-from lexia import LexiaHandler, setup_logging
-from lexia.config import LoadingKind, ButtonColor
+from orca import OrcaHandler, setup_logging
+from orca.config import LoadingKind, ButtonColor
 import logging
 
 # Setup logging
@@ -15,7 +15,7 @@ setup_logging(level=logging.INFO)
 def basic_example():
     """Basic streaming example."""
     # Initialize handler
-    handler = LexiaHandler(dev_mode=True)
+    handler = OrcaHandler(dev_mode=True)
     
     # Create mock data
     class MockData:

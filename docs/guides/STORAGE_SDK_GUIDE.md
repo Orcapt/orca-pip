@@ -1,6 +1,6 @@
 # Storage SDK Guide
 
-Complete guide to using Lexia Storage SDK and building custom storage integrations.
+Complete guide to using Orca Storage SDK and building custom storage integrations.
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@ Complete guide to using Lexia Storage SDK and building custom storage integratio
 
 ## Overview
 
-Lexia Storage provides a workspace-scoped API for file storage with S3-compatible interface. The Python SDK (`LexiaStorage`) is included in the `lexia` package and provides a simple, unified interface for storage operations.
+Orca Storage provides a workspace-scoped API for file storage with S3-compatible interface. The Python SDK (`OrcaStorage`) is included in the `orca` package and provides a simple, unified interface for storage operations.
 
 ### Features
 
@@ -32,7 +32,7 @@ Lexia Storage provides a workspace-scoped API for file storage with S3-compatibl
          │
          ▼
 ┌─────────────────┐
-│  LexiaStorage   │ (Python SDK)
+│  OrcaStorage   │ (Python SDK)
 └────────┬────────┘
          │
          ▼
@@ -50,19 +50,19 @@ Lexia Storage provides a workspace-scoped API for file storage with S3-compatibl
 
 ### Installation
 
-The storage SDK is included with `lexia`:
+The storage SDK is included with `orca`:
 
 ```bash
-pip install lexia
+pip install orca
 ```
 
 ### Quick Start
 
 ```python
-from lexia import LexiaStorage
+from orca import OrcaStorage
 
 # Initialize client
-storage = LexiaStorage(
+storage = OrcaStorage(
     workspace="my-workspace",
     token="your-api-token",
     base_url="https://api.example.com/api/v1/storage",
@@ -250,10 +250,10 @@ storage.remove_permission(permission_id=123)
 
 ## API Reference
 
-### LexiaStorage
+### OrcaStorage
 
 ```python
-class LexiaStorage:
+class OrcaStorage:
     def __init__(
         self,
         workspace: str,
@@ -307,7 +307,7 @@ If you need to build a Storage SDK for another language, follow this guide.
 
 ### Prerequisites
 
-- Lexia workspace and API token
+- Orca workspace and API token
 - Storage API endpoint URL
 - HTTP client library for your language
 - Multipart/form-data upload support
@@ -435,7 +435,7 @@ class CustomStorageSDK:
 #### JavaScript/Node.js
 
 ```javascript
-class LexiaStorage {
+class OrcaStorage {
   constructor({ workspace, token, baseUrl, mode = "prod" }) {
     this.baseUrl = baseUrl.replace(/\/$/, "");
     this.headers = {
@@ -488,7 +488,7 @@ class LexiaStorage {
 #### PHP
 
 ```php
-class LexiaStorage {
+class OrcaStorage {
     private $baseUrl;
     private $headers;
 
@@ -549,14 +549,14 @@ class LexiaStorage {
 ### 1. Error Handling
 
 ```python
-from lexia import LexiaStorage
-from lexia.common.exceptions import LexiaException
+from orca import OrcaStorage
+from orca.common.exceptions import OrcaException
 
-storage = LexiaStorage(...)
+storage = OrcaStorage(...)
 
 try:
     file = storage.upload_file("bucket", "file.pdf")
-except LexiaException as e:
+except OrcaException as e:
     print(f"Storage error: {e.message}")
     print(f"Code: {e.error_code}")
 ```
@@ -566,11 +566,11 @@ except LexiaException as e:
 ```python
 import os
 
-storage = LexiaStorage(
-    workspace=os.getenv("LEXIA_WORKSPACE"),
-    token=os.getenv("LEXIA_TOKEN"),
-    base_url=os.getenv("LEXIA_STORAGE_URL"),
-    mode=os.getenv("LEXIA_MODE", "prod")
+storage = OrcaStorage(
+    workspace=os.getenv("ORCA_WORKSPACE"),
+    token=os.getenv("ORCA_TOKEN"),
+    base_url=os.getenv("ORCA_STORAGE_URL"),
+    mode=os.getenv("ORCA_MODE", "prod")
 )
 ```
 

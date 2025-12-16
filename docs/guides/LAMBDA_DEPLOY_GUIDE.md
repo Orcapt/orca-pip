@@ -1,10 +1,10 @@
-# Lexia Agent Lambda Shipping Guide
+# Orca Agent Lambda Shipping Guide
 
 This document is written for external agent developers who have:
 
-- The **`lexia` PyPI package** (`pip install lexia`)
-- Access to the hosted **`lexia-cli`** and platform APIs
-- Their agent code (using `LexiaHandler`)
+- The **`orca` PyPI package** (`pip install orca`)
+- Access to the hosted **`orca-cli`** and platform APIs
+- Their agent code (using `OrcaHandler`)
 
 Nothing in this guide depends on any internal repositories or starter kits. Follow the steps below to deploy your agent to AWS Lambda with Function URL + SQS trigger.
 
@@ -17,12 +17,12 @@ Nothing in this guide depends on any internal repositories or starter kits. Foll
 | Docker 24+ with BuildKit enabled           | Build the Lambda container image              |
 | AWS account + IAM user/role                | Push to ECR and create Lambda/SQS resources   |
 | AWS CLI v2 (`aws --version`)               | Login to ECR, test SQS, inspect Lambda        |
-| `lexia-cli ≥ 1.12.0`                       | Runs `lexia ship` which talks to platform API |
-| `lexia` PyPI package (`pip install lexia`) | Provides `ChatMessage`, `LexiaHandler`, etc.  |
+| `orca-cli ≥ 1.12.0`                       | Runs `orca ship` which talks to platform API |
+| `orca` PyPI package (`pip install orca`) | Provides `ChatMessage`, `OrcaHandler`, etc.  |
 | `jq` (optional)                            | Formatting JSON for curl/SQS tests            |
 | Text editor + git                          | Modify starter kit and track your changes     |
 
-> **AWS Permissions:** The IAM principal used by `lexia ship` must have `ecr:*`, `lambda:*`, `sqs:*`, `iam:PassRole`, and CloudWatch Logs access. Your platform admin can scope this via IAM policies.
+> **AWS Permissions:** The IAM principal used by `orca ship` must have `ecr:*`, `lambda:*`, `sqs:*`, `iam:PassRole`, and CloudWatch Logs access. Your platform admin can scope this via IAM policies.
 
 ---
 
@@ -44,13 +44,13 @@ That's it! No starter kit or complex structure needed.
 
 ## 3. Create Lambda Handler
 
-Create `lambda_handler.py` in your project root. Using `LambdaAdapter` from the lexia SDK makes this incredibly simple:
+Create `lambda_handler.py` in your project root. Using `LambdaAdapter` from the orca SDK makes this incredibly simple:
 
 ```python
-from lexia import LexiaHandler, LambdaAdapter, ChatMessage
+from orca import OrcaHandler, LambdaAdapter, ChatMessage
 
 # Initialize handler
-handler = LexiaHandler(dev_mode=False)
+handler = OrcaHandler(dev_mode=False)
 
 # Initialize adapter (automatically handles HTTP, SQS, and cron events!)
 adapter = LambdaAdapter()
@@ -139,7 +139,7 @@ CMD ["lambda_handler.handler"]
 
 ```txt
 # Core
-lexia>=2.0.0
+orca>=2.0.0
 boto3>=1.34.0
 
 # Your providers
@@ -168,7 +168,7 @@ Tips:
 docker build -f Dockerfile.lambda -t my-agent:latest .
 ```
 
-**Note:** You don't need to push to ECR manually! `lexia ship` will handle the ECR push automatically.
+**Note:** You don't need to push to ECR manually! `orca ship` will handle the ECR push automatically.
 
 ---
 
@@ -184,28 +184,28 @@ STREAM_TOKEN=ST_xxx
 LOG_LEVEL=info
 ```
 
-The Lexia CLI will also inject:
+The Orca CLI will also inject:
 
 - `SQS_QUEUE_URL` (auto-created per function)
 - Any flags you pass via repeated `--env KEY=value`
 
 ---
 
-## 7. Deploy with `lexia ship`
+## 7. Deploy with `orca ship`
 
 ```bash
-# Login to lexia-cli
-lexia login --api-url https://platform.lexia.ai --token <personal-access-token>
+# Login to orca-cli
+orca login --api-url https://platform.orca.ai --token <personal-access-token>
 
-# Deploy (lexia-cli handles EVERYTHING!)
-lexia ship my-agent \
+# Deploy (orca-cli handles EVERYTHING!)
+orca ship my-agent \
   --image my-agent:latest \
   --memory 2048 \
   --timeout 300 \
   --env-file ./.env.lambda
 ```
 
-**What `lexia ship` does automatically:**
+**What `orca ship` does automatically:**
 
 1. ✅ **Pushes image to ECR** - No manual ECR login/push needed
 2. ✅ **Creates/updates Lambda function** - Using your image
@@ -227,7 +227,7 @@ lexia ship my-agent \
 Deploy complete! 🚀
 ```
 
-You can re-run `lexia ship` any time to update code or environment variables.
+You can re-run `orca ship` any time to update code or environment variables.
 
 ---
 
@@ -267,7 +267,7 @@ curl -XPOST https://<function-url>/ \
 **View logs:**
 
 ```bash
-lexia lambda logs my-agent --tail
+orca lambda logs my-agent --tail
 
 # Or use AWS CLI
 aws logs tail /aws/lambda/my-agent --follow
@@ -311,12 +311,12 @@ The handler prints every key (value masked) on cold start so you can confirm the
 
 | Symptom                             | Root cause                                        | Fix                                                                                                |
 | ----------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `TLS handshake timeout` during push | Slow network / ECR region mismatch                | Re-run `lexia ship` (retries enabled) or push from an EC2 builder in the same region               |
+| `TLS handshake timeout` during push | Slow network / ECR region mismatch                | Re-run `orca ship` (retries enabled) or push from an EC2 builder in the same region               |
 | `Runtime.ExitError` right away      | Wrong base image or missing handler               | Use `public.ecr.aws/lambda/python:3.11` and `CMD ["lambda_handler.handler"]`                       |
-| Function URL returns 403            | Permission missing                                | Re-run `lexia ship`; it re-applies `lambda:InvokeFunctionUrl` policy                               |
+| Function URL returns 403            | Permission missing                                | Re-run `orca ship`; it re-applies `lambda:InvokeFunctionUrl` policy                               |
 | Env vars missing                    | Incorrect `--env` syntax or missing `.env.lambda` | Use `KEY=value` pairs; CLI prints final map—double-check before confirming                         |
 | Centrifugo points to internal URL   | `stream_url` in payload was `null`                | Ensure the invoking service sends `stream_url`/`stream_token`; fallback env can be set             |
-| SQS never triggers                  | Event source mapping disabled                     | `lexia ship` recreates it; or run `aws lambda list-event-source-mappings --function-name my-agent` |
+| SQS never triggers                  | Event source mapping disabled                     | `orca ship` recreates it; or run `aws lambda list-event-source-mappings --function-name my-agent` |
 
 Need more help? Collect the latest CloudWatch log stream and open a ticket with the Function name + timestamp.
 
@@ -326,14 +326,14 @@ Need more help? Collect the latest CloudWatch log stream and open a ticket with 
 
 - [ ] `lambda_handler.py` created with `LambdaAdapter`
 - [ ] `@adapter.message_handler` decorator wraps your agent logic
-- [ ] `requirements-lambda.txt` includes `lexia>=2.0.0` and your providers
+- [ ] `requirements-lambda.txt` includes `orca>=2.0.0` and your providers
 - [ ] `Dockerfile.lambda` builds successfully locally
 - [ ] `.env.lambda` created with all required variables (never commit!)
 - [ ] Docker image built: `docker build -f Dockerfile.lambda -t my-agent:latest .`
-- [ ] `lexia ship my-agent --image my-agent:latest --env-file .env.lambda` executed
-- [ ] Function URL received from `lexia ship` output
+- [ ] `orca ship my-agent --image my-agent:latest --env-file .env.lambda` executed
+- [ ] Function URL received from `orca ship` output
 - [ ] Test HTTP request works: `curl -XPOST <function-url> ...`
-- [ ] Check logs: `lexia lambda logs my-agent --tail`
+- [ ] Check logs: `orca lambda logs my-agent --tail`
 - [ ] Verify SQS processing in logs: `[SQS] Processing ... Message completed ✓`
 
 Once all boxes are checked, your agent is production-ready on AWS Lambda! 🚀
@@ -349,15 +349,15 @@ Here's a complete, production-ready `lambda_handler.py` using `LambdaAdapter`:
 Lambda Handler - Production-Ready Example
 ==========================================
 
-Simplest possible Lambda handler using LexiaAdapter.
+Simplest possible Lambda handler using OrcaAdapter.
 Handles HTTP, SQS, and cron events automatically.
 """
 
-from lexia import LexiaHandler, LambdaAdapter, ChatMessage
+from orca import OrcaHandler, LambdaAdapter, ChatMessage
 import os
 
-# Initialize Lexia handler
-handler = LexiaHandler(dev_mode=False)
+# Initialize Orca handler
+handler = OrcaHandler(dev_mode=False)
 
 # Initialize adapter (handles ALL event types!)
 adapter = LambdaAdapter()

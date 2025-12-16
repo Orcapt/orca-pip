@@ -2,7 +2,7 @@
 Storage Example
 ===============
 
-Demonstrates Lexia Storage SDK usage.
+Demonstrates Orca Storage SDK usage.
 """
 
 import sys
@@ -12,20 +12,20 @@ import os
 # Add parent directory to path for standalone execution
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from lexia import LexiaStorage
+from orca import OrcaStorage
 
 
 def storage_example():
-    """Example using high-level LexiaStorage client."""
+    """Example using high-level OrcaStorage client."""
     print("=" * 60)
-    print("LEXIA STORAGE SDK")
+    print("ORCA STORAGE SDK")
     print("=" * 60)
     print()
     
     # Initialize client
-    storage = LexiaStorage(
-        workspace=os.environ.get('LEXIA_WORKSPACE', 'demo-workspace'),
-        token=os.environ.get('LEXIA_TOKEN', 'demo-token'),
+    storage = OrcaStorage(
+        workspace=os.environ.get('ORCA_WORKSPACE', 'demo-workspace'),
+        token=os.environ.get('ORCA_TOKEN', 'demo-token'),
         base_url=os.environ.get('STORAGE_URL', 'http://localhost:8000/api/v1/storage'),
         mode='dev'
     )
@@ -62,7 +62,7 @@ def storage_example():
     # Upload from buffer
     print("📤 Uploading from buffer...")
     try:
-        content = b"Hello from Lexia Storage!"
+        content = b"Hello from Orca Storage!"
         file_info = storage.upload_buffer(
             bucket='demo-bucket',
             file_name='test.txt',
@@ -108,9 +108,9 @@ def permissions_example():
     print("=" * 60)
     print()
     
-    storage = LexiaStorage(
-        workspace=os.environ.get('LEXIA_WORKSPACE', 'demo-workspace'),
-        token=os.environ.get('LEXIA_TOKEN', 'demo-token'),
+    storage = OrcaStorage(
+        workspace=os.environ.get('ORCA_WORKSPACE', 'demo-workspace'),
+        token=os.environ.get('ORCA_TOKEN', 'demo-token'),
         base_url=os.environ.get('STORAGE_URL', 'http://localhost:8000/api/v1/storage'),
         mode='dev'
     )
@@ -153,11 +153,11 @@ def permissions_example():
 def main():
     """Main example."""
     print()
-    print("🗄️  Lexia Storage SDK Demo")
+    print("🗄️  Orca Storage SDK Demo")
     print()
     print("Note: Set these environment variables:")
-    print("  - LEXIA_WORKSPACE")
-    print("  - LEXIA_TOKEN")
+    print("  - ORCA_WORKSPACE")
+    print("  - ORCA_TOKEN")
     print("  - STORAGE_URL")
     print()
     
@@ -170,7 +170,7 @@ def main():
     print("=" * 60)
     print()
     print("For complete documentation, see:")
-    print("  - Lexia_storage _SDK_Developer_Guide.md")
+    print("  - Orca_storage _SDK_Developer_Guide.md")
     print()
 
 

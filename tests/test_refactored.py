@@ -1,5 +1,5 @@
 """
-Test script for refactored Lexia SDK with SOLID principles
+Test script for refactored Orca SDK with SOLID principles
 ===========================================================
 
 This script demonstrates that the refactored code works correctly
@@ -16,12 +16,12 @@ def test_basic_import():
     print("Testing imports...")
     
     try:
-        from lexia import LexiaHandler
-        from lexia.services import BufferManager, ButtonRenderer, UsageTracker
-        from lexia.factories import StreamClientFactory
-        from lexia.domain.interfaces import IStreamClient, IAPIClient
-        from lexia.core import Session
-        from lexia.helpers import ButtonHelper
+        from orca import OrcaHandler
+        from orca.services import BufferManager, ButtonRenderer, UsageTracker
+        from orca.factories import StreamClientFactory
+        from orca.domain.interfaces import IStreamClient, IAPIClient
+        from orca.core import Session
+        from orca.helpers import ButtonHelper
         print("✅ All imports successful")
         return True
     except ImportError as e:
@@ -30,21 +30,21 @@ def test_basic_import():
 
 
 def test_handler_initialization():
-    """Test that LexiaHandler initializes correctly."""
-    print("\nTesting LexiaHandler initialization...")
+    """Test that OrcaHandler initializes correctly."""
+    print("\nTesting OrcaHandler initialization...")
     
     try:
-        from lexia import LexiaHandler
+        from orca import OrcaHandler
         
         # Test default initialization
-        handler1 = LexiaHandler(dev_mode=True)
+        handler1 = OrcaHandler(dev_mode=True)
         assert handler1.dev_mode == True
         print("✅ Dev mode initialization works")
         
         # Test dependency injection
         mock_stream = Mock()
         mock_api = Mock()
-        handler2 = LexiaHandler(
+        handler2 = OrcaHandler(
             dev_mode=False,
             stream_client=mock_stream,
             api_client=mock_api
@@ -64,7 +64,7 @@ def test_services():
     print("\nTesting services...")
     
     try:
-        from lexia.services import BufferManager, ButtonRenderer, LoadingMarkerProvider
+        from orca.services import BufferManager, ButtonRenderer, LoadingMarkerProvider
         
         # Test BufferManager
         buffer_mgr = BufferManager()
@@ -85,7 +85,7 @@ def test_services():
         # Test LoadingMarkerProvider
         marker_provider = LoadingMarkerProvider()
         marker = marker_provider.get_marker("thinking", "start")
-        assert "[lexia.loading.thinking.start]" in marker
+        assert "[orca.loading.thinking.start]" in marker
         print("✅ LoadingMarkerProvider works")
         
         return True
@@ -101,8 +101,8 @@ def test_factory():
     print("\nTesting factory...")
     
     try:
-        from lexia.factories import StreamClientFactory
-        from lexia.domain.interfaces import IStreamClient
+        from orca.factories import StreamClientFactory
+        from orca.domain.interfaces import IStreamClient
         
         # Test dev client creation
         dev_client = StreamClientFactory.create(dev_mode=True)
@@ -127,16 +127,16 @@ def test_backwards_compatibility():
     print("\nTesting backwards compatibility...")
     
     try:
-        from lexia import LexiaHandler, create_link_button_block, create_action_button_block
+        from orca import OrcaHandler, create_link_button_block, create_action_button_block
         
         # Test standalone functions
         link_block = create_link_button_block("Test", "https://example.com")
-        assert "[lexia.buttons.start]" in link_block
+        assert "[orca.buttons.start]" in link_block
         assert "Test" in link_block
         print("✅ Standalone functions work")
         
         # Test handler with mock data
-        handler = LexiaHandler(dev_mode=True)
+        handler = OrcaHandler(dev_mode=True)
         
         # Create mock data object
         mock_data = MagicMock()
@@ -172,7 +172,7 @@ def test_dependency_injection():
     print("\nTesting dependency injection for mocking...")
     
     try:
-        from lexia import LexiaHandler
+        from orca import OrcaHandler
         
         # Create mocks
         mock_stream = Mock()
@@ -182,7 +182,7 @@ def test_dependency_injection():
         mock_buffer.drain = Mock(return_value="Mocked content")
         
         # Inject mocks
-        handler = LexiaHandler(
+        handler = OrcaHandler(
             dev_mode=True,
             stream_client=mock_stream,
             api_client=mock_api,
@@ -221,7 +221,7 @@ def test_dependency_injection():
 def main():
     """Run all tests."""
     print("="*60)
-    print("LEXIA SDK REFACTORED - SOLID PRINCIPLES TEST SUITE")
+    print("ORCA SDK REFACTORED - SOLID PRINCIPLES TEST SUITE")
     print("="*60)
     
     tests = [

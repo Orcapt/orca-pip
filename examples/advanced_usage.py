@@ -2,23 +2,23 @@
 Advanced Usage Example
 ======================
 
-Demonstrates advanced Lexia SDK features.
+Demonstrates advanced Orca SDK features.
 """
 
-from lexia import (
-    LexiaHandler,
+from orca import (
+    OrcaHandler,
     setup_logging,
     retry,
     log_execution,
     measure_time,
     StreamError,
 )
-from lexia.common import LoggingContext
-from lexia.config import LoadingKind, ButtonColor, TokenType
+from orca.common import LoggingContext
+from orca.config import LoadingKind, ButtonColor, TokenType
 import logging
 
 # Setup logging
-setup_logging(level=logging.DEBUG, log_file="lexia_advanced.log")
+setup_logging(level=logging.DEBUG, log_file="orca_advanced.log")
 
 @retry(max_attempts=3, delay=0.5)
 @measure_time
@@ -61,7 +61,7 @@ def generate_response(handler, data) -> str:
 def advanced_example():
     """Advanced features demonstration."""
     # Initialize with custom configuration
-    handler = LexiaHandler(dev_mode=True)
+    handler = OrcaHandler(dev_mode=True)
     
     # Create mock data
     class MockData:

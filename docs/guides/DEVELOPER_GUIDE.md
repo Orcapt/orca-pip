@@ -1,6 +1,6 @@
-# Lexia Python SDK - Developer Guide
+# Orca Python SDK - Developer Guide
 
-**Official Python SDK for building AI agents on the Lexia platform**
+**Official Python SDK for building AI agents on the Orca platform**
 
 Version: 1.2.7 | Python: >=3.8 | License: MIT
 
@@ -27,14 +27,14 @@ Version: 1.2.7 | Python: >=3.8 | License: MIT
 
 ## Introduction
 
-The Lexia Python SDK (`lexia-pip`) is a professional, production-ready package that enables developers to build AI agents that seamlessly integrate with the Lexia platform. It provides a clean, intuitive interface for:
+The Orca Python SDK (`orca-pip`) is a professional, production-ready package that enables developers to build AI agents that seamlessly integrate with the Orca platform. It provides a clean, intuitive interface for:
 
-- ✅ **Real-time streaming** to Lexia frontend
-- ✅ **Backend communication** with Lexia API
+- ✅ **Real-time streaming** to Orca frontend
+- ✅ **Backend communication** with Orca API
 - ✅ **Data validation** with Pydantic models
 - ✅ **Environment variable management**
 - ✅ **User memory handling** for personalized responses
-- ✅ **Error handling and logging** to Lexia backend
+- ✅ **Error handling and logging** to Orca backend
 - ✅ **Dev mode** for local development without Centrifugo
 - ✅ **FastAPI integration** with standard endpoints
 
@@ -42,7 +42,7 @@ The Lexia Python SDK (`lexia-pip`) is a professional, production-ready package t
 
 The SDK follows these principles:
 
-1. **Platform Agnostic** - Your AI logic stays independent of Lexia internals
+1. **Platform Agnostic** - Your AI logic stays independent of Orca internals
 2. **Clean Interface** - Simple, intuitive methods that do one thing well
 3. **Developer Friendly** - Works identically in dev and production modes
 4. **Type Safe** - Pydantic models ensure data integrity
@@ -55,14 +55,14 @@ The SDK follows these principles:
 ### Essential Functions You'll Use
 
 ```python
-from lexia import LexiaHandler, ChatMessage, Variables, MemoryHelper
+from orca import OrcaHandler, ChatMessage, Variables, MemoryHelper
 
 # 1. Initialize handler
-lexia = LexiaHandler()  # or LexiaHandler(dev_mode=True)
+orca = OrcaHandler()  # or OrcaHandler(dev_mode=True)
 
 # 2. Start session
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)  # ← Start here
+    session = orca.begin(data)  # ← Start here
 
     try:
         # 3. Access variables and memory
@@ -103,32 +103,32 @@ async def process_message(data: ChatMessage):
 
 ```bash
 # Basic installation (core features only)
-pip install lexia
+pip install orca
 
 # With web dependencies (FastAPI + Uvicorn)
-pip install lexia[web]
+pip install orca[web]
 
 # With development tools (pytest, black, flake8)
-pip install lexia[dev]
+pip install orca[dev]
 
 # With everything
-pip install lexia[web,dev]
+pip install orca[web,dev]
 ```
 
 ### From Source
 
 ```bash
-git clone https://github.com/Xalantico/lexia-pip.git
-cd lexia-pip
+git clone https://github.com/Orcapt/orca-pip.git
+cd orca-pip
 pip install -e .
 ```
 
 ### Verify Installation
 
 ```python
-import lexia
-print(f"Lexia SDK version: {lexia.__version__}")
-# Output: Lexia SDK version: 1.2.7
+import orca
+print(f"Orca SDK version: {orca.__version__}")
+# Output: Orca SDK version: 1.2.7
 ```
 
 ---
@@ -138,15 +138,15 @@ print(f"Lexia SDK version: {lexia.__version__}")
 ### Minimal Example
 
 ```python
-from lexia import LexiaHandler, ChatMessage
+from orca import OrcaHandler, ChatMessage
 
-# Initialize Lexia handler
-lexia = LexiaHandler()
+# Initialize Orca handler
+orca = OrcaHandler()
 
 # Your AI processing function
 async def process_message(data: ChatMessage):
     # Start a session
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         # Your AI logic here
@@ -164,19 +164,19 @@ async def process_message(data: ChatMessage):
 
 ```python
 from fastapi import FastAPI
-from lexia import (
-    LexiaHandler,
+from orca import (
+    OrcaHandler,
     ChatMessage,
     Variables,
-    create_lexia_app,
+    create_orca_app,
     add_standard_endpoints
 )
 
-# Initialize Lexia handler
-lexia = LexiaHandler()
+# Initialize Orca handler
+orca = OrcaHandler()
 
-# Create FastAPI app with Lexia defaults
-app = create_lexia_app(
+# Create FastAPI app with Orca defaults
+app = create_orca_app(
     title="My AI Agent",
     version="1.0.0"
 )
@@ -184,7 +184,7 @@ app = create_lexia_app(
 # Your AI processing logic
 async def process_message(data: ChatMessage):
     # Start session
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         # Access environment variables
@@ -201,10 +201,10 @@ async def process_message(data: ChatMessage):
     except Exception as e:
         session.error(str(e), exception=e)
 
-# Add standard Lexia endpoints
+# Add standard Orca endpoints
 add_standard_endpoints(
     app,
-    lexia_handler=lexia,
+    orca_handler=orca,
     process_message_func=process_message
 )
 
@@ -251,15 +251,15 @@ curl -X POST http://localhost:8000/api/v1/send_message \
          │
          ▼
 ┌─────────────────┐
-│  Lexia Handler  │  ← This SDK
-│  (lexia-pip)    │
+│  Orca Handler  │  ← This SDK
+│  (orca-pip)    │
 └────────┬────────┘
          │
     ┌────┴────┐
     │         │
     ▼         ▼
 ┌────────┐ ┌──────────┐
-│Centrifugo│ │Lexia API │  ← Lexia Platform
+│Centrifugo│ │Orca API │  ← Orca Platform
 │(Stream)│ │(Backend) │
 └────────┘ └──────────┘
 ```
@@ -268,58 +268,58 @@ curl -X POST http://localhost:8000/api/v1/send_message \
 
 | Component            | Purpose                                    |
 | -------------------- | ------------------------------------------ |
-| **LexiaHandler**     | Main interface for all Lexia communication |
+| **OrcaHandler**      | Main interface for all Orca communication  |
 | **ChatMessage**      | Pydantic model for incoming requests       |
 | **ChatResponse**     | Pydantic model for responses               |
 | **Variables**        | Helper for accessing environment variables |
 | **MemoryHelper**     | Helper for accessing user memory data      |
 | **DevStreamClient**  | Dev mode streaming (no Centrifugo)         |
 | **CentrifugoClient** | Production real-time streaming             |
-| **APIClient**        | HTTP communication with Lexia backend      |
+| **APIClient**        | HTTP communication with Orca backend       |
 
 ---
 
 ## API Reference
 
-### LexiaHandler
+### OrcaHandler
 
-The main interface for all Lexia communication. Use the **Session API** for building AI agents.
+The main interface for all Orca communication. Use the **Session API** for building AI agents.
 
 #### Constructor
 
 ```python
-LexiaHandler(dev_mode: bool = None)
+OrcaHandler(dev_mode: bool = None)
 ```
 
 **Parameters:**
 
-- `dev_mode` (bool, optional): Enable dev mode. If None, checks `LEXIA_DEV_MODE` environment variable.
+- `dev_mode` (bool, optional): Enable dev mode. If None, checks `ORCA_DEV_MODE` environment variable.
 
 **Example:**
 
 ```python
 # Production mode (uses Centrifugo)
-lexia = LexiaHandler(dev_mode=False)
+orca = OrcaHandler(dev_mode=False)
 
 # Dev mode (uses in-memory streaming)
-lexia = LexiaHandler(dev_mode=True)
+orca = OrcaHandler(dev_mode=True)
 
 # Auto-detect from environment
-lexia = LexiaHandler()
+orca = OrcaHandler()
 ```
 
 ---
 
 ### Session API (Recommended)
 
-Start a session with `lexia.begin(data)` and use these methods:
+Start a session with `orca.begin(data)` and use these methods:
 
 #### `begin(data)` - Start Session
 
 Create a streaming session for handling a request.
 
 ```python
-session = lexia.begin(data: ChatMessage)
+session = orca.begin(data: ChatMessage)
 ```
 
 **Returns:** Session object with the following methods:
@@ -339,7 +339,7 @@ session.stream(content: str) -> None
 **Example:**
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 # Stream chunks as they're generated
 for chunk in ai_stream:
@@ -348,7 +348,7 @@ for chunk in ai_stream:
 
 #### `session.close(usage_info=None)` - Complete Response
 
-Finalize the response and send to Lexia platform. Automatically aggregates all streamed content.
+Finalize the response and send to Orca platform. Automatically aggregates all streamed content.
 
 ```python
 full_text = session.close(
@@ -373,7 +373,7 @@ full_text = session.close(
 **Example:**
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 for chunk in ai_stream:
     session.stream(chunk)
@@ -389,7 +389,7 @@ full_text = session.close(usage_info=usage)
 
 #### `session.error(error_message, exception=None, trace=None)` - Send Error
 
-Send error notification to Lexia platform with automatic logging.
+Send error notification to Orca platform with automatic logging.
 
 ```python
 session.error(
@@ -408,7 +408,7 @@ session.error(
 **Example:**
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 try:
     # Your AI processing
@@ -435,7 +435,7 @@ session.loading.start(kind: str = "thinking") -> None
 **Example:**
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 # Show thinking indicator
 session.loading.start("thinking")
@@ -464,7 +464,7 @@ session.loading.end(kind: str = "thinking") -> None
 
 #### `session.image.send(url)` - Send Image
 
-Send an image URL with Lexia-specific markers for proper display.
+Send an image URL with Orca-specific markers for proper display.
 
 ```python
 session.image.send(url: str) -> None
@@ -477,7 +477,7 @@ session.image.send(url: str) -> None
 **Example:**
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 # Show loading
 session.loading.start("image")
@@ -677,13 +677,13 @@ session.audio.send_single(
 Here's a full example using all session methods:
 
 ```python
-from lexia import LexiaHandler, ChatMessage
+from orca import OrcaHandler, ChatMessage
 from openai import OpenAI
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         # Show thinking indicator
@@ -736,13 +736,13 @@ For advanced use cases, these low-level methods are available, but **Session API
 #### `stream_chunk(data, content)` ⚠️ Use `session.stream()` instead
 
 ```python
-lexia.stream_chunk(data: ChatMessage, content: str) -> None
+orca.stream_chunk(data: ChatMessage, content: str) -> None
 ```
 
 #### `complete_response(data, full_response, usage_info=None)` ⚠️ Use `session.close()` instead
 
 ```python
-lexia.complete_response(
+orca.complete_response(
     data: ChatMessage,
     full_response: str,
     usage_info: dict = None
@@ -752,7 +752,7 @@ lexia.complete_response(
 #### `send_error(data, error_message, exception=None)` ⚠️ Use `session.error()` instead
 
 ```python
-lexia.send_error(
+orca.send_error(
     data: ChatMessage,
     error_message: str,
     exception: Exception = None
@@ -767,7 +767,7 @@ lexia.send_error(
 
 #### ChatMessage
 
-Request model for incoming messages from Lexia.
+Request model for incoming messages from Orca.
 
 ```python
 class ChatMessage(BaseModel):
@@ -931,11 +931,11 @@ if not memory.is_empty():
 
 ## Usage Examples
 
-All examples below use the **Session API** which is the recommended approach for building AI agents with Lexia.
+All examples below use the **Session API** which is the recommended approach for building AI agents with Orca.
 
 ### Key Session Methods
 
-- `session = lexia.begin(data)` - Start a session
+- `session = orca.begin(data)` - Start a session
 - `session.stream(content)` - Stream content chunk
 - `session.close(usage_info=None)` - Complete response
 - `session.error(message, exception=None)` - Handle errors
@@ -952,12 +952,12 @@ All examples below use the **Session API** which is the recommended approach for
 
 ```python
 from openai import OpenAI
-from lexia import LexiaHandler, ChatMessage, Variables
+from orca import OrcaHandler, ChatMessage, Variables
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         # Get OpenAI API key from variables
@@ -999,12 +999,12 @@ async def process_message(data: ChatMessage):
 
 ```python
 from openai import OpenAI
-from lexia import LexiaHandler, ChatMessage, Variables
+from orca import OrcaHandler, ChatMessage, Variables
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -1035,13 +1035,13 @@ async def process_message(data: ChatMessage):
 
 ```python
 from openai import OpenAI
-from lexia import LexiaHandler, ChatMessage, Variables
+from orca import OrcaHandler, ChatMessage, Variables
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
     # Start a session
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -1076,12 +1076,12 @@ async def process_message(data: ChatMessage):
 ### Example 4: Personalized Response with Memory
 
 ```python
-from lexia import LexiaHandler, ChatMessage, Variables, MemoryHelper
+from orca import OrcaHandler, ChatMessage, Variables, MemoryHelper
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -1120,12 +1120,12 @@ async def process_message(data: ChatMessage):
 ```python
 from openai import OpenAI
 from anthropic import Anthropic
-from lexia import LexiaHandler, ChatMessage, Variables
+from orca import OrcaHandler, ChatMessage, Variables
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -1177,12 +1177,12 @@ async def process_message(data: ChatMessage):
 ```python
 import requests
 from openai import OpenAI
-from lexia import LexiaHandler, ChatMessage, Variables
+from orca import OrcaHandler, ChatMessage, Variables
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -1229,12 +1229,12 @@ async def process_message(data: ChatMessage):
 
 ```python
 from openai import OpenAI
-from lexia import LexiaHandler, ChatMessage, Variables
+from orca import OrcaHandler, ChatMessage, Variables
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -1259,7 +1259,7 @@ async def process_message(data: ChatMessage):
         # Hide loading
         session.loading.end("image")
 
-        # Send image with Lexia markers
+        # Send image with Orca markers
         session.image.send(image_url)
 
         # Also send text response
@@ -1282,15 +1282,15 @@ The SDK supports two modes: **Development** and **Production**. Your code works 
 Uses **Centrifugo** for real-time WebSocket streaming.
 
 ```python
-lexia = LexiaHandler(dev_mode=False)  # or just LexiaHandler()
+orca = OrcaHandler(dev_mode=False)  # or just OrcaHandler()
 ```
 
 **Flow:**
 
 ```
-AI Agent → LexiaHandler → Centrifugo → WebSocket → Frontend
+AI Agent → OrcaHandler → Centrifugo → WebSocket → Frontend
                       ↓
-                  Lexia API (Backend)
+                  Orca API (Backend)
 ```
 
 **Features:**
@@ -1305,13 +1305,13 @@ AI Agent → LexiaHandler → Centrifugo → WebSocket → Frontend
 Uses **in-memory storage** and **Server-Sent Events (SSE)** for streaming.
 
 ```python
-lexia = LexiaHandler(dev_mode=True)
+orca = OrcaHandler(dev_mode=True)
 ```
 
 **Flow:**
 
 ```
-AI Agent → LexiaHandler → DevStreamClient → SSE → Frontend
+AI Agent → OrcaHandler → DevStreamClient → SSE → Frontend
                       ↓
               Console Output (for debugging)
 ```
@@ -1328,22 +1328,22 @@ AI Agent → LexiaHandler → DevStreamClient → SSE → Frontend
 **Option 1: Direct Parameter**
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-lexia = LexiaHandler(dev_mode=True)
+orca = OrcaHandler(dev_mode=True)
 ```
 
 **Option 2: Environment Variable**
 
 ```bash
-export LEXIA_DEV_MODE=true
+export ORCA_DEV_MODE=true
 python main.py
 ```
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-lexia = LexiaHandler()  # Auto-detects LEXIA_DEV_MODE
+orca = OrcaHandler()  # Auto-detects ORCA_DEV_MODE
 ```
 
 **Option 3: Command Line Flag**
@@ -1353,11 +1353,11 @@ import sys
 import os
 
 if '--dev' in sys.argv:
-    os.environ['LEXIA_DEV_MODE'] = 'true'
+    os.environ['ORCA_DEV_MODE'] = 'true'
 
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 ```
 
 Run with:
@@ -1429,7 +1429,7 @@ async function pollStream(channel) {
 When dev mode is active, you'll see real-time output:
 
 ```
-🔧 LexiaHandler initialized in DEV MODE (no Centrifugo)
+🔧 OrcaHandler initialized in DEV MODE (no Centrifugo)
 📝 Dev stream delta added to channel-123: 15 chars
 This is streaming...
 ✅ Dev stream completed for channel-123
@@ -1451,7 +1451,7 @@ This is streaming...
 ```python
 # This EXACT code works in both dev and production mode
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         # Stream chunks
@@ -1484,12 +1484,12 @@ The only difference is the `dev_mode` flag during initialization!
 
 ## Working with Variables
 
-Lexia sends environment variables (API keys, configs, etc.) with each request. The SDK provides easy access.
+Orca sends environment variables (API keys, configs, etc.) with each request. The SDK provides easy access.
 
 ### Variables Helper Class
 
 ```python
-from lexia import Variables, ChatMessage
+from orca import Variables, ChatMessage
 
 async def process_message(data: ChatMessage):
     # Create Variables helper
@@ -1536,7 +1536,7 @@ elif groq_key:
     # Use Groq
     client = Groq(api_key=groq_key)
 else:
-    lexia.send_error(data, "No AI API key provided")
+    orca.send_error(data, "No AI API key provided")
     return
 ```
 
@@ -1574,7 +1574,7 @@ if enable_search and data.force_search:
 ### Legacy Function (Still Supported)
 
 ```python
-from lexia import get_variable_value, get_openai_api_key
+from orca import get_variable_value, get_openai_api_key
 
 # Get specific variable
 api_key = get_variable_value(data.variables, "OPENAI_API_KEY")
@@ -1589,7 +1589,7 @@ openai_key = get_openai_api_key(data.variables)
 
 ## User Memory System
 
-Lexia provides user memory for personalized AI responses.
+Orca provides user memory for personalized AI responses.
 
 ### Memory Structure
 
@@ -1607,7 +1607,7 @@ Lexia provides user memory for personalized AI responses.
 ### MemoryHelper Class
 
 ```python
-from lexia import MemoryHelper, ChatMessage
+from orca import MemoryHelper, ChatMessage
 
 async def process_message(data: ChatMessage):
     # Create memory helper
@@ -1727,24 +1727,24 @@ The SDK handles various memory formats gracefully:
 
 ## Error Handling
 
-Comprehensive error handling ensures errors are logged and reported to Lexia.
+Comprehensive error handling ensures errors are logged and reported to Orca.
 
 ### Basic Error Handling
 
 ```python
-from lexia import LexiaHandler, ChatMessage
+from orca import OrcaHandler, ChatMessage
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 
 async def process_message(data: ChatMessage):
     try:
         # Your AI processing
         result = process_ai_request(data)
-        lexia.complete_response(data, result)
+        orca.complete_response(data, result)
 
     except Exception as e:
-        # Send error to Lexia
-        lexia.send_error(data, str(e), exception=e)
+        # Send error to Orca
+        orca.send_error(data, str(e), exception=e)
 ```
 
 ### Error with Stack Trace
@@ -1755,14 +1755,14 @@ import traceback
 async def process_message(data: ChatMessage):
     try:
         result = risky_operation()
-        lexia.complete_response(data, result)
+        orca.complete_response(data, result)
 
     except Exception as e:
         # Get stack trace
         trace = traceback.format_exc()
 
         # Send with trace
-        lexia.send_error(data, f"Operation failed: {str(e)}", trace=trace)
+        orca.send_error(data, f"Operation failed: {str(e)}", trace=trace)
 ```
 
 ### Error with Exception Object
@@ -1771,23 +1771,23 @@ async def process_message(data: ChatMessage):
 async def process_message(data: ChatMessage):
     try:
         result = process_data()
-        lexia.complete_response(data, result)
+        orca.complete_response(data, result)
 
     except ValueError as e:
         # SDK automatically extracts trace from exception
-        lexia.send_error(data, "Invalid input value", exception=e)
+        orca.send_error(data, "Invalid input value", exception=e)
 
     except KeyError as e:
-        lexia.send_error(data, "Missing required key", exception=e)
+        orca.send_error(data, "Missing required key", exception=e)
 
     except Exception as e:
-        lexia.send_error(data, "Unexpected error occurred", exception=e)
+        orca.send_error(data, "Unexpected error occurred", exception=e)
 ```
 
 ### Validation Errors
 
 ```python
-from lexia import Variables
+from orca import Variables
 
 async def process_message(data: ChatMessage):
     vars = Variables(data.variables)
@@ -1795,20 +1795,20 @@ async def process_message(data: ChatMessage):
     # Validate required variables
     api_key = vars.get("OPENAI_API_KEY")
     if not api_key:
-        lexia.send_error(data, "OPENAI_API_KEY is required but not provided")
+        orca.send_error(data, "OPENAI_API_KEY is required but not provided")
         return
 
     # Validate message
     if not data.message.strip():
-        lexia.send_error(data, "Message cannot be empty")
+        orca.send_error(data, "Message cannot be empty")
         return
 
     # Proceed with processing
     try:
         result = call_ai(api_key, data.message)
-        lexia.complete_response(data, result)
+        orca.complete_response(data, result)
     except Exception as e:
-        lexia.send_error(data, str(e), exception=e)
+        orca.send_error(data, str(e), exception=e)
 ```
 
 ### Graceful Degradation
@@ -1822,7 +1822,7 @@ async def process_message(data: ChatMessage):
         openai_key = vars.get("OPENAI_API_KEY")
         if openai_key:
             result = call_openai(openai_key, data.message)
-            lexia.complete_response(data, result)
+            orca.complete_response(data, result)
             return
     except Exception as e:
         logger.warning(f"OpenAI failed: {e}")
@@ -1832,21 +1832,21 @@ async def process_message(data: ChatMessage):
         anthropic_key = vars.get("ANTHROPIC_API_KEY")
         if anthropic_key:
             result = call_anthropic(anthropic_key, data.message)
-            lexia.complete_response(data, result)
+            orca.complete_response(data, result)
             return
     except Exception as e:
         logger.warning(f"Anthropic failed: {e}")
 
     # No providers available
-    lexia.send_error(data, "All AI providers failed or no API keys provided")
+    orca.send_error(data, "All AI providers failed or no API keys provided")
 ```
 
-### Error Logging to Lexia Backend
+### Error Logging to Orca Backend
 
 When you call `send_error()`, the SDK automatically:
 
 1. Streams error to frontend (visible to user)
-2. Persists error to Lexia backend API
+2. Persists error to Orca backend API
 3. Sends detailed error log to `api/internal/v1/logs` with:
    - Error message (max 1000 chars)
    - Stack trace (max 5000 chars)
@@ -1855,7 +1855,7 @@ When you call `send_error()`, the SDK automatically:
 
 ```python
 # This single call does all the above
-lexia.send_error(data, "Processing failed", exception=e)
+orca.send_error(data, "Processing failed", exception=e)
 ```
 
 ---
@@ -1868,32 +1868,32 @@ The SDK provides utilities for easy FastAPI integration.
 
 ```python
 from fastapi import FastAPI
-from lexia import (
-    LexiaHandler,
+from orca import (
+    OrcaHandler,
     ChatMessage,
-    create_lexia_app,
+    create_orca_app,
     add_standard_endpoints
 )
 
-# Create Lexia handler
-lexia = LexiaHandler()
+# Create Orca handler
+orca = OrcaHandler()
 
 # Create FastAPI app with defaults
-app = create_lexia_app(
+app = create_orca_app(
     title="My AI Agent",
     version="1.0.0",
-    description="Custom AI agent powered by Lexia"
+    description="Custom AI agent powered by Orca"
 )
 
 # Define your processing logic
 async def process_message(data: ChatMessage):
     # Your AI logic here
-    lexia.complete_response(data, "Response")
+    orca.complete_response(data, "Response")
 
 # Add standard endpoints
 add_standard_endpoints(
     app,
-    lexia_handler=lexia,
+    orca_handler=orca,
     process_message_func=process_message
 )
 
@@ -1920,13 +1920,13 @@ When you call `add_standard_endpoints()`, these endpoints are added:
 
 ```python
 from fastapi import FastAPI
-from lexia import LexiaHandler, create_lexia_app, add_standard_endpoints
+from orca import OrcaHandler, create_orca_app, add_standard_endpoints
 
-app = create_lexia_app(title="My AI Agent")
-lexia = LexiaHandler()
+app = create_orca_app(title="My AI Agent")
+orca = OrcaHandler()
 
 # Add standard endpoints
-add_standard_endpoints(app, lexia_handler=lexia, process_message_func=process_message)
+add_standard_endpoints(app, orca_handler=orca, process_message_func=process_message)
 
 # Add custom endpoints
 @app.get("/api/v1/custom")
@@ -1945,9 +1945,9 @@ async def analyze_text(text: str):
 ```python
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from lexia import create_lexia_app
+from orca import create_orca_app
 
-app = create_lexia_app(title="My AI Agent")
+app = create_orca_app(title="My AI Agent")
 
 # Add CORS middleware
 app.add_middleware(
@@ -1964,7 +1964,7 @@ app.add_middleware(
 If you have a custom conversation manager:
 
 ```python
-from lexia import add_standard_endpoints
+from orca import add_standard_endpoints
 
 # Your custom conversation manager
 class ConversationManager:
@@ -1981,7 +1981,7 @@ conversation_manager = ConversationManager()
 # Add endpoints with conversation manager
 add_standard_endpoints(
     app,
-    lexia_handler=lexia,
+    orca_handler=orca,
     process_message_func=process_message,
     conversation_manager=conversation_manager
 )
@@ -2001,7 +2001,7 @@ This adds:
 Show loading states to users during processing.
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 try:
     # Show thinking indicator
@@ -2040,18 +2040,18 @@ except Exception as e:
 
 ### Image Handling
 
-Send images with Lexia-specific markers.
+Send images with Orca-specific markers.
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-lexia = LexiaHandler()
-session = lexia.begin(data)
+orca = OrcaHandler()
+session = orca.begin(data)
 
 # Generate or get image URL
 image_url = "https://example.com/image.png"
 
-# Send with Lexia markers (auto-wrapped)
+# Send with Orca markers (auto-wrapped)
 session.image.send(image_url)
 
 # Alternative method name
@@ -2066,21 +2066,21 @@ session.close()
 
 ### Manual Markers
 
-Use Lexia markers directly if needed.
+Use Orca markers directly if needed.
 
 ````python
 # Image markers
-session.stream("[lexia.image.start]https://example.com/image.png[lexia.image.end]")
+session.stream("[orca.image.start]https://example.com/image.png[orca.image.end]")
 
 # Loading markers
-session.stream("[lexia.loading.thinking.start]\n\n")
+session.stream("[orca.loading.thinking.start]\n\n")
 # ... processing ...
-session.stream("[lexia.loading.thinking.end]\n\n")
+session.stream("[orca.loading.thinking.end]\n\n")
 
 # Code markers (for code blocks)
-session.stream("[lexia.loading.code.start]\n\n")
+session.stream("[orca.loading.code.start]\n\n")
 session.stream("```python\nprint('hello')\n```")
-session.stream("[lexia.loading.code.end]\n\n")
+session.stream("[orca.loading.code.end]\n\n")
 ````
 
 ### Streaming with Aggregation
@@ -2088,7 +2088,7 @@ session.stream("[lexia.loading.code.end]\n\n")
 The Session API automatically aggregates streamed content.
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 # Stream chunks (automatically aggregated internally)
 for chunk in ai_stream:
@@ -2103,7 +2103,7 @@ logger.info(f"Complete response: {full_text}")
 
 ### Header Forwarding
 
-Request headers (like `x-tenant`) are automatically forwarded to Lexia API.
+Request headers (like `x-tenant`) are automatically forwarded to Orca API.
 
 ```python
 # Headers from ChatMessage are automatically extracted and forwarded
@@ -2125,7 +2125,7 @@ Centrifugo config can be updated per-request (production mode).
 # they're automatically used
 
 # Manual update (if needed)
-lexia.update_centrifugo_config(
+orca.update_centrifugo_config(
     stream_url="https://centrifugo.example.com/api",
     stream_token="your-api-key"
 )
@@ -2139,7 +2139,7 @@ lexia.update_centrifugo_config(
 
 ```python
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         # Your processing
@@ -2154,7 +2154,7 @@ async def process_message(data: ChatMessage):
 
 ```python
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -2183,7 +2183,7 @@ async def process_message(data: ChatMessage):
 
 ```python
 # ✅ RECOMMENDED: Session API
-session = lexia.begin(data)
+session = orca.begin(data)
 try:
     session.stream(chunk1)
     session.stream(chunk2)
@@ -2193,9 +2193,9 @@ except Exception as e:
 
 # ⚠️ NOT RECOMMENDED: Low-level API
 # (Only for advanced use cases)
-lexia.stream_chunk(data, chunk1)
-lexia.stream_chunk(data, chunk2)
-lexia.complete_response(data, full_response)
+orca.stream_chunk(data, chunk1)
+orca.stream_chunk(data, chunk2)
+orca.complete_response(data, full_response)
 ```
 
 ### 4. Personalize with Memory
@@ -2221,7 +2221,7 @@ async def process_message(data: ChatMessage):
 ### 5. Provide Usage Info
 
 ```python
-session = lexia.begin(data)
+session = orca.begin(data)
 
 try:
     response = client.chat.completions.create(...)
@@ -2245,14 +2245,14 @@ except Exception as e:
 
 ```python
 # Development
-lexia = LexiaHandler(dev_mode=True)
+orca = OrcaHandler(dev_mode=True)
 
 # Production
-lexia = LexiaHandler(dev_mode=False)
+orca = OrcaHandler(dev_mode=False)
 
 # Or use environment variable
-# export LEXIA_DEV_MODE=true
-lexia = LexiaHandler()
+# export ORCA_DEV_MODE=true
+orca = OrcaHandler()
 ```
 
 ### 7. Log Important Events
@@ -2268,19 +2268,19 @@ async def process_message(data: ChatMessage):
     try:
         result = process(data)
         logger.info(f"Successfully processed message")
-        lexia.complete_response(data, result)
+        orca.complete_response(data, result)
     except Exception as e:
         logger.error(f"Error processing message: {e}")
-        lexia.send_error(data, str(e), exception=e)
+        orca.send_error(data, str(e), exception=e)
 ```
 
 ### 8. Use Type Hints
 
 ```python
-from lexia import ChatMessage, LexiaHandler, Variables, MemoryHelper
+from orca import ChatMessage, OrcaHandler, Variables, MemoryHelper
 from typing import Optional
 
-lexia: LexiaHandler = LexiaHandler()
+orca: OrcaHandler = OrcaHandler()
 
 async def process_message(data: ChatMessage) -> None:
     vars: Variables = Variables(data.variables)
@@ -2288,7 +2288,7 @@ async def process_message(data: ChatMessage) -> None:
 
     api_key: Optional[str] = vars.get("OPENAI_API_KEY")
     if not api_key:
-        lexia.send_error(data, "API key not found")
+        orca.send_error(data, "API key not found")
         return
 
     # Continue...
@@ -2298,7 +2298,7 @@ async def process_message(data: ChatMessage) -> None:
 
 ```python
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         vars = Variables(data.variables)
@@ -2335,7 +2335,7 @@ async def process_message(data: ChatMessage):
 ```python
 async def process_message(data: ChatMessage):
     client = None
-    session = lexia.begin(data)
+    session = orca.begin(data)
 
     try:
         client = OpenAI(api_key=api_key)
@@ -2358,18 +2358,18 @@ async def process_message(data: ChatMessage):
 
 ### Common Issues
 
-#### 1. ModuleNotFoundError: No module named 'lexia'
+#### 1. ModuleNotFoundError: No module named 'orca'
 
 **Solution:**
 
 ```bash
-pip install lexia
+pip install orca
 ```
 
 Verify installation:
 
 ```bash
-pip list | grep lexia
+pip list | grep orca
 ```
 
 #### 2. ImportError: No module named 'fastapi'
@@ -2379,7 +2379,7 @@ You're trying to use web features without web dependencies.
 **Solution:**
 
 ```bash
-pip install lexia[web]
+pip install orca[web]
 ```
 
 #### 3. Streaming Not Working in Dev Mode
@@ -2457,20 +2457,20 @@ else:
 **Solution:** Verify dev mode is enabled:
 
 ```python
-lexia = LexiaHandler(dev_mode=True)
-print(f"Dev mode: {lexia.dev_mode}")  # Should print: True
+orca = OrcaHandler(dev_mode=True)
+print(f"Dev mode: {orca.dev_mode}")  # Should print: True
 ```
 
 Or check environment variable:
 
 ```bash
-export LEXIA_DEV_MODE=true
-echo $LEXIA_DEV_MODE
+export ORCA_DEV_MODE=true
+echo $ORCA_DEV_MODE
 ```
 
-#### 8. Lexia API Errors
+#### 8. Orca API Errors
 
-**Issue:** `LEXIA API ERROR: 500`
+**Issue:** `ORCA API ERROR: 500`
 
 **Solution:** Check logs:
 
@@ -2489,7 +2489,7 @@ print(f"Callback URL: {data.url}")
 
 #### 9. Headers Not Forwarded
 
-**Issue:** Tenant headers not reaching Lexia API.
+**Issue:** Tenant headers not reaching Orca API.
 
 **Solution:** Headers are automatically forwarded from `data.headers`. Verify they're in the request:
 
@@ -2509,13 +2509,13 @@ else:
 ```python
 # Correct
 async def process_message(data: ChatMessage):
-    session = lexia.begin(data)  # One session
+    session = orca.begin(data)  # One session
     # ... use session ...
     session.close()
 
 # Incorrect
-session1 = lexia.begin(data)
-session2 = lexia.begin(data)  # Don't do this!
+session1 = orca.begin(data)
+session2 = orca.begin(data)  # Don't do this!
 ```
 
 ### Debug Mode
@@ -2531,8 +2531,8 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-# Enable lexia debug logs
-logging.getLogger('lexia').setLevel(logging.DEBUG)
+# Enable orca debug logs
+logging.getLogger('orca').setLevel(logging.DEBUG)
 ```
 
 ### Getting Help
@@ -2548,12 +2548,12 @@ logging.getLogger('lexia').setLevel(logging.DEBUG)
 
 ## Package Information
 
-- **Package Name**: `lexia`
+- **Package Name**: `orca`
 - **Current Version**: 1.2.7
 - **Python Support**: >=3.8, <4.0
 - **License**: MIT
-- **Repository**: https://github.com/Xalantico/lexia-pip
-- **PyPI**: https://pypi.org/project/lexia/
+- **Repository**: https://github.com/Orcapt/orca-pip
+- **PyPI**: https://pypi.org/project/orca/
 
 ### Dependencies
 
@@ -2579,23 +2579,23 @@ logging.getLogger('lexia').setLevel(logging.DEBUG)
 
 ```bash
 # Basic
-pip install lexia
+pip install orca
 
 # With web support
-pip install lexia[web]
+pip install orca[web]
 
 # With dev tools
-pip install lexia[dev]
+pip install orca[dev]
 
 # Everything
-pip install lexia[web,dev]
+pip install orca[web,dev]
 ```
 
 ---
 
 ## Summary
 
-The Lexia Python SDK provides a clean, professional interface for building AI agents on the Lexia platform. Key benefits:
+The Orca Python SDK provides a clean, professional interface for building AI agents on the Orca platform. Key benefits:
 
 ✅ **Simple API** - Intuitive methods that just work  
 ✅ **Platform Agnostic** - Your AI logic stays independent  
@@ -2603,7 +2603,7 @@ The Lexia Python SDK provides a clean, professional interface for building AI ag
 ✅ **Type Safe** - Pydantic models ensure data integrity  
 ✅ **Feature Rich** - Variables, memory, streaming, errors, etc.  
 ✅ **Well Documented** - Comprehensive examples and guides  
-✅ **Production Ready** - Used in real Lexia deployments
+✅ **Production Ready** - Used in real Orca deployments
 
 Get started in minutes, scale to production with confidence.
 
@@ -2611,4 +2611,4 @@ Get started in minutes, scale to production with confidence.
 
 **Happy Building! 🚀**
 
-For questions or support, visit: https://github.com/Xalantico/lexia-pip
+For questions or support, visit: https://github.com/Orcapt/orca-pip

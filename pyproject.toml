@@ -3,18 +3,18 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "lexia"
-version = "1.2.13"
-description = "Clean, minimal package for Lexia platform integration"
+name = "orca"
+version = "2.0.0"
+description = "Clean, minimal package for Orca platform integration"
 readme = "README.md"
 license = "MIT"
 authors = [
-    {name = "Lexia Team", email = "support@lexiaplatform.com"}
+    {name = "Orca Team", email = "support@orcapt.com"}
 ]
 maintainers = [
-    {name = "Lexia Team", email = "support@lexiaplatform.com"}
+    {name = "Orca Team", email = "support@orcapt.com"}
 ]
-keywords = ["lexia", "ai", "chatbot", "platform", "integration", "fastapi", "real-time"]
+keywords = ["orca", "ai", "chatbot", "platform", "integration", "fastapi", "real-time"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -51,14 +51,14 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/Xalantico/lexia-pip"
-Documentation = "https://github.com/Xalantico/lexia-pip#readme"
-Repository = "https://github.com/Xalantico/lexia-pip"
-"Bug Tracker" = "https://github.com/Xalantico/lexia-pip/issues"
+Homepage = "https://github.com/Orcapt/orca-pip"
+Documentation = "https://github.com/Orcapt/orca-pip#readme"
+Repository = "https://github.com/Orcapt/orca-pip"
+"Bug Tracker" = "https://github.com/Orcapt/orca-pip/issues"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["lexia*"]
+include = ["orca*"]
 
 [tool.setuptools.package-data]
-lexia = ["*.txt", "*.md"]
+orca = ["*.txt", "*.md"]

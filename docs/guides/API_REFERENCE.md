@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API reference for Lexia SDK domain models and interfaces.
+Complete API reference for Orca SDK domain models and interfaces.
 
 ## Table of Contents
 
@@ -16,7 +16,7 @@ Complete API reference for Lexia SDK domain models and interfaces.
 Primary data model for chat interactions.
 
 ```python
-from lexia import ChatMessage
+from orca import ChatMessage
 
 message = ChatMessage(
     message="Hello, world!",
@@ -55,7 +55,7 @@ message = ChatMessage(
 Context variable for agent execution.
 
 ```python
-from lexia import Variable
+from orca import Variable
 
 var = Variable(
     key="user_name",
@@ -77,7 +77,7 @@ var = Variable(
 Long-term memory storage for agents.
 
 ```python
-from lexia import Memory
+from orca import Memory
 
 memory = Memory(
     key="user_preference",
@@ -98,14 +98,14 @@ memory = Memory(
 
 ## Core Classes
 
-### LexiaHandler
+### OrcaHandler
 
-Main handler for Lexia communication.
+Main handler for Orca communication.
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-handler = LexiaHandler(
+handler = OrcaHandler(
     dev_mode=False,
     stream_client=None,
     api_client=None,
@@ -495,7 +495,7 @@ session.button.action("Delete", "delete", color="danger")
 Stream client interface.
 
 ```python
-from lexia.domain.interfaces import IStreamClient
+from orca.domain.interfaces import IStreamClient
 
 class CustomStreamClient(IStreamClient):
     def update_config(self, stream_url: str, stream_token: str):
@@ -516,7 +516,7 @@ class CustomStreamClient(IStreamClient):
 API client interface.
 
 ```python
-from lexia.domain.interfaces import IAPIClient
+from orca.domain.interfaces import IAPIClient
 
 class CustomAPIClient(IAPIClient):
     def get(self, url: str, params=None, headers=None):
@@ -533,7 +533,7 @@ class CustomAPIClient(IAPIClient):
 Loading indicator types.
 
 ```python
-from lexia.config import LoadingKind
+from orca.config import LoadingKind
 
 LoadingKind.THINKING      # "thinking"
 LoadingKind.SEARCHING     # "searching"
@@ -548,7 +548,7 @@ LoadingKind.CUSTOM        # "custom"
 Button colors.
 
 ```python
-from lexia.config import ButtonColor
+from orca.config import ButtonColor
 
 ButtonColor.PRIMARY       # "primary"
 ButtonColor.SECONDARY     # "secondary"
@@ -565,7 +565,7 @@ ButtonColor.DARK          # "dark"
 Token types for tracking.
 
 ```python
-from lexia.config import TokenType
+from orca.config import TokenType
 
 TokenType.GPT4            # "gpt4"
 TokenType.GPT35           # "gpt35"

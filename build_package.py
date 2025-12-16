@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Build Script for Lexia Platform Package
+Build Script for Orca Platform Package
 ========================================
 
 This script builds the package and provides options for local installation and testing.
@@ -57,10 +57,10 @@ def test_import():
     """Test that the package can be imported."""
     print("🧪 Testing package import...")
     try:
-        import lexia
-        from lexia import LexiaHandler, ChatMessage, create_success_response
+        import orca
+        from orca import OrcaHandler, ChatMessage, create_success_response
         print("✅ Package import successful")
-        print(f"   Package version: {getattr(lexia, '__version__', 'Not specified')}")
+        print(f"   Package version: {getattr(orca, '__version__', 'Not specified')}")
         return True
     except ImportError as e:
         print(f"❌ Package import failed: {e}")
@@ -69,7 +69,7 @@ def test_import():
 def show_usage():
     """Show usage information."""
     print("""
-🚀 Lexia Platform Package Builder
+🚀 Orca Platform Package Builder
 =================================
 
 Usage:

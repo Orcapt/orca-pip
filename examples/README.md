@@ -1,6 +1,6 @@
-# Lexia SDK Examples
+# Orca SDK Examples
 
-Comprehensive examples demonstrating all Lexia SDK features.
+Comprehensive examples demonstrating all Orca SDK features.
 
 ## Quick Start Examples
 
@@ -53,8 +53,8 @@ cp examples/lambda_deployment_simple.py lambda_handler.py
 # 3. Build Docker image
 docker build -f Dockerfile.lambda -t my-agent:latest .
 
-# 4. Deploy with lexia-cli
-lexia ship my-agent --image my-agent:latest --env-file .env
+# 4. Deploy with orca-cli
+orca ship my-agent --image my-agent:latest --env-file .env
 ```
 
 See `LAMBDA_DEPLOY_GUIDE.md` for complete deployment guide.
@@ -79,7 +79,7 @@ python examples/patterns_example.py
 
 ### 8. `storage_example.py` - Storage SDK 📦
 
-Lexia Storage SDK for file management.
+Orca Storage SDK for file management.
 
 ```bash
 python examples/storage_example.py
@@ -107,7 +107,7 @@ session.stream("Hello, world!")
 ### Loading Indicators
 
 ```python
-from lexia.config import LoadingKind
+from orca.config import LoadingKind
 session.loading.start(LoadingKind.THINKING.value)
 session.stream("Processing...")
 session.loading.end(LoadingKind.THINKING.value)
@@ -116,24 +116,24 @@ session.loading.end(LoadingKind.THINKING.value)
 ### Buttons
 
 ```python
-from lexia.config import ButtonColor
+from orca.config import ButtonColor
 session.button.link("Click", "https://example.com", color=ButtonColor.PRIMARY.value)
 ```
 
 ### Error Handling
 
 ```python
-from lexia.exceptions import LexiaException
+from orca.exceptions import OrcaException
 try:
     # operations
-except LexiaException as e:
+except OrcaException as e:
     logger.error(f"Error: {e.to_dict()}")
 ```
 
 ### Decorators
 
 ```python
-from lexia.decorators import retry, log_execution
+from orca.decorators import retry, log_execution
 
 @retry(max_attempts=3)
 @log_execution
@@ -144,6 +144,6 @@ def process_data():
 ### Logging
 
 ```python
-from lexia.logging_config import setup_logging
+from orca.logging_config import setup_logging
 setup_logging(level=logging.DEBUG, log_file="app.log")
 ```

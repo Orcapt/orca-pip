@@ -5,7 +5,7 @@
 # Copy this to your project root and customize as needed.
 #
 # Build: docker build -f Dockerfile.lambda -t my-agent:latest .
-# Deploy: lexia ship my-agent --image my-agent:latest --env-file .env
+# Deploy: orca ship my-agent --image my-agent:latest --env-file .env
 
 FROM public.ecr.aws/lambda/python:3.11
 

@@ -1,14 +1,14 @@
-# Lexia Dev Mode Guide
+# Orca Dev Mode Guide
 
 ## Overview
 
-Lexia now supports **Dev Mode** for local development without requiring Centrifugo. This makes it easier to develop and test AI agents locally.
+Orca now supports **Dev Mode** for local development without requiring Centrifugo. This makes it easier to develop and test AI agents locally.
 
 **🎯 KEY POINT**: Your application code (OpenAI calls, streaming logic) **stays exactly the same** in both dev and production modes. Just change one flag!
 
 ## What is Dev Mode?
 
-In production, Lexia uses **Centrifugo** for real-time WebSocket streaming to the frontend. In dev mode, Lexia uses:
+In production, Orca uses **Centrifugo** for real-time WebSocket streaming to the frontend. In dev mode, Orca uses:
 - **In-memory storage** for streaming data
 - **SSE (Server-Sent Events)** for real-time updates
 - **Simple HTTP polling** as an alternative
@@ -19,24 +19,24 @@ In production, Lexia uses **Centrifugo** for real-time WebSocket streaming to th
 ### Option 1: Direct Parameter (Recommended)
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
 # Enable dev mode
-lexia = LexiaHandler(dev_mode=True)
+orca = OrcaHandler(dev_mode=True)
 ```
 
 ### Option 2: Environment Variable
 
 ```bash
-export LEXIA_DEV_MODE=true
+export ORCA_DEV_MODE=true
 python main.py
 ```
 
 ```python
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-# Will automatically detect LEXIA_DEV_MODE env var
-lexia = LexiaHandler()
+# Will automatically detect ORCA_DEV_MODE env var
+orca = OrcaHandler()
 ```
 
 ### Option 3: Command Line Argument
@@ -50,11 +50,11 @@ dev_mode = '--dev' in sys.argv
 
 # Set environment variable
 if dev_mode:
-    os.environ['LEXIA_DEV_MODE'] = 'true'
+    os.environ['ORCA_DEV_MODE'] = 'true'
 
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
-lexia = LexiaHandler()
+orca = OrcaHandler()
 ```
 
 Then run:
@@ -79,7 +79,7 @@ AI Agent (Background Thread) → DevStreamClient (Async Queue) → SSE → Front
 **Key Technical Details:**
 - **Dev Mode**: Your `process_message()` runs in a background thread (not asyncio task) to avoid blocking the event loop, allowing SSE to flush chunks immediately
 - **Production**: Runs as async background task with Centrifugo handling delivery
-- **Your code**: Identical in both modes - just call `lexia.stream_chunk(data, content)` and the package handles the rest!
+- **Your code**: Identical in both modes - just call `orca.stream_chunk(data, content)` and the package handles the rest!
 
 ## Available Endpoints in Dev Mode
 
@@ -142,7 +142,7 @@ async function pollStream(channel) {
 #!/usr/bin/env python3
 import sys
 from openai import OpenAI
-from lexia import LexiaHandler, create_lexia_app, add_standard_endpoints, Variables
+from orca import OrcaHandler, create_orca_app, add_standard_endpoints, Variables
 
 # Detect dev/prod mode from CLI
 if '--dev' in sys.argv:
@@ -150,13 +150,13 @@ if '--dev' in sys.argv:
 elif '--prod' in sys.argv:
     dev_mode = False
 else:
-    dev_mode = None  # Auto-detect from LEXIA_DEV_MODE env var
+    dev_mode = None  # Auto-detect from ORCA_DEV_MODE env var
 
-# Initialize Lexia handler
-lexia = LexiaHandler(dev_mode=dev_mode)
+# Initialize Orca handler
+orca = OrcaHandler(dev_mode=dev_mode)
 
 # Create FastAPI app
-app = create_lexia_app(title="My AI Agent", version="1.0.0")
+app = create_orca_app(title="My AI Agent", version="1.0.0")
 
 async def process_message(data):
     """Process message - identical code for dev and prod!"""
@@ -177,14 +177,14 @@ async def process_message(data):
         if chunk.choices[0].delta.content:
             content = chunk.choices[0].delta.content
             full_response += content
-            # lexia handles dev/prod internally!
-            lexia.stream_chunk(data, content)
+            # orca handles dev/prod internally!
+            orca.stream_chunk(data, content)
     
     # Complete (same in both modes)
-    lexia.complete_response(data, full_response)
+    orca.complete_response(data, full_response)
 
 # Add endpoints
-add_standard_endpoints(app, lexia_handler=lexia, process_message_func=process_message)
+add_standard_endpoints(app, orca_handler=orca, process_message_func=process_message)
 
 if __name__ == "__main__":
     import uvicorn
@@ -197,7 +197,7 @@ python main.py --dev   # Dev mode (SSE)
 python main.py --prod  # Production (Centrifugo)
 ```
 
-**Your OpenAI code is IDENTICAL in both modes!** The lexia package handles all the differences internally.
+**Your OpenAI code is IDENTICAL in both modes!** The orca package handles all the differences internally.
 
 ## Benefits of Dev Mode
 
@@ -212,10 +212,10 @@ python main.py --prod  # Production (Centrifugo)
 
 ### How Dev Mode Avoids Event Loop Blocking
 
-In dev mode, lexia runs your `process_message()` in a **background thread** (not an async task):
+In dev mode, orca runs your `process_message()` in a **background thread** (not an async task):
 
 ```python
-# Inside lexia-pip when dev_mode=True:
+# Inside orca-pip when dev_mode=True:
 bg_thread = threading.Thread(target=run_process_message, daemon=True)
 bg_thread.start()
 
@@ -236,7 +236,7 @@ async for event_type, content in queue:
 
 When dev mode is active, you'll see:
 ```
-🔧 LexiaHandler initialized in DEV MODE (no Centrifugo)
+🔧 OrcaHandler initialized in DEV MODE (no Centrifugo)
 📝 Dev stream delta added to channel-123: 15 chars
 ✅ Dev stream completed for channel-123
 ```
@@ -260,18 +260,18 @@ Your code works identically in both modes:
 
 ```python
 # This code works in BOTH dev and production mode
-lexia.stream_chunk(data, content)
-lexia.complete_response(data, full_response)
-lexia.send_error(data, error_message)
+orca.stream_chunk(data, content)
+orca.complete_response(data, full_response)
+orca.send_error(data, error_message)
 ```
 
 The only difference is initialization:
 ```python
 # Production
-lexia = LexiaHandler(dev_mode=False)  # or LexiaHandler()
+orca = OrcaHandler(dev_mode=False)  # or OrcaHandler()
 
 # Development
-lexia = LexiaHandler(dev_mode=True)
+orca = OrcaHandler(dev_mode=True)
 ```
 
 ## Troubleshooting
@@ -302,7 +302,7 @@ app.add_middleware(
 
 **Solution:** Make sure dev mode is actually enabled:
 ```python
-print(f"Dev mode: {lexia.dev_mode}")  # Should print: Dev mode: True
+print(f"Dev mode: {orca.dev_mode}")  # Should print: Dev mode: True
 ```
 
 ## Next Steps

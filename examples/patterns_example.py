@@ -2,11 +2,11 @@
 Design Patterns Example
 =======================
 
-Demonstrates all design patterns available in Lexia SDK.
+Demonstrates all design patterns available in Orca SDK.
 """
 
-from lexia import (
-    LexiaBuilder,
+from orca import (
+    OrcaBuilder,
     SessionBuilder,
     SessionContext,
     ResourceContext,
@@ -23,7 +23,7 @@ from lexia import (
 
 def main():
     """Main example."""
-    print("🎨 Lexia Design Patterns Demo\n")
+    print("🎨 Orca Design Patterns Demo\n")
     
     # ============================================
     # 1. Builder Pattern
@@ -36,7 +36,7 @@ def main():
     # Build handler with fluent interface
     print("🏗️ Building handler with fluent interface...")
     handler = (
-        LexiaBuilder()
+        OrcaBuilder()
         .with_dev_mode(True)
         .build()
     )
@@ -200,7 +200,7 @@ def main():
     
     # Build handler
     handler = (
-        LexiaBuilder()
+        OrcaBuilder()
         .with_dev_mode(True)
         .build()
     )
@@ -242,7 +242,7 @@ def main():
     print()
     print("Available Patterns:")
     print("  1️⃣ Builder Pattern")
-    print("     • LexiaBuilder - Fluent handler construction")
+    print("     • OrcaBuilder - Fluent handler construction")
     print("     • SessionBuilder - Multi-step session flows")
     print()
     print("  2️⃣ Context Managers")

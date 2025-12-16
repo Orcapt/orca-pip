@@ -18,7 +18,7 @@ We take security vulnerabilities seriously. If you discover a security issue, pl
 
 **Do NOT open a public issue.** Instead:
 
-1. Email: security@lexia.ai
+1. Email: security@orcapt.com
 2. Include:
    - Description of the vulnerability
    - Steps to reproduce
@@ -58,7 +58,7 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 Always validate user input:
 
 ```python
-from lexia.common.exceptions import ValidationError
+from orca.common.exceptions import ValidationError
 
 def process_user_input(data):
     if not data or not isinstance(data, dict):
@@ -157,7 +157,7 @@ pip install safety
 safety check
 
 # Update dependencies
-pip install --upgrade lexia
+pip install --upgrade orca
 ```
 
 ### For Contributors
@@ -220,7 +220,7 @@ secret = client.get_secret_value(SecretId='my-secret')
 
 ### 1. Type Safety
 
-Lexia SDK uses Pydantic for type validation:
+Orca SDK uses Pydantic for type validation:
 
 ```python
 from pydantic import BaseModel, validator
@@ -241,12 +241,12 @@ class UserInput(BaseModel):
 Custom exception hierarchy prevents information leakage:
 
 ```python
-from lexia.common.exceptions import LexiaException
+from orca.common.exceptions import OrcaException
 
 try:
     # Your code
     pass
-except LexiaException as e:
+except OrcaException as e:
     # Safe error handling
     logger.error(f"Error: {e.to_dict()}")
     raise
@@ -257,7 +257,7 @@ except LexiaException as e:
 Secure logging configuration:
 
 ```python
-from lexia.common.logging_config import setup_logging
+from orca.common.logging_config import setup_logging
 
 # Sensitive data is automatically masked
 setup_logging(
@@ -315,7 +315,7 @@ If you suspect a security breach:
 
 1. **Contain**: Isolate affected systems
 2. **Assess**: Determine scope and impact
-3. **Notify**: Contact security@lexia.ai
+3. **Notify**: Contact security@orcapt.com
 4. **Remediate**: Apply fixes
 5. **Review**: Conduct post-incident review
 
@@ -323,4 +323,4 @@ If you suspect a security breach:
 
 This security policy is updated regularly. Last update: December 2025
 
-For questions: security@lexia.ai
+For questions: security@orcapt.com

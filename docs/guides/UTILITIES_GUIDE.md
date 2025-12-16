@@ -1,6 +1,6 @@
 # Utilities Guide
 
-Complete guide to common utilities, exceptions, decorators, and logging in Lexia SDK.
+Complete guide to common utilities, exceptions, decorators, and logging in Orca SDK.
 
 ## Table of Contents
 
@@ -14,10 +14,10 @@ Complete guide to common utilities, exceptions, decorators, and logging in Lexia
 
 ### Exception Hierarchy
 
-Lexia SDK provides a comprehensive exception hierarchy:
+Orca SDK provides a comprehensive exception hierarchy:
 
 ```
-LexiaException (base)
+OrcaException (base)
 ├── ConfigurationError
 ├── ValidationError
 ├── CommunicationError
@@ -28,17 +28,17 @@ LexiaException (base)
 └── DeploymentError
 ```
 
-### LexiaException
+### OrcaException
 
-Base exception for all Lexia errors.
+Base exception for all Orca errors.
 
 ```python
-from lexia.common.exceptions import LexiaException
+from orca.common.exceptions import OrcaException
 
 try:
     # Your code
     pass
-except LexiaException as e:
+except OrcaException as e:
     print(f"Error: {e.message}")
     print(f"Code: {e.error_code}")
     print(f"Context: {e.context}")
@@ -72,7 +72,7 @@ error_dict = exception.to_dict()
 Configuration-related errors.
 
 ```python
-from lexia.common.exceptions import ConfigurationError
+from orca.common.exceptions import ConfigurationError
 
 if not api_key:
     raise ConfigurationError(
@@ -87,7 +87,7 @@ if not api_key:
 Input validation errors.
 
 ```python
-from lexia.common.exceptions import ValidationError
+from orca.common.exceptions import ValidationError
 
 def validate_message(data):
     if not data.message:
@@ -110,7 +110,7 @@ def validate_message(data):
 Communication-related errors (base for StreamError and APIError).
 
 ```python
-from lexia.common.exceptions import CommunicationError
+from orca.common.exceptions import CommunicationError
 
 try:
     response = api_client.post(url, data)
@@ -127,7 +127,7 @@ except Exception as e:
 Streaming-specific errors.
 
 ```python
-from lexia.common.exceptions import StreamError
+from orca.common.exceptions import StreamError
 
 try:
     stream_client.send_delta(channel, uuid, thread_id, content)
@@ -144,7 +144,7 @@ except Exception as e:
 API-specific errors.
 
 ```python
-from lexia.common.exceptions import APIError
+from orca.common.exceptions import APIError
 
 if response.status_code != 200:
     raise APIError(
@@ -165,7 +165,7 @@ if response.status_code != 200:
 Retry failed operations with exponential backoff.
 
 ```python
-from lexia.common.decorators import retry
+from orca.common.decorators import retry
 
 @retry(max_attempts=3, delay=1.0, backoff=2.0)
 def unstable_operation():
@@ -194,7 +194,7 @@ except Exception as e:
 Log function execution with timing.
 
 ```python
-from lexia.common.decorators import log_execution
+from orca.common.decorators import log_execution
 import logging
 
 logger = logging.getLogger(__name__)
@@ -223,7 +223,7 @@ def process_data(data):
 Measure and log execution time.
 
 ```python
-from lexia.common.decorators import measure_time
+from orca.common.decorators import measure_time
 
 @measure_time("data_processing")
 def process_large_dataset(data):
@@ -239,7 +239,7 @@ def process_large_dataset(data):
 Automatic error handling with custom error handler.
 
 ```python
-from lexia.common.decorators import handle_errors
+from orca.common.decorators import handle_errors
 
 def error_callback(exception, func_name):
     print(f"Error in {func_name}: {exception}")
@@ -265,7 +265,7 @@ def risky_operation():
 Mark functions as deprecated.
 
 ```python
-from lexia.common.decorators import deprecated
+from orca.common.decorators import deprecated
 
 @deprecated("Use new_function() instead")
 def old_function():
@@ -280,7 +280,7 @@ def old_function():
 Runtime type validation.
 
 ```python
-from lexia.common.decorators import validate_types
+from orca.common.decorators import validate_types
 
 @validate_types
 def add_numbers(x: int, y: int) -> int:
@@ -298,7 +298,7 @@ result = add_numbers("5", 10)  # Raises TypeError
 Cache function results.
 
 ```python
-from lexia.common.decorators import cache_result
+from orca.common.decorators import cache_result
 
 @cache_result(ttl=3600)  # Cache for 1 hour
 def expensive_computation(x):
@@ -321,7 +321,7 @@ result2 = expensive_computation(5)
 Configure logging for your application.
 
 ```python
-from lexia.common.logging_config import setup_logging
+from orca.common.logging_config import setup_logging
 import logging
 
 # Basic setup
@@ -360,7 +360,7 @@ setup_logging(
 Get configured logger instance.
 
 ```python
-from lexia.common.logging_config import get_logger
+from orca.common.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -376,7 +376,7 @@ logger.critical("Critical message")
 Enable debug logging temporarily.
 
 ```python
-from lexia.common.logging_config import enable_debug_logging
+from orca.common.logging_config import enable_debug_logging
 
 # Enable debug mode
 enable_debug_logging()
@@ -388,7 +388,7 @@ logger.debug("This will now be visible")
 ### Structured Logging
 
 ```python
-from lexia.common.logging_config import get_logger
+from orca.common.logging_config import get_logger
 
 logger = get_logger(__name__)
 
@@ -408,7 +408,7 @@ logger.info(
 ### Runtime Type Checking
 
 ```python
-from lexia.common.type_guards import (
+from orca.common.type_guards import (
     is_valid_string,
     is_valid_dict,
     is_valid_list,
@@ -434,7 +434,7 @@ validate_type(value, expected_type=int, param_name="user_id")
 ### Available Type Guards
 
 ```python
-from lexia.common.type_guards import *
+from orca.common.type_guards import *
 
 # String validation
 is_valid_string(value, min_length=None, max_length=None, pattern=None)
@@ -466,7 +466,7 @@ is_valid_json(value)
 ### File Utilities
 
 ```python
-from lexia.utils.files import (
+from orca.utils.files import (
     read_file,
     write_file,
     ensure_dir,
@@ -493,7 +493,7 @@ mime = get_mime_type("image.png")  # Returns: "image/png"
 ### Environment Utilities
 
 ```python
-from lexia.utils.environment import (
+from orca.utils.environment import (
     get_env,
     get_env_bool,
     get_env_int,
@@ -516,7 +516,7 @@ api_key = require_env("API_KEY")
 ### Response Handling
 
 ```python
-from lexia.utils.response_handler import (
+from orca.utils.response_handler import (
     format_error_response,
     format_success_response,
     parse_json_response
@@ -544,9 +544,9 @@ data = parse_json_response(response_text)
 ### 1. Use Custom Exceptions
 
 ```python
-from lexia.common.exceptions import LexiaException
+from orca.common.exceptions import OrcaException
 
-class CustomAgentError(LexiaException):
+class CustomAgentError(OrcaException):
     """Custom error for agent-specific issues."""
     pass
 
@@ -564,7 +564,7 @@ except SomeError as e:
 ### 2. Combine Decorators
 
 ```python
-from lexia.common.decorators import retry, log_execution, measure_time
+from orca.common.decorators import retry, log_execution, measure_time
 
 @retry(max_attempts=3)
 @log_execution(logger)
@@ -577,7 +577,7 @@ def call_external_api():
 ### 3. Structure Logging
 
 ```python
-from lexia.common.logging_config import setup_logging, get_logger
+from orca.common.logging_config import setup_logging, get_logger
 
 # Setup once at startup
 setup_logging(
@@ -598,8 +598,8 @@ logger.info("Starting processing", extra={
 ### 4. Validate Input
 
 ```python
-from lexia.common.type_guards import validate_type, is_valid_string
-from lexia.common.exceptions import ValidationError
+from orca.common.type_guards import validate_type, is_valid_string
+from orca.common.exceptions import ValidationError
 
 def process_user_input(user_id: int, message: str):
     # Validate types

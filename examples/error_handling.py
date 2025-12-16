@@ -5,15 +5,15 @@ Error Handling Example
 Demonstrates comprehensive error handling with custom exceptions.
 """
 
-from lexia import (
-    LexiaHandler,
+from orca import (
+    OrcaHandler,
     setup_logging,
-    LexiaException,
+    OrcaException,
     ValidationError,
     StreamError,
     handle_errors,
 )
-from lexia.common import InvalidValueError, wrap_exception
+from orca.common import InvalidValueError, wrap_exception
 import logging
 
 # Setup logging
@@ -31,7 +31,7 @@ def validate_input(value: str) -> str:
 
 def error_handling_example():
     """Demonstrate error handling patterns."""
-    handler = LexiaHandler(dev_mode=True)
+    handler = OrcaHandler(dev_mode=True)
     
     # Mock data
     class MockData:
@@ -58,9 +58,9 @@ def error_handling_example():
         try:
             raise ValueError("Simulated error")
         except ValueError as e:
-            # Wrap in Lexia exception
-            lexia_error = wrap_exception(e, "Processing failed")
-            logger.error(f"Error details: {lexia_error.to_dict()}")
+            # Wrap in Orca exception
+            orca_error = wrap_exception(e, "Processing failed")
+            logger.error(f"Error details: {orca_error.to_dict()}")
             
             # Send error to client
             session.error("An error occurred during processing")
@@ -69,9 +69,9 @@ def error_handling_example():
         response = session.close()
         print(f"Response: {response}")
         
-    except LexiaException as e:
-        # Catch all Lexia exceptions
-        logger.error(f"Lexia error: {e}")
+    except OrcaException as e:
+        # Catch all Orca exceptions
+        logger.error(f"Orca error: {e}")
         logger.error(f"Error details: {e.to_dict()}")
     
     except Exception as e:

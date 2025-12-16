@@ -1,6 +1,6 @@
 # Design Patterns Guide
 
-Complete guide to design patterns available in Lexia SDK for professional code organization.
+Complete guide to design patterns available in Orca SDK for professional code organization.
 
 ## Table of Contents
 
@@ -12,7 +12,7 @@ Complete guide to design patterns available in Lexia SDK for professional code o
 
 ## Overview
 
-Lexia SDK provides professional implementations of common design patterns:
+Orca SDK provides professional implementations of common design patterns:
 
 - **Builder**: Fluent interface for complex object construction
 - **Middleware**: Chain of responsibility for request processing
@@ -20,20 +20,20 @@ Lexia SDK provides professional implementations of common design patterns:
 
 ## Builder Pattern
 
-### LexiaBuilder
+### OrcaBuilder
 
-Build `LexiaHandler` with fluent interface:
+Build `OrcaHandler` with fluent interface:
 
 ```python
-from lexia.patterns import LexiaBuilder
+from orca.patterns import OrcaBuilder
 
 # Simple builder
-handler = (LexiaBuilder()
+handler = (OrcaBuilder()
     .with_dev_mode(True)
     .build())
 
 # With custom services
-handler = (LexiaBuilder()
+handler = (OrcaBuilder()
     .with_dev_mode(False)
     .with_buffer_manager(custom_buffer)
     .with_error_handler(custom_error_handler)
@@ -43,10 +43,10 @@ handler = (LexiaBuilder()
 ### Full Configuration
 
 ```python
-from lexia.patterns import LexiaBuilder
-from lexia.services import BufferManager, ErrorHandler
+from orca.patterns import OrcaBuilder
+from orca.services import BufferManager, ErrorHandler
 
-handler = (LexiaBuilder()
+handler = (OrcaBuilder()
     # Core settings
     .with_dev_mode(False)
 
@@ -68,7 +68,7 @@ handler = (LexiaBuilder()
 Build session workflows with fluent interface:
 
 ```python
-from lexia.patterns import SessionBuilder
+from orca.patterns import SessionBuilder
 
 # Create builder with handler
 builder = SessionBuilder(handler)
@@ -200,7 +200,7 @@ async def handler(data):
 Chain of responsibility for request processing:
 
 ```python
-from lexia.patterns import Middleware, MiddlewareChain
+from orca.patterns import Middleware, MiddlewareChain
 
 class LoggingMiddleware(Middleware):
     def process(self, data, next_handler):
@@ -210,12 +210,12 @@ class LoggingMiddleware(Middleware):
         return result
 
 # Option 1: Using MiddlewareManager (recommended)
-from lexia.patterns import MiddlewareManager
+from orca.patterns import MiddlewareManager
 manager = MiddlewareManager()
 manager.use(LoggingMiddleware())
 
 # Option 2: Using MiddlewareChain directly
-from lexia.patterns import MiddlewareChain
+from orca.patterns import MiddlewareChain
 chain = MiddlewareChain()
 chain.add(LoggingMiddleware())
 ```
@@ -225,7 +225,7 @@ chain.add(LoggingMiddleware())
 #### LoggingMiddleware
 
 ```python
-from lexia.patterns import LoggingMiddleware
+from orca.patterns import LoggingMiddleware
 
 middleware = LoggingMiddleware(
     logger=my_logger,
@@ -238,7 +238,7 @@ middleware = LoggingMiddleware(
 #### ValidationMiddleware
 
 ```python
-from lexia.patterns import ValidationMiddleware
+from orca.patterns import ValidationMiddleware
 
 def validate_data(data):
     if not data.message:
@@ -251,7 +251,7 @@ middleware = ValidationMiddleware(validator=validate_data)
 #### TransformMiddleware
 
 ```python
-from lexia.patterns import TransformMiddleware
+from orca.patterns import TransformMiddleware
 
 def transform_request(data):
     # Modify request
@@ -273,10 +273,10 @@ middleware = TransformMiddleware(
 Combine multiple middleware:
 
 ```python
-from lexia.patterns import MiddlewareChain
+from orca.patterns import MiddlewareChain
 
 # Using MiddlewareManager (recommended - has execute method)
-from lexia.patterns import MiddlewareManager
+from orca.patterns import MiddlewareManager
 
 manager = MiddlewareManager()
 
@@ -298,7 +298,7 @@ result = manager.execute(handler, data)
 Higher-level middleware management:
 
 ```python
-from lexia.patterns import MiddlewareManager
+from orca.patterns import MiddlewareManager
 
 manager = MiddlewareManager()
 
@@ -321,7 +321,7 @@ result = manager.execute_all(data, handler)
 ### Custom Middleware
 
 ```python
-from lexia.patterns import Middleware, MiddlewareManager
+from orca.patterns import Middleware, MiddlewareManager
 import logging
 
 class AuditMiddleware(Middleware):
@@ -337,7 +337,7 @@ manager.use(AuditMiddleware())
 ### Async Middleware
 
 ```python
-from lexia.patterns import Middleware
+from orca.patterns import Middleware
 
 class AsyncCacheMiddleware(Middleware):
     async def process_async(self, data, next_handler):
@@ -361,7 +361,7 @@ class AsyncCacheMiddleware(Middleware):
 Automatic session management:
 
 ```python
-from lexia.patterns import SessionContext
+from orca.patterns import SessionContext
 
 # Synchronous context (blocking operations)
 with SessionContext(handler, data) as session:
@@ -377,10 +377,10 @@ For async contexts (FastAPI, async functions), manage the session manually:
 
 ```python
 import asyncio
-from lexia import LexiaHandler
+from orca import OrcaHandler
 
 # Async-safe version
-async def process_request(handler: LexiaHandler, data):
+async def process_request(handler: OrcaHandler, data):
     session = handler.begin(data)
     try:
         session.stream("Processing...")
@@ -408,7 +408,7 @@ with SessionContext(handler, data) as session:
 Generic resource management:
 
 ```python
-from lexia.patterns import ResourceContext
+from orca.patterns import ResourceContext
 
 class DatabaseConnection:
     def setup(self):
@@ -428,7 +428,7 @@ with ResourceContext(DatabaseConnection()) as db:
 Measure execution time:
 
 ```python
-from lexia.patterns import timed_operation
+from orca.patterns import timed_operation
 
 # timed_operation logs the duration automatically
 with timed_operation("database_query"):
@@ -442,7 +442,7 @@ with timed_operation("database_query"):
 Suppress specific exceptions:
 
 ```python
-from lexia.patterns import suppress_exceptions
+from orca.patterns import suppress_exceptions
 
 with suppress_exceptions(ValueError, KeyError):
     # This won't crash the program
@@ -476,17 +476,17 @@ with transaction(db) as tx:
 ### 1. Use Builder for Complex Setup
 
 ```python
-from lexia.patterns import LexiaBuilder
+from orca.patterns import OrcaBuilder
 
 # Good - clear configuration
-handler = (LexiaBuilder()
+handler = (OrcaBuilder()
     .with_dev_mode(False)
     .with_buffer_manager(custom_buffer)
     .with_error_handler(custom_error_handler)
     .build())
 
 # Instead of
-handler = LexiaHandler(
+handler = OrcaHandler(
     dev_mode=False,
     buffer_manager=custom_buffer,
     error_handler=custom_error_handler
@@ -496,7 +496,7 @@ handler = LexiaHandler(
 ### 2. Use Middleware for Cross-cutting Concerns
 
 ```python
-from lexia.patterns import MiddlewareManager
+from orca.patterns import MiddlewareManager
 
 manager = MiddlewareManager()
 manager.use(LoggingMiddleware())      # Logging
@@ -509,7 +509,7 @@ result = manager.execute(handler, data)
 ### 3. Use Context Managers for Cleanup
 
 ```python
-from lexia.patterns import SessionContext
+from orca.patterns import SessionContext
 
 # Automatic cleanup
 with SessionContext(handler, data) as session:
@@ -520,18 +520,18 @@ with SessionContext(handler, data) as session:
 ### 4. Combine Patterns
 
 ```python
-from lexia.patterns import (
-    LexiaBuilder,
+from orca.patterns import (
+    OrcaBuilder,
     MiddlewareChain,
     SessionContext,
     timed_operation
 )
 
 # Build handler
-handler = LexiaBuilder().with_dev_mode(True).build()
+handler = OrcaBuilder().with_dev_mode(True).build()
 
 # Setup middleware
-from lexia.patterns import MiddlewareManager
+from orca.patterns import MiddlewareManager
 manager = MiddlewareManager()
 manager.use(LoggingMiddleware())
 
@@ -548,11 +548,11 @@ with timed_operation("request_processing"):
 ### With Lambda
 
 ```python
-from lexia import LambdaAdapter
-from lexia.patterns import LexiaBuilder, MiddlewareManager
+from orca import LambdaAdapter
+from orca.patterns import OrcaBuilder, MiddlewareManager
 
 # Build handler
-handler = (LexiaBuilder()
+handler = (OrcaBuilder()
     .with_dev_mode(False)
     .build())
 
