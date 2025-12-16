@@ -29,14 +29,14 @@ def basic_example():
     session = handler.begin(data)
     
     # Start loading indicator
-    session.start_loading(LoadingKind.THINKING.value)
+    session.loading.start(LoadingKind.THINKING.value)
     
     # Stream response
     session.stream("Hello, ")
     session.stream("world!")
     
     # End loading
-    session.end_loading(LoadingKind.THINKING.value)
+    session.loading.end(LoadingKind.THINKING.value)
     
     # Add buttons
     session.button.link("Learn More", "https://example.com", color=ButtonColor.PRIMARY.value)

@@ -93,32 +93,6 @@ from .common import (
     enable_debug_logging,
 )
 
-# Observability (Optional - for advanced users)
-try:
-    from .observability import (
-        Counter,
-        Gauge,
-        Histogram,
-        Timer,
-        MetricsCollector,
-        measure_time as measure_time_obs,
-        get_metrics_collector,
-        Profiler,
-        profile,
-        profile_async,
-        profile_block,
-        Event,
-        EventListener,
-        EventBus,
-        get_event_bus,
-        HealthStatus,
-        HealthCheck,
-        SystemMonitor,
-    )
-    _has_observability = True
-except ImportError:
-    _has_observability = False
-
 # Build __all__ list
 __all__ = [
     # Core
@@ -189,28 +163,6 @@ __all__ = [
     # Version
     '__version__'
 ]
-
-# Add observability exports if available
-if _has_observability:
-    __all__.extend([
-        'Counter',
-        'Gauge',
-        'Histogram',
-        'Timer',
-        'MetricsCollector',
-        'get_metrics_collector',
-        'Profiler',
-        'profile',
-        'profile_async',
-        'profile_block',
-        'Event',
-        'EventListener',
-        'EventBus',
-        'get_event_bus',
-        'HealthStatus',
-        'HealthCheck',
-        'SystemMonitor',
-    ])
 
 # Storage SDK
 try:

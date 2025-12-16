@@ -9,6 +9,7 @@ Provides a clean, readable API for object construction.
 from typing import Optional, Dict, Any, List
 from ..config import LoadingKind, ButtonColor
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -128,15 +129,55 @@ class SessionBuilder:
         ...     .build())
     """
     
-    def __init__(self, session: Any):
+    def __init__(self, handler_or_session: Optional[Any] = None):
         """
-        Initialize builder with session.
+        Initialize builder with optional handler or session.
         
         Args:
-            session: Session instance to build on
+            handler_or_session: Optional handler or session instance.
+                                If handler, use start_session(data) to begin.
+                                If session, can use directly.
         """
-        self._session = session
+        # Try to detect if it's a handler (has 'begin' method) or session (has 'stream' method)
+        if handler_or_session is None:
+            self._handler = None
+            self._session = None
+        elif hasattr(handler_or_session, 'begin'):
+            # It's a handler
+            self._handler = handler_or_session
+            self._session = None
+        elif hasattr(handler_or_session, 'stream'):
+            # It's a session
+            self._handler = None
+            self._session = handler_or_session
+        else:
+            # Default: assume it's a handler (for backward compatibility)
+            self._handler = handler_or_session
+            self._session = None
+        
         self._operations: List[Dict[str, Any]] = []
+        self._executed: bool = False  # Track if operations have been executed
+    
+    def start_session(self, data: Any) -> 'SessionBuilder':
+        """
+        Start session with request data (convenience method for documentation API).
+        
+        Requires handler to be provided in constructor.
+        
+        Args:
+            data: Request data to start session with
+            
+        Returns:
+            Self for chaining
+            
+        Raises:
+            ValueError: If handler was not provided in constructor
+        """
+        if self._handler is None:
+            raise ValueError("Handler must be provided in constructor to use start_session()")
+        
+        self._session = self._handler.begin(data)
+        return self
     
     def add_loading(
         self,
@@ -242,20 +283,158 @@ class SessionBuilder:
         })
         return self
     
+    def add_video(self, url: str) -> 'SessionBuilder':
+        """
+        Add video operation.
+        
+        Args:
+            url: Video URL
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "video",
+            "url": url,
+        })
+        return self
+    
+    def add_youtube(self, url: str) -> 'SessionBuilder':
+        """
+        Add YouTube video operation.
+        
+        Args:
+            url: YouTube video URL
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "youtube",
+            "url": url,
+        })
+        return self
+    
+    def add_location(self, coordinates: str) -> 'SessionBuilder':
+        """
+        Add location operation.
+        
+        Args:
+            coordinates: Location coordinates (e.g., "35.6892, 51.3890")
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "location",
+            "coordinates": coordinates,
+        })
+        return self
+    
+    def add_location_coordinates(self, lat: float, lng: float) -> 'SessionBuilder':
+        """
+        Add location operation with coordinates.
+        
+        Args:
+            lat: Latitude
+            lng: Longitude
+            
+        Returns:
+            Self for chaining
+        """
+        coordinates = f"{lat}, {lng}"
+        return self.add_location(coordinates)
+    
+    def add_card_list(self, cards: List[Dict[str, Any]]) -> 'SessionBuilder':
+        """
+        Add card list operation.
+        
+        Args:
+            cards: List of card dictionaries with keys:
+                   - photo: Image URL (optional)
+                   - header: Card title (optional)
+                   - subheader: Card description (optional)
+                   - text: Additional content (optional)
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "card_list",
+            "cards": cards,
+        })
+        return self
+    
+    def add_audio(self, tracks: List[Dict[str, str]]) -> 'SessionBuilder':
+        """
+        Add audio operation.
+        
+        Args:
+            tracks: List of track dictionaries with keys:
+                    - label: Track label (required)
+                    - url: Audio URL (required)
+                    - type: MIME type (e.g., "audio/mp3") (optional)
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "audio",
+            "tracks": tracks,
+        })
+        return self
+    
+    def add_audio_single(
+        self,
+        url: str,
+        label: Optional[str] = None,
+        mime_type: Optional[str] = None
+    ) -> 'SessionBuilder':
+        """
+        Add single audio track operation.
+        
+        Args:
+            url: Audio URL
+            label: Optional track label
+            mime_type: Optional MIME type (e.g., "audio/mp3")
+            
+        Returns:
+            Self for chaining
+        """
+        track = {"url": url}
+        if label:
+            track["label"] = label
+        if mime_type:
+            track["type"] = mime_type
+        
+        return self.add_audio([track])
+    
     def execute(self) -> None:
         """
         Execute all queued operations on the session.
         
         This method runs all operations that were added via the builder.
+        Operations are only executed once, even if execute() is called multiple times.
+        
+        Raises:
+            ValueError: If session is not available (neither set directly nor started)
         """
+        if self._executed:
+            # Already executed, skip to avoid duplicate execution
+            logger.debug("Operations already executed, skipping")
+            return
+        
+        if self._session is None:
+            raise ValueError("Session not available. Either provide session in constructor or call start_session(data) first.")
+        
         for op in self._operations:
             op_type = op["type"]
             
             if op_type == "loading":
                 if op["action"] == "start":
-                    self._session.start_loading(op["kind"])
+                    self._session.loading.start(op["kind"])
                 else:
-                    self._session.end_loading(op["kind"])
+                    self._session.loading.end(op["kind"])
             
             elif op_type == "stream":
                 self._session.stream(op["content"])
@@ -277,21 +456,256 @@ class SessionBuilder:
                 )
             
             elif op_type == "image":
-                self._session.image(op["url"])
+                self._session.image.send(op["url"])
             
             elif op_type == "tracing":
-                self._session.tracing(op["message"], op["visibility"])
+                self._session.tracing.send(op["message"], op["visibility"])
+            
+            elif op_type == "video":
+                self._session.video.send(op["url"])
+            
+            elif op_type == "youtube":
+                self._session.video.youtube(op["url"])
+            
+            elif op_type == "location":
+                self._session.location.send(op["coordinates"])
+            
+            elif op_type == "card_list":
+                self._session.card.send(op["cards"])
+            
+            elif op_type == "audio":
+                self._session.audio.send(op["tracks"])
+            
+            elif op_type == "usage":
+                self._session.usage.track(
+                    tokens=op["tokens"],
+                    token_type=op["token_type"],
+                    cost=op.get("cost"),
+                    label=op.get("label")
+                )
+            
+            elif op_type == "process":
+                op["func"](self._session)
         
+        self._executed = True  # Mark as executed
         logger.info(f"Executed {len(self._operations)} operations")
     
     def build(self) -> 'SessionBuilder':
         """
         Build (execute) the session flow.
         
+        Executes all queued operations but does NOT close the session.
+        Use complete() or close() to finalize and send to frontend.
+        
         Returns:
             Self for final operations
         """
         self.execute()
+        return self
+    
+    def finalize(self) -> 'SessionBuilder':
+        """
+        Finalize (execute) the session flow.
+        
+        Alias for build() for better readability.
+        Note: Does NOT close the session. Use complete() to close and send to frontend.
+        
+        Returns:
+            Self for final operations
+        """
+        return self.build()
+    
+    def complete(self, usage_info=None, file_url=None) -> str:
+        """
+        Complete the session and send response to frontend.
+        
+        Executes all queued operations and closes the session.
+        This is the method to use when you want to finalize everything
+        and send the complete response to the frontend.
+        
+        Args:
+            usage_info: Optional usage information dict
+            file_url: Optional file URL
+            
+        Returns:
+            Full response content as string
+            
+        Raises:
+            ValueError: If session is not available
+        """
+        self.execute()
+        
+        if self._session is None:
+            raise ValueError("Session not available. Either provide session in constructor or call start_session(data) first.")
+        
+        return self._session.close(usage_info=usage_info, file_url=file_url)
+    
+    def close(self, usage_info=None, file_url=None) -> str:
+        """
+        Close session and send response to frontend (alias for complete()).
+        
+        Args:
+            usage_info: Optional usage information dict
+            file_url: Optional file URL
+            
+        Returns:
+            Full response content as string
+        """
+        return self.complete(usage_info=usage_info, file_url=file_url)
+    
+    async def acomplete(self, usage_info=None, file_url=None) -> str:
+        """
+        Async version of complete() for use in async contexts.
+        
+        Executes all queued operations and closes the session in a thread,
+        making it safe for use in async functions (FastAPI, async handlers, etc.).
+        
+        Args:
+            usage_info: Optional usage information dict
+            file_url: Optional file URL
+            
+        Returns:
+            Full response content as string
+            
+        Raises:
+            ValueError: If session is not available
+            
+        Example:
+            >>> async def handler(data):
+            ...     builder = SessionBuilder(handler).start_session(data)
+            ...     response = await builder.acomplete()
+            ...     return response
+        """
+        self.execute()
+        
+        if self._session is None:
+            raise ValueError("Session not available. Either provide session in constructor or call start_session(data) first.")
+        
+        # Run blocking session.close() in thread
+        return await asyncio.to_thread(self._session.close, usage_info=usage_info, file_url=file_url)
+    
+    async def aclose(self, usage_info=None, file_url=None) -> str:
+        """
+        Async version of close() for use in async contexts (alias for acomplete()).
+        
+        Args:
+            usage_info: Optional usage information dict
+            file_url: Optional file URL
+            
+        Returns:
+            Full response content as string
+        """
+        return await self.acomplete(usage_info=usage_info, file_url=file_url)
+    
+    # ==================== Convenience Methods (Documentation API) ====================
+    
+    def show_loading(self, kind: str = LoadingKind.THINKING.value) -> 'SessionBuilder':
+        """
+        Show loading indicator (convenience method).
+        
+        Args:
+            kind: Type of loading indicator
+            
+        Returns:
+            Self for chaining
+        """
+        return self.add_loading(kind, "start")
+    
+    def hide_loading(self, kind: str = LoadingKind.THINKING.value) -> 'SessionBuilder':
+        """
+        Hide loading indicator (convenience method).
+        
+        Args:
+            kind: Type of loading indicator
+            
+        Returns:
+            Self for chaining
+        """
+        return self.add_loading(kind, "end")
+    
+    def add_button(
+        self,
+        label: str,
+        url_or_id: str,
+        row: int = 1,
+        color: Optional[str] = None
+    ) -> 'SessionBuilder':
+        """
+        Add button (convenience method - auto-detects link vs action).
+        
+        Args:
+            label: Button label
+            url_or_id: URL (if starts with http) or action ID
+            row: Button row
+            color: Button color
+            
+        Returns:
+            Self for chaining
+        """
+        if url_or_id.startswith("http://") or url_or_id.startswith("https://"):
+            return self.add_button_link(label, url_or_id, row, color)
+        else:
+            return self.add_button_action(label, url_or_id, row, color)
+    
+    def track_trace(
+        self,
+        message: str,
+        visibility: str = "all"
+    ) -> 'SessionBuilder':
+        """
+        Track trace (convenience method).
+        
+        Args:
+            message: Trace message
+            visibility: Visibility level
+            
+        Returns:
+            Self for chaining
+        """
+        return self.add_tracing(message, visibility)
+    
+    def track_usage(
+        self,
+        tokens: int,
+        token_type: str,
+        cost: Optional[str] = None,
+        label: Optional[str] = None
+    ) -> 'SessionBuilder':
+        """
+        Track usage (adds usage operation to queue).
+        
+        Args:
+            tokens: Token count
+            token_type: Type of tokens
+            cost: Optional cost
+            label: Optional label
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "usage",
+            "tokens": tokens,
+            "token_type": token_type,
+            "cost": cost,
+            "label": label,
+        })
+        return self
+    
+    def process(self, func) -> 'SessionBuilder':
+        """
+        Process with custom function.
+        
+        Args:
+            func: Function that takes session and processes it
+            
+        Returns:
+            Self for chaining
+        """
+        self._operations.append({
+            "type": "process",
+            "func": func,
+        })
         return self
 
 

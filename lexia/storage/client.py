@@ -2,43 +2,57 @@
 Lexia Storage Client
 ====================
 
-High-level storage client for Lexia platform.
-Based on the Storage SDK Developer Guide.
+Facade for Lexia Storage operations.
+Delegates to specialized services (SOLID principles).
 """
 
 import os
-import io
-import json
-import requests
 from typing import Optional, Dict, Any, List, BinaryIO, Union
 from pathlib import Path
 
+from .base_client import BaseStorageClient, StorageException
+from .bucket_service import BucketService
+from .file_service import FileService
+from .permission_service import PermissionService
 
-class LexiaStorageException(Exception):
-    """Base exception for storage errors"""
+
+# Re-export exception
+class LexiaStorageException(StorageException):
+    """Alias for StorageException (backward compatibility)"""
     pass
 
 
 class LexiaStorage:
     """
-    Lexia Storage S3-Compatible Client
+    Lexia Storage S3-Compatible Client (Facade Pattern).
+    
+    This class delegates to specialized services:
+    - BucketService: Bucket operations
+    - FileService: File operations
+    - PermissionService: Permission operations
+    
+    SOLID Principles Applied:
+    - SRP: Each service has single responsibility
+    - OCP: Services can be extended without modifying this class
+    - LSP: Services implement clear contracts
+    - ISP: Services expose only relevant methods
+    - DIP: Depends on abstractions (BaseStorageClient)
     
     Example:
         >>> storage = LexiaStorage(
         ...     workspace='my-workspace',
         ...     token='my-token',
-        ...     base_url='https://api.example.com/api/v1/storage',
-        ...     mode='prod'
+        ...     base_url='https://api.example.com/api/v1/storage'
         ... )
         >>> 
         >>> # Create bucket
         >>> bucket = storage.create_bucket('my-bucket')
         >>> 
         >>> # Upload file
-        >>> file_info = storage.upload_file('my-bucket', 'report.pdf', 'reports/2025/')
+        >>> file = storage.upload_file('my-bucket', 'report.pdf', 'reports/')
         >>> 
-        >>> # Download file
-        >>> storage.download_file('my-bucket', 'reports/2025/report.pdf', 'local.pdf')
+        >>> # List files
+        >>> files = storage.list_files('my-bucket')
     """
     
     def __init__(
@@ -59,68 +73,19 @@ class LexiaStorage:
             mode: 'dev' or 'prod'
             timeout: Request timeout in seconds
         """
-        if not workspace or not token:
-            raise ValueError('Workspace and token are required')
+        # Initialize base client
+        self._client = BaseStorageClient(
+            workspace=workspace,
+            token=token,
+            base_url=base_url,
+            mode=mode,
+            timeout=timeout
+        )
         
-        self.base_url = base_url.rstrip('/')
-        self.timeout = timeout
-        self.headers = {
-            'x-workspace': workspace,
-            'x-token': token,
-            'x-mode': mode
-        }
-    
-    def _request(
-        self,
-        method: str,
-        endpoint: str,
-        data: Optional[Dict] = None,
-        files: Optional[Dict] = None,
-        params: Optional[Dict] = None,
-        json_data: Optional[Dict] = None
-    ) -> Dict[str, Any]:
-        """
-        Make HTTP request to storage API.
-        
-        Args:
-            method: HTTP method
-            endpoint: API endpoint
-            data: Form data
-            files: Files to upload
-            params: Query parameters
-            json_data: JSON data
-            
-        Returns:
-            Response JSON
-            
-        Raises:
-            LexiaStorageException: On API errors
-        """
-        url = f"{self.base_url}{endpoint}"
-        
-        try:
-            response = requests.request(
-                method=method,
-                url=url,
-                headers=self.headers,
-                json=json_data if json_data and not files else None,
-                data=data if files or (data and not json_data) else None,
-                files=files,
-                params=params,
-                timeout=self.timeout
-            )
-            response.raise_for_status()
-            return response.json()
-            
-        except requests.exceptions.HTTPError as e:
-            try:
-                error_data = e.response.json()
-                message = error_data.get('message', str(e))
-            except:
-                message = str(e)
-            raise LexiaStorageException(f"Storage API error: {message}")
-        except Exception as e:
-            raise LexiaStorageException(f"Request failed: {e}")
+        # Initialize services (Dependency Injection)
+        self._buckets = BucketService(self._client)
+        self._files = FileService(self._client)
+        self._permissions = PermissionService(self._client)
     
     # ==================== Bucket Operations ====================
     
@@ -139,52 +104,21 @@ class LexiaStorage:
             encryption: Enable encryption
             
         Returns:
-            Bucket info
+            Bucket information
         """
-        payload = {
-            'bucket_name': name,
-            'visibility': visibility,
-            'encryption_enabled': encryption
-        }
-        response = self._request('POST', '/bucket/create', json_data=payload)
-        return response.get('bucket', {})
+        return self._buckets.create(name, visibility, encryption)
     
     def list_buckets(self) -> List[Dict[str, Any]]:
-        """
-        List all buckets.
-        
-        Returns:
-            List of buckets
-        """
-        response = self._request('GET', '/bucket/list')
-        return response.get('buckets', [])
+        """List all buckets."""
+        return self._buckets.list()
     
-    def get_bucket(self, name: str) -> Dict[str, Any]:
-        """
-        Get bucket metadata.
-        
-        Args:
-            name: Bucket name
-            
-        Returns:
-            Bucket info
-        """
-        response = self._request('GET', f'/bucket/{name}')
-        return response.get('bucket', {})
+    def get_bucket_info(self, name: str) -> Dict[str, Any]:
+        """Get bucket information."""
+        return self._buckets.get_info(name)
     
     def delete_bucket(self, name: str, force: bool = False) -> Dict[str, Any]:
-        """
-        Delete a bucket.
-        
-        Args:
-            name: Bucket name
-            force: Force delete even if not empty
-            
-        Returns:
-            Response data
-        """
-        params = {'force': 'true'} if force else None
-        return self._request('DELETE', f'/bucket/{name}', params=params)
+        """Delete a bucket."""
+        return self._buckets.delete(name, force)
     
     # ==================== File Operations ====================
     
@@ -192,269 +126,93 @@ class LexiaStorage:
         self,
         bucket: str,
         file_path: Union[str, Path],
-        folder_path: str = '',
+        folder: str = '',
         visibility: str = 'private',
-        generate_url: bool = True,
         metadata: Optional[Dict] = None,
-        tags: Optional[Dict] = None
+        tags: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        Upload a file to bucket.
+        Upload a file.
         
         Args:
             bucket: Bucket name
-            file_path: Local file path
-            folder_path: Destination folder in bucket
+            file_path: Path to local file
+            folder: Destination folder
             visibility: 'public' or 'private'
-            generate_url: Generate download URL
             metadata: File metadata
             tags: File tags
             
         Returns:
-            File info including download URL if generate_url=True
+            File information with download URL
         """
-        file_path = Path(file_path)
-        
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
-        
-        with open(file_path, 'rb') as f:
-            files = {'file': (file_path.name, f)}
-            data = {
-                'folder_path': folder_path or '',
-                'visibility': visibility,
-                'generate_url': 'true' if generate_url else 'false',
-            }
-            
-            if metadata:
-                data['metadata'] = json.dumps(metadata)
-            if tags:
-                data['tags'] = json.dumps(tags)
-            
-            response = self._request('POST', f'/{bucket}/upload', data=data, files=files)
-            return response.get('file', {})
+        return self._files.upload(bucket, file_path, folder, visibility, metadata, tags)
     
     def upload_buffer(
         self,
         bucket: str,
-        file_name: str,
-        buffer: Union[bytes, BinaryIO],
-        folder_path: str = '',
-        visibility: str = 'private',
-        generate_url: bool = True,
-        metadata: Optional[Dict] = None,
-        tags: Optional[Dict] = None
+        buffer: BinaryIO,
+        filename: str,
+        folder: str = '',
+        **options
     ) -> Dict[str, Any]:
-        """
-        Upload from memory buffer.
-        
-        Args:
-            bucket: Bucket name
-            file_name: File name
-            buffer: File content (bytes or file-like object)
-            folder_path: Destination folder
-            visibility: 'public' or 'private'
-            generate_url: Generate download URL
-            metadata: File metadata
-            tags: File tags
-            
-        Returns:
-            File info
-        """
-        if isinstance(buffer, bytes):
-            buffer = io.BytesIO(buffer)
-        
-        files = {'file': (file_name, buffer)}
-        data = {
-            'folder_path': folder_path or '',
-            'visibility': visibility,
-            'generate_url': 'true' if generate_url else 'false',
-        }
-        
-        if metadata:
-            data['metadata'] = json.dumps(metadata)
-        if tags:
-            data['tags'] = json.dumps(tags)
-        
-        response = self._request('POST', f'/{bucket}/upload', data=data, files=files)
-        return response.get('file', {})
+        """Upload from memory buffer."""
+        return self._files.upload_buffer(bucket, buffer, filename, folder, **options)
     
     def list_files(
         self,
         bucket: str,
-        folder_path: str = '',
+        folder: str = '',
         page: int = 1,
         per_page: int = 50
     ) -> Dict[str, Any]:
-        """
-        List files in bucket.
-        
-        Args:
-            bucket: Bucket name
-            folder_path: Filter by folder
-            page: Page number
-            per_page: Items per page
-            
-        Returns:
-            Dict with 'files' and 'pagination'
-        """
-        params = {
-            'page': page,
-            'per_page': per_page
-        }
-        if folder_path:
-            params['folder_path'] = folder_path
-        
-        return self._request('GET', f'/{bucket}/files', params=params)
-    
-    def get_download_url(self, bucket: str, key: str) -> str:
-        """
-        Get pre-signed download URL.
-        
-        Args:
-            bucket: Bucket name
-            key: File key (path)
-            
-        Returns:
-            Download URL (valid for 60 minutes)
-        """
-        response = self._request('GET', f'/{bucket}/download/{key}')
-        return response.get('download_url', '')
+        """List files in bucket."""
+        return self._files.list(bucket, folder, page, per_page)
     
     def download_file(
         self,
         bucket: str,
         key: str,
-        local_path: Union[str, Path]
+        destination: Union[str, Path]
     ) -> None:
-        """
-        Download file to local path.
-        
-        Args:
-            bucket: Bucket name
-            key: File key
-            local_path: Local destination path
-        """
-        url = self.get_download_url(bucket, key)
-        
-        response = requests.get(url, stream=True, timeout=self.timeout)
-        response.raise_for_status()
-        
-        local_path = Path(local_path)
-        local_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        with open(local_path, 'wb') as f:
-            for chunk in response.iter_content(chunk_size=8192):
-                f.write(chunk)
+        """Download file to local path."""
+        self._files.download(bucket, key, destination)
+    
+    def get_download_url(self, bucket: str, key: str) -> Dict[str, Any]:
+        """Get pre-signed download URL."""
+        return self._files.get_download_url(bucket, key)
     
     def get_file_info(self, bucket: str, key: str) -> Dict[str, Any]:
-        """
-        Get file metadata.
-        
-        Args:
-            bucket: Bucket name
-            key: File key
-            
-        Returns:
-            File info
-        """
-        response = self._request('GET', f'/{bucket}/file-info/{key}')
-        return response.get('file', {})
+        """Get file information."""
+        return self._files.get_info(bucket, key)
     
     def delete_file(self, bucket: str, key: str) -> Dict[str, Any]:
-        """
-        Delete a file.
-        
-        Args:
-            bucket: Bucket name
-            key: File key
-            
-        Returns:
-            Response data
-        """
-        return self._request('DELETE', f'/{bucket}/file/{key}')
+        """Delete a file."""
+        return self._files.delete(bucket, key)
     
-    # ==================== Permissions ====================
+    # ==================== Permission Operations ====================
     
     def add_permission(
         self,
         bucket: str,
         target_type: str,
         target_id: str,
-        resource_type: str,
-        resource_path: str,
-        can_read: bool = False,
+        resource_type: str = 'bucket',
+        resource_path: str = '',
+        can_read: bool = True,
         can_write: bool = False,
-        can_delete: bool = False,
-        can_list: bool = False
+        can_list: bool = True
     ) -> Dict[str, Any]:
-        """
-        Add bucket permission.
-        
-        Args:
-            bucket: Bucket name
-            target_type: 'user' or 'workspace'
-            target_id: User/workspace ID
-            resource_type: 'bucket' or 'folder'
-            resource_path: Path to resource
-            can_read: Read permission
-            can_write: Write permission
-            can_delete: Delete permission
-            can_list: List permission
-            
-        Returns:
-            Permission info
-        """
-        payload = {
-            'target_type': target_type,
-            'target_id': target_id,
-            'resource_type': resource_type,
-            'resource_path': resource_path,
-            'can_read': can_read,
-            'can_write': can_write,
-            'can_delete': can_delete,
-            'can_list': can_list
-        }
-        response = self._request('POST', f'/{bucket}/permission/add', json_data=payload)
-        return response.get('permission', {})
+        """Add permission."""
+        return self._permissions.add(
+            bucket, target_type, target_id,
+            resource_type, resource_path,
+            can_read, can_write, can_list
+        )
     
     def list_permissions(self, bucket: str) -> List[Dict[str, Any]]:
-        """
-        List bucket permissions.
-        
-        Args:
-            bucket: Bucket name
-            
-        Returns:
-            List of permissions
-        """
-        response = self._request('GET', f'/{bucket}/permissions')
-        return response.get('permissions', [])
+        """List bucket permissions."""
+        return self._permissions.list(bucket)
     
-    def delete_permission(self, permission_id: str) -> Dict[str, Any]:
-        """
-        Delete a permission.
-        
-        Args:
-            permission_id: Permission ID
-            
-        Returns:
-            Response data
-        """
-        return self._request('DELETE', f'/permission/{permission_id}')
-    
-    # ==================== Utilities ====================
-    
-    def get_storage_stats(self) -> Dict[str, Any]:
-        """
-        Get storage statistics.
-        
-        Returns:
-            Storage stats
-        """
-        response = self._request('GET', '/stats')
-        return response.get('stats', {})
-
-
-__all__ = ['LexiaStorage', 'LexiaStorageException']
-
+    def remove_permission(self, permission_id: int) -> Dict[str, Any]:
+        """Remove a permission."""
+        return self._permissions.remove(permission_id)

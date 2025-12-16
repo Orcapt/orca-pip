@@ -1,32 +1,99 @@
 # Lexia SDK Examples
 
-Comprehensive examples demonstrating Lexia SDK features.
+Comprehensive examples demonstrating all Lexia SDK features.
 
-## Examples
+## Quick Start Examples
 
-### 1. `basic_usage.py`
+### 1. `basic_usage.py` - Start Here! 🚀
 
-Basic streaming and button usage.
+Basic streaming and button usage. Perfect for beginners.
 
 ```bash
 python examples/basic_usage.py
 ```
 
-### 2. `advanced_usage.py`
+### 2. `advanced_usage.py` - Advanced Features
 
-Advanced features: decorators, logging, usage tracking.
+Decorators, logging, usage tracking, and more.
 
 ```bash
 python examples/advanced_usage.py
 ```
 
-### 3. `error_handling.py`
+### 3. `error_handling.py` - Error Handling
 
-Comprehensive error handling patterns.
+Comprehensive error handling patterns and best practices.
 
 ```bash
 python examples/error_handling.py
 ```
+
+## Deployment Examples
+
+### 4. `lambda_deployment_simple.py` - Lambda Deployment ⚡
+
+**Production-ready Lambda handler template.** Copy this as your `lambda_handler.py`!
+
+Features:
+
+- ✅ HTTP, SQS, and Cron event handling
+- ✅ Automatic error handling
+- ✅ Ready to customize with your agent logic
+- ✅ Includes OpenAI examples (commented out)
+
+Deploy:
+
+```bash
+# 1. Copy to your project
+cp examples/lambda_deployment_simple.py lambda_handler.py
+
+# 2. Customize your logic
+# Edit lambda_handler.py
+
+# 3. Build Docker image
+docker build -f Dockerfile.lambda -t my-agent:latest .
+
+# 4. Deploy with lexia-cli
+lexia ship my-agent --image my-agent:latest --env-file .env
+```
+
+See `LAMBDA_DEPLOY_GUIDE.md` for complete deployment guide.
+
+### 5. `lambda_usage_example.py` - Lambda Advanced Examples
+
+Advanced Lambda examples with different patterns and use cases.
+
+```bash
+python examples/lambda_usage_example.py
+```
+
+## Feature Examples
+
+### 7. `patterns_example.py` - Design Patterns 🏗️
+
+Builder, Context Managers, and Middleware patterns.
+
+```bash
+python examples/patterns_example.py
+```
+
+### 8. `storage_example.py` - Storage SDK 📦
+
+Lexia Storage SDK for file management.
+
+```bash
+python examples/storage_example.py
+```
+
+## Template Files
+
+### `Dockerfile.lambda` - Lambda Dockerfile Template
+
+Sample Dockerfile for AWS Lambda deployment. Copy to your project root.
+
+### `requirements-lambda.txt` - Lambda Requirements Template
+
+Sample requirements file for Lambda. Keep dependencies minimal!
 
 ## Key Concepts
 
@@ -41,9 +108,9 @@ session.stream("Hello, world!")
 
 ```python
 from lexia.config import LoadingKind
-session.start_loading(LoadingKind.THINKING.value)
+session.loading.start(LoadingKind.THINKING.value)
 session.stream("Processing...")
-session.end_loading(LoadingKind.THINKING.value)
+session.loading.end(LoadingKind.THINKING.value)
 ```
 
 ### Buttons

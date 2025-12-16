@@ -2,78 +2,325 @@
 
 ## Supported Versions
 
-Use this section to tell people about which versions of your project are currently being supported with security updates.
+We release patches for security vulnerabilities in the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.1.x   | :white_check_mark: |
-| 1.0.x   | :white_check_mark: |
+| 2.x.x   | :white_check_mark: |
+| 1.x.x   | :x:                |
 | < 1.0   | :x:                |
 
 ## Reporting a Vulnerability
 
-We take security vulnerabilities seriously. If you discover a security vulnerability, please follow these steps:
+We take security vulnerabilities seriously. If you discover a security issue, please report it responsibly.
 
-### 1. **DO NOT** create a public GitHub issue
-Security vulnerabilities should not be disclosed publicly until they are addressed.
+### Where to Report
 
-### 2. Report the vulnerability privately
-Send an email to **support@lexiaplatform.com** with:
-- A detailed description of the vulnerability
-- Steps to reproduce the issue
-- Potential impact assessment
-- Any additional context or information
+**Do NOT open a public issue.** Instead:
 
-### 3. What happens next?
-- We will acknowledge receipt of your report within 48 hours
-- We will investigate and provide updates on our progress
-- Once fixed, we will credit you in our security advisory (unless you prefer to remain anonymous)
-- We will coordinate the public disclosure with you
+1. Email: security@lexia.ai
+2. Include:
+   - Description of the vulnerability
+   - Steps to reproduce
+   - Potential impact
+   - Suggested fix (if any)
 
-### 4. Timeline
-- **Critical vulnerabilities**: We aim to address these within 24-48 hours
-- **High severity**: Within 1 week
-- **Medium severity**: Within 2 weeks
-- **Low severity**: Within 1 month
+### What to Expect
+
+- **Acknowledgment**: Within 48 hours
+- **Initial Assessment**: Within 5 business days
+- **Status Updates**: Every 7 days until resolved
+- **Disclosure Timeline**: 90 days after fix is available
+
+### Bug Bounty
+
+We do not currently offer a bug bounty program, but we greatly appreciate responsible disclosure.
 
 ## Security Best Practices
 
 ### For Users
-- Always use the latest stable version of the package
-- Keep your dependencies updated
-- Review the code you're integrating
-- Use virtual environments to isolate dependencies
+
+#### 1. Environment Variables
+
+Never commit sensitive data:
+
+```python
+# ❌ BAD - Hardcoded secrets
+OPENAI_API_KEY = "sk-..."
+
+# ✅ GOOD - Use environment variables
+import os
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+```
+
+#### 2. Input Validation
+
+Always validate user input:
+
+```python
+from lexia.common.exceptions import ValidationError
+
+def process_user_input(data):
+    if not data or not isinstance(data, dict):
+        raise ValidationError("Invalid input data")
+
+    # Validate required fields
+    required = ["message", "user_id"]
+    for field in required:
+        if field not in data:
+            raise ValidationError(f"Missing required field: {field}")
+
+    return data
+```
+
+#### 3. Error Handling
+
+Don't expose sensitive information in errors:
+
+```python
+try:
+    # Your code
+    pass
+except Exception as e:
+    # ❌ BAD - Exposes internal details
+    session.error(f"Database error: {str(e)}")
+
+    # ✅ GOOD - Generic message
+    session.error("An error occurred. Please try again.")
+    logger.error(f"Internal error: {e}", exc_info=True)
+```
+
+#### 4. Rate Limiting
+
+Implement rate limiting for production:
+
+```python
+from functools import wraps
+import time
+
+def rate_limit(max_calls=10, period=60):
+    """Simple rate limiter decorator."""
+    calls = []
+
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            now = time.time()
+            calls[:] = [c for c in calls if c > now - period]
+
+            if len(calls) >= max_calls:
+                raise Exception("Rate limit exceeded")
+
+            calls.append(now)
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+@rate_limit(max_calls=100, period=60)
+def process_request(data):
+    pass
+```
+
+#### 5. Lambda Security
+
+For Lambda deployments:
+
+```python
+# Enable CORS only for specific origins
+ALLOWED_ORIGINS = os.environ.get("ALLOWED_ORIGINS", "").split(",")
+
+def validate_origin(origin):
+    return origin in ALLOWED_ORIGINS
+
+# Validate JWT tokens
+import jwt
+
+def validate_token(token):
+    try:
+        payload = jwt.decode(
+            token,
+            os.environ["JWT_SECRET"],
+            algorithms=["HS256"]
+        )
+        return payload
+    except jwt.InvalidTokenError:
+        return None
+```
+
+#### 6. Dependency Security
+
+Keep dependencies updated:
+
+```bash
+# Check for security vulnerabilities
+pip install safety
+safety check
+
+# Update dependencies
+pip install --upgrade lexia
+```
 
 ### For Contributors
-- Follow secure coding practices
-- Validate all inputs
-- Use parameterized queries when applicable
-- Keep dependencies updated
-- Review security implications of new features
+
+#### 1. Code Review
+
+All code must be reviewed before merging:
+
+- Check for SQL injection vulnerabilities
+- Verify input validation
+- Ensure no secrets in code
+- Review error messages
+
+#### 2. Testing
+
+Include security tests:
+
+```python
+def test_sql_injection_prevention():
+    """Test that SQL injection is prevented."""
+    malicious_input = "'; DROP TABLE users; --"
+    result = process_input(malicious_input)
+    # Assert safe handling
+    pass
+
+def test_xss_prevention():
+    """Test that XSS is prevented."""
+    malicious_input = "<script>alert('XSS')</script>"
+    result = sanitize_html(malicious_input)
+    assert "<script>" not in result
+```
+
+#### 3. Secrets Management
+
+Never commit secrets:
+
+```bash
+# Add to .gitignore
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+secrets.json
+```
+
+Use environment variables or secret managers:
+
+```python
+# ✅ GOOD - Environment variables
+API_KEY = os.environ.get("API_KEY")
+
+# ✅ GOOD - AWS Secrets Manager
+import boto3
+client = boto3.client('secretsmanager')
+secret = client.get_secret_value(SecretId='my-secret')
+```
 
 ## Security Features
 
-This package includes several security features:
-- Input validation using Pydantic models
-- Secure HTTP communication
-- Environment variable protection
-- API key management utilities
+### 1. Type Safety
 
-## Disclosure Policy
+Lexia SDK uses Pydantic for type validation:
 
-When we receive a security bug report, we will:
-1. Confirm the problem and determine affected versions
-2. Audit code to find any similar problems
-3. Prepare fixes for all supported versions
-4. Release new versions with security fixes
-5. Publicly announce the security issue
+```python
+from pydantic import BaseModel, validator
 
-## Credits
+class UserInput(BaseModel):
+    message: str
+    user_id: int
 
-We would like to thank all security researchers and contributors who help us maintain the security of this package.
+    @validator('message')
+    def validate_message(cls, v):
+        if len(v) > 10000:
+            raise ValueError('Message too long')
+        return v
+```
 
-## Contact
+### 2. Error Handling
 
-For security-related issues, please contact:
-- **Email**: support@lexiaplatform.com
-- **Response Time**: Within 48 hours
+Custom exception hierarchy prevents information leakage:
+
+```python
+from lexia.common.exceptions import LexiaException
+
+try:
+    # Your code
+    pass
+except LexiaException as e:
+    # Safe error handling
+    logger.error(f"Error: {e.to_dict()}")
+    raise
+```
+
+### 3. Logging
+
+Secure logging configuration:
+
+```python
+from lexia.common.logging_config import setup_logging
+
+# Sensitive data is automatically masked
+setup_logging(
+    level="INFO",
+    mask_sensitive=True  # Masks API keys, tokens, etc.
+)
+```
+
+## Compliance
+
+### GDPR
+
+For GDPR compliance:
+
+- Don't log personally identifiable information (PII)
+- Implement data retention policies
+- Allow users to request data deletion
+
+```python
+def anonymize_user_data(data):
+    """Remove PII from logs."""
+    sensitive_fields = ['email', 'phone', 'ssn', 'address']
+    for field in sensitive_fields:
+        if field in data:
+            data[field] = "***REDACTED***"
+    return data
+```
+
+### SOC 2
+
+For SOC 2 compliance:
+
+- Enable audit logging
+- Implement access controls
+- Monitor for suspicious activity
+
+## Security Checklist
+
+Before deploying to production:
+
+- [ ] All secrets in environment variables
+- [ ] Input validation implemented
+- [ ] Error messages don't expose internal details
+- [ ] Rate limiting configured
+- [ ] CORS properly configured
+- [ ] Dependencies updated
+- [ ] Security tests passing
+- [ ] Logging configured (no PII)
+- [ ] Access controls in place
+- [ ] Monitoring and alerts configured
+
+## Incident Response
+
+If you suspect a security breach:
+
+1. **Contain**: Isolate affected systems
+2. **Assess**: Determine scope and impact
+3. **Notify**: Contact security@lexia.ai
+4. **Remediate**: Apply fixes
+5. **Review**: Conduct post-incident review
+
+## Updates
+
+This security policy is updated regularly. Last update: December 2025
+
+For questions: security@lexia.ai

@@ -1,155 +1,47 @@
-# 🚀 Lexia SDK - Python Library
+# Lexia SDK
 
-[![Python Version](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.0.0-orange.svg)](https://github.com/your-org/lexia-sdk)
+Professional Python SDK for building real-time AI agents with streaming and production-ready deployment.
 
-**Lexia SDK** یک کتابخانه Python حرفه‌ای برای ساخت AI applications با قابلیت real-time streaming، observability، و design patterns پیشرفته است.
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
+## Features
 
-## ✨ ویژگی‌های کلیدی
+- 🚀 **Real-time Streaming** - Stream responses to users in real-time
+- 🏗️ **Clean Architecture** - SOLID principles, dependency injection, modular design
+- ⚡ **AWS Lambda Ready** - Deploy to Lambda with one command
+- 🎨 **Design Patterns** - Builder, middleware, context managers
+- 📦 **Storage SDK** - Integrated file storage management
+- 🔒 **Production Ready** - Error handling, logging, type safety
+- ⚙️ **Focused Core** - Lean dependency surface for core streaming and deployment
 
-- 🎯 **Real-time Streaming** - پشتیبانی از Centrifugo و Dev Mode
-- 🗄️ **Storage SDK** - S3-compatible storage client با دو API (high-level و boto3-style)
-- 🚀 **Lambda Deployment** - ابزارهای کامل برای deploy بدون دردسر به AWS Lambda
-- 🏗️ **Clean Architecture** - معماری SOLID با 13 لایه
-- 🎨 **Design Patterns** - Builder, Middleware, Context Manager, و بیشتر
-- 🔭 **Observability** - Metrics, Profiling, Events, System Monitoring
-- 🛡️ **Type Safety** - 100% type hints coverage با type guards
-- 🔧 **Developer Friendly** - API ساده و intuitive
-- 📦 **Production Ready** - آماده برای deploy در مقیاس بزرگ
+## Quick Start
 
----
-
-## 📥 نصب
+### Installation
 
 ```bash
-pip install lexia-sdk
+pip install lexia
 ```
 
----
-
-## 🚀 شروع سریع
-
-### Real-time Streaming
+### Basic Usage
 
 ```python
 from lexia import LexiaHandler
 
-# ایجاد handler
+# Initialize handler
 handler = LexiaHandler(dev_mode=True)
 
-# شروع session
+# Create session
 session = handler.begin(data)
 
-# ارسال محتوا
-session.stream("سلام! این یک پیام تستی است.")
+# Stream response
+session.stream("Hello, world!")
 
-# بستن session
-response = session.close()
-```
-
-### Storage SDK
-
-```python
-from lexia import LexiaStorage
-
-# ایجاد storage client
-storage = LexiaStorage(
-    workspace='my-workspace',
-    token='my-token',
-    base_url='https://api.example.com/api/v1/storage'
-)
-
-# Upload file
-file_info = storage.upload_file('my-bucket', 'report.pdf', 'reports/')
+# Close session
+session.close()
 ```
 
 ### Lambda Deployment
-
-```python
-from lexia.deployment import create_lambda_handler
-
-# Generate Lambda files (one command!)
-create_lambda_handler('.')
-
-# Files created:
-# - lambda_handler.py
-# - Dockerfile.lambda
-# - requirements-lambda.txt
-# - src/sqs_handler.py
-```
-
----
-
-## 📚 مستندات کامل
-
-### 🎯 راهنماهای اصلی
-
-| راهنما                     | توضیحات                        | لینک                                                                           |
-| -------------------------- | ------------------------------ | ------------------------------------------------------------------------------ |
-| 📖 **Developer Guide**     | راهنمای کامل استفاده از SDK    | [LEXIA_STORAGE_SDK_DEVELOPER_GUIDE.md](./LEXIA_STORAGE_SDK_DEVELOPER_GUIDE.md) |
-| 🚀 **Lambda Deploy Guide** | راهنمای deploy روی AWS Lambda  | [LAMBDA_DEPLOY_GUIDE.md](./LAMBDA_DEPLOY_GUIDE.md)                             |
-| 📝 **Usage Guide**         | نحوه استفاده از features مختلف | [LEXIA_USAGE_GUIDE.md](./LEXIA_USAGE_GUIDE.md)                                 |
-| 🏗️ **Architecture**        | معماری و ساختار کدبیس          | [ARCHITECTURE.md](./ARCHITECTURE.md)                                           |
-
-### 📖 مستندات تخصصی
-
-| موضوع               | لینک                                                   |
-| ------------------- | ------------------------------------------------------ |
-| Clean Architecture  | [CLEAN_ARCHITECTURE.md](./CLEAN_ARCHITECTURE.md)       |
-| Design Patterns     | [patterns/](./lexia/patterns/)                         |
-| Observability       | [observability/](./lexia/observability/)               |
-| Refactoring Summary | [LEGENDARY_REFACTORING.md](./LEGENDARY_REFACTORING.md) |
-| Final Summary       | [FINAL_SUMMARY.md](./FINAL_SUMMARY.md)                 |
-| Quick Reference     | [QUICK_REFERENCE.md](./QUICK_REFERENCE.md)             |
-
-### 📊 Examples
-
-| Example         | توضیحات              | لینک                                                                     |
-| --------------- | -------------------- | ------------------------------------------------------------------------ |
-| Basic Usage     | استفاده پایه         | [examples/basic_usage.py](./examples/basic_usage.py)                     |
-| Advanced Usage  | استفاده پیشرفته      | [examples/advanced_usage.py](./examples/advanced_usage.py)               |
-| Storage SDK     | Storage و S3 client  | [examples/storage_example.py](./examples/storage_example.py)             |
-| Lambda Support  | استفاده روی Lambda   | [examples/lambda_usage_example.py](./examples/lambda_usage_example.py)   |
-| Error Handling  | مدیریت خطا           | [examples/error_handling.py](./examples/error_handling.py)               |
-| Observability   | Metrics و Monitoring | [examples/observability_example.py](./examples/observability_example.py) |
-| Design Patterns | Patterns کاربردی     | [examples/patterns_example.py](./examples/patterns_example.py)           |
-
----
-
-## 🎨 ویژگی‌های پیشرفته
-
-### 1️⃣ Real-time Streaming
-
-```python
-session.stream("محتوای خود را اینجا بنویسید")
-session.stream("می‌توانید چند بار stream کنید")
-
-# Loading
-session.loading.start_loading("thinking")
-# انجام کار...
-session.loading.end_loading("thinking")
-
-# Buttons
-session.button.link("مشاهده سایت", "https://example.com")
-session.button.action("تایید", "confirm_action")
-```
-
-### 2️⃣ Storage SDK
-
-```python
-from lexia import LexiaStorage
-
-# Simple storage client
-storage = LexiaStorage(workspace='...', token='...', base_url='...')
-storage.create_bucket('my-bucket')
-storage.upload_file('my-bucket', 'file.pdf', folder='reports/')
-storage.download_file('my-bucket', 'reports/file.pdf', 'local.pdf')
-```
-
-### 3️⃣ Lambda Support
 
 ```python
 from lexia import LexiaHandler, LambdaAdapter
@@ -160,418 +52,202 @@ adapter = LambdaAdapter()
 @adapter.message_handler
 async def process_message(data):
     session = handler.begin(data)
-    session.stream("Hello from Lambda!")
+    session.stream("Response from Lambda!")
     session.close()
 
-# Lambda handler
-def lambda_handler(event, context):
+def handler(event, context):
     return adapter.handle(event, context)
-
-# Deploy با lexia-cli:
-# $ lexia ship my-agent --image my-agent:latest
 ```
 
-### 4️⃣ Observability
+## Documentation
+
+| Document                                                  | Description                         |
+| --------------------------------------------------------- | ----------------------------------- |
+| [Quick Reference](docs/guides/QUICK_REFERENCE.md)         | API reference and quick examples    |
+| [Developer Guide](docs/guides/DEVELOPER_GUIDE.md)         | Complete development guide          |
+| [API Reference](docs/guides/API_REFERENCE.md)             | Complete API documentation          |
+| [Patterns Guide](docs/guides/PATTERNS_GUIDE.md)           | Design patterns and best practices  |
+| [Utilities Guide](docs/guides/UTILITIES_GUIDE.md)         | Exceptions, decorators, and logging |
+| [Storage SDK Guide](docs/guides/STORAGE_SDK_GUIDE.md)     | Storage SDK and API reference       |
+| [Lambda Deploy Guide](docs/guides/LAMBDA_DEPLOY_GUIDE.md) | AWS Lambda deployment guide         |
+| [Dev Mode Guide](docs/guides/DEV_MODE_GUIDE.md)           | Local development setup             |
+| [Contributing](CONTRIBUTING.md)                           | How to contribute                   |
+| [Security](SECURITY.md)                                   | Security policies                   |
+| [Changelog](CHANGELOG.md)                                 | Version history                     |
+
+## Examples
+
+Complete examples are available in the [`examples/`](examples/) directory:
+
+### Quick Start
+
+- [`basic_usage.py`](examples/basic_usage.py) - Basic streaming and buttons
+- [`advanced_usage.py`](examples/advanced_usage.py) - Advanced features
+- [`error_handling.py`](examples/error_handling.py) - Error handling patterns
+
+### Deployment
+
+- [`lambda_deployment_simple.py`](examples/lambda_deployment_simple.py) - **Production-ready Lambda template**
+- [`lambda_usage_example.py`](examples/lambda_usage_example.py) - Advanced Lambda examples
+- [`Dockerfile.lambda`](examples/Dockerfile.lambda) - Docker template
+- [`requirements-lambda.txt`](examples/requirements-lambda.txt) - Lambda requirements
+
+### Features
+
+- [`patterns_example.py`](examples/patterns_example.py) - Design patterns
+- [`storage_example.py`](examples/storage_example.py) - Storage SDK
+
+## Core Features
+
+### Streaming
 
 ```python
-from lexia import get_metrics_collector, get_event_bus
-
-# Metrics
-collector = get_metrics_collector()
-counter = collector.counter("requests")
-counter.inc()
-
-# Events
-bus = get_event_bus()
-bus.publish("user.login", {"user_id": 123})
+session.loading.start("thinking")
+session.stream("Processing your request...")
+session.loading.end("thinking")
+session.close()
 ```
 
-### 5️⃣ Design Patterns
+### Buttons
 
 ```python
-from lexia import LexiaBuilder
-from lexia.patterns import SessionContext
+session.button.link("Visit Website", "https://example.com")
+session.button.action("Regenerate", "regenerate")
+```
 
-# Builder Pattern
-handler = (
-    LexiaBuilder()
-    .with_dev_mode(True)
-    .build()
+### Tracing
+
+```python
+session.tracing.begin("Processing", visibility="all")
+session.tracing.append("Step 1: Analyzing...")
+session.tracing.append("Step 2: Generating...")
+session.tracing.end("Complete!")
+```
+
+### Usage Tracking
+
+```python
+session.usage.track(
+    tokens=1500,
+    token_type="gpt4",
+    cost="0.03",
+    label="OpenAI GPT-4"
 )
-
-# Context Manager
-with SessionContext(handler, data) as session:
-    session.stream("محتوا")
 ```
 
----
+### Error Handling
 
-## 🏗️ معماری
+```python
+try:
+    # Your logic
+    pass
+except Exception as e:
+    session.error("An error occurred", exception=e)
+```
+
+## Architecture
+
+Lexia SDK follows clean architecture principles with 14 distinct layers:
 
 ```
 lexia/
-├── core/              # Handler & Session
-├── domain/            # Models & Interfaces
-├── services/          # Business Services
-├── infrastructure/    # External I/O (API, Streaming)
-├── patterns/          # Design Patterns
-├── observability/     # Metrics, Profiling, Events, Monitoring
-├── common/            # Exceptions, Decorators, Type Guards
-├── helpers/           # Helper Classes
-├── utils/             # Utilities
-└── web/               # Web Framework Integration
+├── core/           # Core handler and session
+├── domain/         # Interfaces and models
+├── services/       # Business logic services
+├── infrastructure/ # External clients
+├── factories/      # Factory patterns
+├── helpers/        # Helper utilities
+├── utils/          # Utility functions
+├── common/         # Cross-cutting concerns
+├── patterns/       # Design patterns
+├── adapters/       # Deployment adapters
+└── storage/        # Storage SDK
 ```
 
-**معماری:** Clean Architecture + SOLID Principles  
-**تعداد فایل‌ها:** 56 Python files  
-**تعداد خطوط:** ~7,971 lines  
-**Design Patterns:** 7+ patterns  
-**کیفیت:** S++ (Legendary) ⭐⭐⭐⭐⭐⭐⭐⭐
+## Requirements
 
----
+- Python 3.8+
+- `requests>=2.31.0`
+- `pydantic>=2.0.0`
+- `boto3>=1.34.0` (optional, for Lambda/SQS)
 
-## 🔭 Observability
+## Development
 
-Lexia SDK شامل یک سیستم observability کامل است:
-
-### Metrics Collection
-
-```python
-from lexia import get_metrics_collector
-
-collector = get_metrics_collector()
-
-# Counter
-counter = collector.counter("api_requests")
-counter.inc()
-
-# Gauge
-gauge = collector.gauge("active_users")
-gauge.set(150)
-
-# Histogram
-histogram = collector.histogram("response_time")
-histogram.observe(0.234)
-```
-
-### Performance Profiling
-
-```python
-from lexia import profile
-
-@profile(sort_by='time', limit=10)
-def expensive_function():
-    # کد پیچیده
-    pass
-```
-
-### Event System
-
-```python
-from lexia import get_event_bus
-
-bus = get_event_bus()
-bus.subscribe("user.login", lambda e: print(e.data))
-bus.publish("user.login", {"user_id": 123})
-```
-
-### System Monitoring
-
-```python
-from lexia import SystemMonitor
-
-monitor = SystemMonitor()
-stats = monitor.get_system_stats()
-print(f"CPU: {stats['cpu_percent']}%")
-```
-
----
-
-## 🧪 Testing
+### Setup
 
 ```bash
-# Run tests
-pytest tests/
+# Clone repository
+git clone https://github.com/your-org/lexia-sdk
+cd lexia-sdk
 
-# With coverage
-pytest --cov=lexia tests/
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests
+pytest
+
+# Run examples
+python examples/basic_usage.py
+```
+
+### Testing
+
+```bash
+# Run all tests
+pytest
+
+# Run with coverage
+pytest --cov=lexia
 
 # Run specific test
 pytest tests/test_handler.py
 ```
 
----
+## Deployment
 
-## 🚀 Deploy به AWS Lambda
+### AWS Lambda
 
-راهنمای کامل deploy به AWS Lambda را در [LAMBDA_DEPLOY_GUIDE.md](./LAMBDA_DEPLOY_GUIDE.md) مشاهده کنید.
-
-### Quick Start
+1. Copy templates:
 
 ```bash
-# با SAM
-sam build
-sam deploy --guided
-
-# با Serverless Framework
-serverless deploy --stage prod
+cp examples/lambda_deployment_simple.py lambda_handler.py
+cp examples/Dockerfile.lambda .
+cp examples/requirements-lambda.txt .
 ```
 
----
-
-## 📊 Performance
-
-- ⚡ **Cold Start:** < 1s (با optimization)
-- 🔥 **Throughput:** 1000+ requests/minute
-- 💾 **Memory:** 512MB-1024MB (توصیه می‌شود)
-- ⏱️ **Response Time:** < 100ms (بدون AI processing)
-
----
-
-## 🛡️ Security
-
-- ✅ Type-safe با 100% type hints
-- ✅ Custom exception hierarchy
-- ✅ Input validation با type guards
-- ✅ Secure environment variables
-- ✅ AWS IAM integration
-- ✅ SSM Parameter Store support
-
----
-
-## 📈 کیفیت کد
-
-```
-Architecture:           S++ (100/100) ✅
-Design Patterns:        S++ (100/100) ✅
-Type Safety:            S++ (100/100) ✅
-Error Handling:         S++ (100/100) ✅
-Observability:          S++ (100/100) ✅
-Performance:            S++ (100/100) ✅
-Testing:                S++ (100/100) ✅
-Documentation:          S++ (100/100) ✅
-
-Overall: S++ (LEGENDARY) 🔥
-```
-
----
-
-## 🤝 Contributing
-
-ما از contribution استقبال می‌کنیم! لطفاً:
-
-1. Fork کنید
-2. Branch جدید بسازید (`git checkout -b feature/amazing-feature`)
-3. تغییرات را commit کنید (`git commit -m 'Add amazing feature'`)
-4. Push کنید (`git push origin feature/amazing-feature`)
-5. Pull Request باز کنید
-
-### Development Setup
+2. Build image:
 
 ```bash
-# Clone
-git clone https://github.com/your-org/lexia-sdk.git
-cd lexia-sdk
-
-# Install in dev mode
-pip install -e .
-
-# Install dev dependencies
-pip install -r requirements-dev.txt
-
-# Run tests
-pytest
-
-# Run linters
-black lexia/
-mypy lexia/
-flake8 lexia/
+docker build -f Dockerfile.lambda -t my-agent:latest .
 ```
 
----
+3. Deploy:
 
-## 📄 License
-
-این پروژه تحت لایسنس MIT منتشر شده است. برای جزئیات بیشتر [LICENSE](LICENSE) را مشاهده کنید.
-
----
-
-## 💬 پشتیبانی
-
-- 📧 **Email:** support@your-org.com
-- 🐛 **Issues:** [GitHub Issues](https://github.com/your-org/lexia-sdk/issues)
-- 💬 **Discussions:** [GitHub Discussions](https://github.com/your-org/lexia-sdk/discussions)
-- 📖 **Documentation:** [Full Documentation](./LEXIA_STORAGE_SDK_DEVELOPER_GUIDE.md)
-
----
-
-## 🌟 نمونه‌های استفاده
-
-### مثال 1: Chatbot ساده
-
-```python
-from lexia import LexiaHandler
-
-def chatbot_handler(data):
-    handler = LexiaHandler(dev_mode=False)
-    session = handler.begin(data)
-
-    # پردازش prompt
-    prompt = data.get('prompt', '')
-
-    # Loading
-    session.loading.start_loading("thinking")
-
-    # فراخوانی AI
-    response = call_ai_model(prompt)
-
-    session.loading.end_loading("thinking")
-
-    # ارسال نتیجه
-    session.stream(response)
-
-    return session.close()
+```bash
+lexia ship my-agent --image my-agent:latest --env-file .env
 ```
 
-### مثال 2: با Observability
+See [Lambda Deploy Guide](LAMBDA_DEPLOY_GUIDE.md) for complete instructions.
 
-```python
-from lexia import LexiaHandler, get_metrics_collector
+## License
 
-def advanced_handler(data):
-    collector = get_metrics_collector()
-    requests = collector.counter("api_requests")
+MIT License - see [LICENSE](LICENSE) file for details.
 
-    handler = LexiaHandler(dev_mode=False)
-    session = handler.begin(data)
+## Support
 
-    requests.inc()
+- 📧 Email: support@lexia.ai
+- 💬 Discord: [Join our community](https://discord.gg/lexia)
+- 📚 Docs: [docs.lexia.ai](https://docs.lexia.ai)
+- 🐛 Issues: [GitHub Issues](https://github.com/your-org/lexia-sdk/issues)
 
-    try:
-        # پردازش
-        result = process_data(data)
-        session.stream(result)
+## Contributing
 
-        return session.close()
-    except Exception as e:
-        session.error("خطا رخ داد", exception=e)
-        raise
-```
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
-### مثال 3: Production-Ready
+## Acknowledgments
 
-```python
-from lexia import LexiaHandler, get_metrics_collector, get_event_bus
-from lexia.patterns import timed_operation
-import logging
-
-logger = logging.getLogger(__name__)
-
-def production_handler(event, context):
-    """Lambda handler with full observability"""
-
-    # Setup
-    collector = get_metrics_collector()
-    bus = get_event_bus()
-
-    # Metrics
-    requests = collector.counter("requests")
-    requests.inc()
-
-    # Event
-    bus.publish("request.started", {
-        "request_id": context.request_id
-    })
-
-    try:
-        # Process
-        with timed_operation("processing"):
-            handler = LexiaHandler(dev_mode=False)
-            session = handler.begin(event)
-
-            # پردازش اصلی
-            result = process_request(event)
-            session.stream(result)
-
-            response = session.close()
-
-        # Success event
-        bus.publish("request.completed", {
-            "request_id": context.request_id
-        })
-
-        return response
-
-    except Exception as e:
-        logger.error(f"Error: {e}", exc_info=True)
-        bus.publish("request.failed", {
-            "request_id": context.request_id,
-            "error": str(e)
-        })
-        raise
-```
+Built with ❤️ by the Lexia team.
 
 ---
 
-## 🎓 یادگیری بیشتر
-
-### مبتدی
-
-1. [Quick Start](#-شروع-سریع)
-2. [Basic Usage Example](./examples/basic_usage.py)
-3. [Usage Guide](./LEXIA_USAGE_GUIDE.md)
-
-### متوسط
-
-1. [Advanced Usage Example](./examples/advanced_usage.py)
-2. [Design Patterns](./examples/patterns_example.py)
-3. [Developer Guide](./LEXIA_STORAGE_SDK_DEVELOPER_GUIDE.md)
-
-### پیشرفته
-
-1. [Observability Example](./examples/observability_example.py)
-2. [Lambda Deploy Guide](./LAMBDA_DEPLOY_GUIDE.md)
-3. [Architecture Guide](./ARCHITECTURE.md)
-
----
-
-## 🏆 تیم
-
-این پروژه توسط تیم حرفه‌ای با استفاده از:
-
-- Clean Architecture
-- SOLID Principles
-- Design Patterns
-- Test-Driven Development
-- Best Practices
-
-ساخته شده است.
-
----
-
-## 📊 آمار پروژه
-
-- 📁 **Files:** 56 Python files
-- 📝 **Lines of Code:** ~7,971 lines
-- 📚 **Examples:** 5 comprehensive examples
-- 📖 **Documentation:** 31+ markdown files
-- 🎨 **Design Patterns:** 7+ patterns
-- 🔭 **Observability Features:** 17 components
-- 📦 **Total Exports:** 70 public APIs
-- ⭐ **Quality Grade:** S++ (Legendary)
-
----
-
-## 🔗 لینک‌های مفید
-
-- [Developer Guide](./LEXIA_STORAGE_SDK_DEVELOPER_GUIDE.md) - راهنمای کامل
-- [Lambda Deploy](./LAMBDA_DEPLOY_GUIDE.md) - راهنمای deploy
-- [Examples](./examples/) - مثال‌های عملی
-- [Architecture](./ARCHITECTURE.md) - معماری سیستم
-- [API Reference](./API_REFERENCE.md) - مرجع API
-
----
-
-**🔥 Lexia SDK - Production-Ready AI Streaming Library 🔥**
-
-**Version:** 2.0.0 | **Status:** Production Ready | **Grade:** S++ (Legendary)
+**Made with 🚀 by [Lexia](https://lexia.ai)**

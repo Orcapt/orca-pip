@@ -28,12 +28,12 @@ async def process_message(data: ChatMessage):
     
     try:
         # Loading
-        session.loading.start_loading("thinking")
+        session.loading.start("thinking")
         
         # Your agent logic here
         response = f"پاسخ به: {data.message}"
         
-        session.loading.end_loading("thinking")
+        session.loading.end("thinking")
         
         # Stream result
         session.stream(response)
@@ -108,7 +108,7 @@ async def process_message(data: ChatMessage):
     session = handler.begin(data)
     
     try:
-        session.loading.start_loading("thinking")
+        session.loading.start("thinking")
         
         # Call OpenAI
         response = client.chat.completions.create(
@@ -117,7 +117,7 @@ async def process_message(data: ChatMessage):
             stream=True
         )
         
-        session.loading.end_loading("thinking")
+        session.loading.end("thinking")
         
         # Stream response
         for chunk in response:

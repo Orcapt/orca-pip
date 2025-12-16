@@ -1,161 +1,278 @@
-# Contributing to Lexia Platform Integration Package
+# Contributing to Lexia SDK
 
-Thank you for your interest in contributing to the Lexia Platform Integration Package! This document provides guidelines and information for contributors.
+Thank you for your interest in contributing to Lexia SDK! This document provides guidelines and instructions for contributing.
 
-## 🤝 How to Contribute
+## Code of Conduct
 
-### Reporting Issues
-- Use the [GitHub Issues](https://github.com/Xalantico/lexia-pip/issues) page
-- Provide a clear description of the problem
-- Include steps to reproduce the issue
-- Specify your environment (Python version, OS, etc.)
+By participating in this project, you agree to maintain a respectful and inclusive environment for all contributors.
 
-### Suggesting Features
-- Open a new issue with the "enhancement" label
-- Describe the feature and its benefits
-- Provide use cases if possible
-
-### Submitting Code Changes
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests if applicable
-5. Ensure code follows the project's style guidelines
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
-
-## 🧪 Development Setup
+## Getting Started
 
 ### Prerequisites
-- Python 3.8 or higher
-- pip
-- git
 
-### Local Development
+- Python 3.8 or higher
+- Git
+- pip
+
+### Setting Up Development Environment
+
 ```bash
 # Clone the repository
-git clone https://github.com/Xalantico/lexia-pip.git
-cd lexia-pip
+git clone https://github.com/your-org/lexia-sdk
+cd lexia-sdk
 
 # Create virtual environment
-python -m venv lexia_env
-source lexia_env/bin/activate  # On Windows: lexia_env\Scripts\activate
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
-pip install -r lexia/requirements.txt
-pip install lexia[dev]
+pip install -r requirements.txt
 
-# Install package in editable mode
-pip install -e .
+# Install development dependencies
+pip install pytest pytest-cov black mypy flake8
 ```
 
-### Using Make Commands
+## Development Workflow
+
+### 1. Create a Branch
+
 ```bash
-make help          # Show all available commands
-make build         # Build the package
-make test          # Test the package
-make format        # Format code with black
-make lint          # Run linting checks
+git checkout -b feature/your-feature-name
 ```
 
-## 📝 Code Style Guidelines
+Use prefixes:
 
-### Python Code
-- Follow PEP 8 style guidelines
-- Use type hints where appropriate
-- Keep functions focused and single-purpose
-- Add docstrings for public functions and classes
+- `feature/` for new features
+- `fix/` for bug fixes
+- `docs/` for documentation
+- `refactor/` for code refactoring
+- `test/` for test improvements
 
-### Code Formatting
-- Use Black for code formatting (line length: 88)
-- Use isort for import sorting
-- Run `make format` before committing
+### 2. Make Changes
 
-### Linting
-- Use flake8 for linting
-- Maximum line length: 88 characters
-- Ignore E203 and W503 warnings
+- Write clean, readable code
+- Follow PEP 8 style guide
+- Add docstrings to functions and classes
+- Update tests for your changes
+- Update documentation if needed
 
-## 🧪 Testing
+### 3. Run Tests
 
-### Running Tests
 ```bash
-# Basic import test
-make test
+# Run all tests
+pytest
 
-# Full test suite (if tests directory exists)
-make test-full
+# Run with coverage
+pytest --cov=lexia --cov-report=html
 
-# Manual testing
-python -c "import lexia; print('✅ Import successful')"
+# Run specific test file
+pytest tests/test_handler.py
+
+# Run with verbose output
+pytest -v
 ```
 
-### Writing Tests
-- Create tests in a `tests/` directory
-- Use pytest as the testing framework
-- Test both success and error cases
-- Mock external dependencies when appropriate
+### 4. Code Quality Checks
 
-## 📦 Building and Publishing
-
-### Local Build
 ```bash
-make build
+# Format code with black
+black lexia/ tests/ examples/
+
+# Type checking with mypy
+mypy lexia/
+
+# Linting with flake8
+flake8 lexia/ tests/ examples/
 ```
 
-### Publishing to Test PyPI
+### 5. Commit Your Changes
+
 ```bash
-make publish-test
+git add .
+git commit -m "feat: add new feature"
 ```
 
-### Publishing to PyPI
+Use conventional commit messages:
+
+- `feat:` for new features
+- `fix:` for bug fixes
+- `docs:` for documentation
+- `refactor:` for code refactoring
+- `test:` for tests
+- `chore:` for maintenance
+
+### 6. Push and Create Pull Request
+
 ```bash
-make publish
+git push origin feature/your-feature-name
 ```
 
-## 📚 Documentation
+Then create a pull request on GitHub.
 
-### README Updates
-- Keep the README.md up to date
-- Update examples when APIs change
-- Add new features to the documentation
+## Code Guidelines
 
-### Code Comments
-- Use clear, concise comments
-- Explain complex logic
-- Document any non-obvious design decisions
+### Python Style
 
-## 🚀 Release Process
+- Follow PEP 8
+- Use type hints
+- Maximum line length: 100 characters
+- Use meaningful variable names
+- Add docstrings to all public functions/classes
 
-1. Update version numbers in:
-   - `pyproject.toml`
-   - `setup.py`
-   - `lexia/__init__.py`
+Example:
 
-2. Update CHANGELOG.md (if it exists)
+```python
+from typing import Optional, Dict, Any
 
-3. Create a release tag:
-   ```bash
-   git tag v1.1.0
-   git push origin v1.1.0
-   ```
+def process_data(
+    data: Dict[str, Any],
+    options: Optional[Dict[str, Any]] = None
+) -> str:
+    """
+    Process data with optional configuration.
 
-4. Build and publish:
-   ```bash
-   make publish
-   ```
+    Args:
+        data: Input data dictionary
+        options: Optional configuration parameters
 
-## 📞 Getting Help
+    Returns:
+        Processed result as string
 
-- **Issues**: [GitHub Issues](https://github.com/Xalantico/lexia-pip/issues)
-- **Email**: support@lexiaplatform.com
-- **Discussions**: [GitHub Discussions](https://github.com/Xalantico/lexia-pip/discussions) (if enabled)
+    Raises:
+        ValueError: If data is invalid
+    """
+    if not data:
+        raise ValueError("Data cannot be empty")
 
-## 📄 License
+    # Processing logic
+    return str(data)
+```
 
-By contributing to this project, you agree that your contributions will be licensed under the MIT License.
+### Architecture
 
-## 🙏 Thank You
+Lexia SDK follows clean architecture principles:
 
-Thank you for contributing to the Lexia Platform Integration Package! Your contributions help make this project better for everyone.
+1. **Domain Layer** (`domain/`)
+
+   - Interfaces and models
+   - No dependencies on other layers
+
+2. **Services Layer** (`services/`)
+
+   - Business logic
+   - Depends only on domain
+
+3. **Infrastructure Layer** (`infrastructure/`)
+
+   - External clients (API, Centrifugo, etc.)
+   - Implements domain interfaces
+
+4. **Core Layer** (`core/`)
+   - Main handler and session orchestration
+   - Uses services and infrastructure
+
+When adding new features:
+
+- Define interfaces in `domain/`
+- Implement business logic in `services/`
+- Add external integrations in `infrastructure/`
+- Wire everything in `core/`
+
+### Testing
+
+- Write unit tests for all new code
+- Aim for >80% code coverage
+- Use mocking for external dependencies
+- Test edge cases and error conditions
+
+Example test:
+
+```python
+import pytest
+from lexia import LexiaHandler
+
+def test_handler_initialization():
+    """Test that handler initializes correctly."""
+    handler = LexiaHandler(dev_mode=True)
+    assert handler.dev_mode is True
+
+def test_handler_begin_session():
+    """Test session creation."""
+    handler = LexiaHandler(dev_mode=True)
+    # Test logic here
+    pass
+
+def test_error_handling():
+    """Test error handling."""
+    handler = LexiaHandler(dev_mode=True)
+    with pytest.raises(ValueError):
+        # Code that should raise error
+        pass
+```
+
+### Documentation
+
+- Update README.md for user-facing changes
+- Add docstrings to all public APIs
+- Update guides in `docs/` for major features
+- Add examples to `examples/` directory
+
+## Pull Request Process
+
+1. **Ensure Tests Pass**: All tests must pass
+2. **Update Documentation**: Update relevant docs
+3. **Add Examples**: Add examples if adding new features
+4. **Code Review**: Wait for maintainer review
+5. **Address Feedback**: Make requested changes
+6. **Squash Commits**: Keep PR history clean
+
+## Pull Request Template
+
+```markdown
+## Description
+
+Brief description of changes
+
+## Type of Change
+
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+
+## Testing
+
+- [ ] Unit tests added/updated
+- [ ] Integration tests added/updated
+- [ ] All tests pass
+
+## Checklist
+
+- [ ] Code follows style guidelines
+- [ ] Self-review completed
+- [ ] Documentation updated
+- [ ] No new warnings
+- [ ] Tests added
+```
+
+## Release Process
+
+Releases are handled by maintainers:
+
+1. Update version in `setup.py`
+2. Update `CHANGELOG.md`
+3. Create git tag
+4. Build and publish to PyPI
+5. Create GitHub release
+
+## Questions?
+
+- Open an issue for bugs or feature requests
+- Join our Discord for discussions
+- Email support@lexia.ai for other questions
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the MIT License.
+
+Thank you for contributing to Lexia SDK! 🚀

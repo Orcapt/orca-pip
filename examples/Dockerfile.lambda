@@ -1,0 +1,26 @@
+# Dockerfile.lambda
+# =================
+#
+# Sample Dockerfile for AWS Lambda deployment.
+# Copy this to your project root and customize as needed.
+#
+# Build: docker build -f Dockerfile.lambda -t my-agent:latest .
+# Deploy: lexia ship my-agent --image my-agent:latest --env-file .env
+
+FROM public.ecr.aws/lambda/python:3.11
+
+# Set working directory
+WORKDIR ${LAMBDA_TASK_ROOT}
+
+# Copy requirements and install
+COPY requirements-lambda.txt .
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements-lambda.txt
+
+# Copy your agent code
+COPY lambda_handler.py .
+COPY . .
+
+# Set the Lambda handler
+CMD ["lambda_handler.handler"]
+

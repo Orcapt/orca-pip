@@ -11,6 +11,10 @@ from typing import Optional
 
 from .loading_ops import LoadingOperations
 from .image_ops import ImageOperations
+from .video_ops import VideoOperations
+from .location_ops import LocationOperations
+from .card_ops import CardListOperations
+from .audio_ops import AudioOperations
 from .tracing_ops import TracingOperations
 from .usage_ops import UsageOperations
 from .button_ops import ButtonOperations
@@ -45,11 +49,15 @@ class Session:
         self._handler = handler
         self._data = data
         
-        # Core operations (private, accessed via methods)
-        self._loading = LoadingOperations(handler, data, self._stream_wrapper)
-        self._image = ImageOperations(self._stream_wrapper)
-        self._tracing = TracingOperations(handler, self._stream_wrapper)
-        self._usage = UsageOperations(handler, data)
+        # Core operations (public property access)
+        self.loading = LoadingOperations(handler, data, self._stream_wrapper)
+        self.image = ImageOperations(self._stream_wrapper)
+        self.video = VideoOperations(self._stream_wrapper)
+        self.location = LocationOperations(self._stream_wrapper)
+        self.card = CardListOperations(self._stream_wrapper)
+        self.audio = AudioOperations(self._stream_wrapper)
+        self.tracing = TracingOperations(handler, self._stream_wrapper)
+        self.usage = UsageOperations(handler, data)
         
         # Button helper (public namespace)
         self.button = ButtonHelper(self)
@@ -84,37 +92,31 @@ class Session:
         """Internal wrapper for delegation."""
         self.stream(content)
     
-    # ==================== Loading Operations ====================
+    # ==================== Deprecated Methods (Backwards Compatibility) ====================
     
     def start_loading(self, kind: str = "thinking") -> None:
-        """Start loading indicator."""
-        self._loading.start(kind)
+        """[DEPRECATED] Use session.loading.start_loading() instead."""
+        self.loading.start(kind)
     
     def end_loading(self, kind: str = "thinking") -> None:
-        """End loading indicator."""
-        self._loading.end(kind)
+        """[DEPRECATED] Use session.loading.end_loading() instead."""
+        self.loading.end(kind)
     
-    # ==================== Image Operations ====================
-    
-    def image(self, url: str) -> None:
-        """Send image."""
-        self._image.send(url)
-    
-    pass_image = image  # Alias
-    
-    # ==================== Tracing Operations ====================
+    def pass_image(self, url: str) -> None:
+        """[DEPRECATED] Use session.image.image() instead."""
+        self.image.send(url)
     
     def tracing(self, content: str, visibility: str = "all") -> None:
-        """Send trace."""
-        self._tracing.send(content, visibility)
+        """[DEPRECATED] Use session.tracing.begin() instead."""
+        self.tracing.send(content, visibility)
     
     def tracing_begin(self, message: str, visibility: str = "all") -> None:
-        """Start progressive trace."""
-        self._tracing.begin(message, visibility)
+        """[DEPRECATED] Use session.tracing.begin() instead."""
+        self.tracing.begin(message, visibility)
     
     def tracing_append(self, message: str) -> None:
-        """Append to progressive trace."""
-        self._tracing.append(message)
+        """[DEPRECATED] Use session.tracing.append() instead."""
+        self.tracing.append(message)
     
     def tracing_end(self, message: str = None) -> None:
         """End progressive trace."""

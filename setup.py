@@ -8,17 +8,26 @@ def read_readme():
 
 # Read requirements from requirements.txt
 def read_requirements():
-    with open("lexia/requirements.txt", "r", encoding="utf-8") as fh:
-        requirements = []
-        for line in fh:
-            line = line.strip()
-            if line and not line.startswith("#"):
-                requirements.append(line)
-        return requirements
+    try:
+        with open("requirements.txt", "r", encoding="utf-8") as fh:
+            requirements = []
+            for line in fh:
+                line = line.strip()
+                if line and not line.startswith("#"):
+                    # Skip comments and options
+                    if not line.startswith("-"):
+                        requirements.append(line)
+            return requirements
+    except FileNotFoundError:
+        # Fallback to minimal requirements
+        return [
+            "requests>=2.25.0",
+            "pydantic>=2.0.0",
+        ]
 
 setup(
     name="lexia",
-    version="1.2.13",
+    version="2.0.0",
     author="Lexia Team",
     author_email="support@lexiaplatform.com",
     description="Clean, minimal package for Lexia platform integration",

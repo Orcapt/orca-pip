@@ -33,14 +33,14 @@ def generate_response(handler, data) -> str:
     session = handler.begin(data)
     
     # Progressive loading
-    session.start_loading(LoadingKind.ANALYZING.value)
+    session.loading.start(LoadingKind.ANALYZING.value)
     session.stream("Analyzing your request...\n\n")
-    session.end_loading(LoadingKind.ANALYZING.value)
+    session.loading.end(LoadingKind.ANALYZING.value)
     
     # Main content
-    session.start_loading(LoadingKind.GENERATING.value)
+    session.loading.start(LoadingKind.GENERATING.value)
     process_with_retry(session, "Generated response here!")
-    session.end_loading(LoadingKind.GENERATING.value)
+    session.loading.end(LoadingKind.GENERATING.value)
     
     # Track usage
     session.usage.track(150, TokenType.PROMPT.value, label="input")

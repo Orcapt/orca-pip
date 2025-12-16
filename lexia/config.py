@@ -38,6 +38,11 @@ class LoadingKind(str, Enum):
     CODING = "coding"
     ANALYZING = "analyzing"
     GENERATING = "generating"
+    GENERAL = "general"
+    IMAGE = "image"
+    VIDEO = "video"
+    CARD = "card.list"
+    MAP = "map"
     CUSTOM = "custom"
 
 
@@ -47,6 +52,11 @@ LOADING_MARKERS = {
     LoadingKind.CODING: "💻 Coding...",
     LoadingKind.ANALYZING: "📊 Analyzing...",
     LoadingKind.GENERATING: "✨ Generating...",
+    LoadingKind.GENERAL: "⏳ Loading...",
+    LoadingKind.IMAGE: "🖼️ Loading image...",
+    LoadingKind.VIDEO: "🎥 Loading video...",
+    LoadingKind.CARD: "🃏 Loading card...",
+    LoadingKind.MAP: "🗺️ Loading map...",
 }
 
 

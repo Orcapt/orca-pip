@@ -38,16 +38,23 @@ class LoadingMarkerProvider(ILoadingMarkerProvider):
         Get loading marker for given kind and action.
         
         Args:
-            kind: Type of loading (image, code, search, thinking)
+            kind: Type of loading (general, image, video, card, thinking, etc.)
             action: Action type (start or end)
             
         Returns:
             Formatted loading marker string
+            - For "general": [lexia.loading.start] (no kind)
+            - For others: [lexia.loading.{kind}.start] (with kind)
         """
         kind_norm = self._normalize_kind(kind)
         action_norm = "start" if action == "start" else "end"
         
-        marker = f"[lexia.loading.{kind_norm}.{action_norm}]\n\n"
+        # Special case: "general" uses format without kind (matching Orca Components)
+        if kind_norm == LoadingKind.GENERAL.value:
+            marker = f"[lexia.loading.{action_norm}]\n\n"
+        else:
+            marker = f"[lexia.loading.{kind_norm}.{action_norm}]\n\n"
+        
         logger.debug(f"Generated marker: {marker.strip()}")
         return marker
     
@@ -99,14 +106,30 @@ class LoadingMarkerProvider(ILoadingMarkerProvider):
         aliases = {}
         
         for kind in self.SUPPORTED_KINDS:
-            # Start aliases
-            aliases[f'show {kind} load'] = f"[lexia.loading.{kind}.start]\n\n"
-            aliases[f'start {kind} load'] = f"[lexia.loading.{kind}.start]\n\n"
-            
-            # End aliases
-            aliases[f'end {kind} load'] = f"[lexia.loading.{kind}.end]\n\n"
-            aliases[f'hide {kind} load'] = f"[lexia.loading.{kind}.end]\n\n"
-            aliases[f'stop {kind} load'] = f"[lexia.loading.{kind}.end]\n\n"
+            # Special format for "general" (no kind in marker, matching Orca Components)
+            if kind == LoadingKind.GENERAL.value:
+                # Start aliases
+                aliases[f'show {kind} load'] = f"[lexia.loading.start]\n\n"
+                aliases[f'start {kind} load'] = f"[lexia.loading.start]\n\n"
+                aliases['show load'] = f"[lexia.loading.start]\n\n"
+                aliases['start load'] = f"[lexia.loading.start]\n\n"
+                
+                # End aliases
+                aliases[f'end {kind} load'] = f"[lexia.loading.end]\n\n"
+                aliases[f'hide {kind} load'] = f"[lexia.loading.end]\n\n"
+                aliases[f'stop {kind} load'] = f"[lexia.loading.end]\n\n"
+                aliases['end load'] = f"[lexia.loading.end]\n\n"
+                aliases['hide load'] = f"[lexia.loading.end]\n\n"
+                aliases['stop load'] = f"[lexia.loading.end]\n\n"
+            else:
+                # Start aliases (with kind)
+                aliases[f'show {kind} load'] = f"[lexia.loading.{kind}.start]\n\n"
+                aliases[f'start {kind} load'] = f"[lexia.loading.{kind}.start]\n\n"
+                
+                # End aliases (with kind)
+                aliases[f'end {kind} load'] = f"[lexia.loading.{kind}.end]\n\n"
+                aliases[f'hide {kind} load'] = f"[lexia.loading.{kind}.end]\n\n"
+                aliases[f'stop {kind} load'] = f"[lexia.loading.{kind}.end]\n\n"
         
         return aliases
     
