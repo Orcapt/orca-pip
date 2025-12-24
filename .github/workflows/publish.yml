@@ -1,90 +1,92 @@
 name: Publish to PyPI
 
 on:
-    release:
-        types: [published]
-    workflow_dispatch:
-        inputs:
-            version:
-                description: "Version to publish (e.g., 2.0.1)"
-                required: false
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to publish (e.g., 2.0.1)"
+        required: false
 
 jobs:
-    publish:
-        name: Build and Publish to PyPI
-        runs-on: ubuntu-latest
-        permissions:
-            contents: read
-            id-token: write # برای OIDC (اختیاری)
+  publish:
+    name: Build and Publish to PyPI
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # برای OIDC (اختیاری)
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                  fetch-depth: 0
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-            - name: Set up Python
-              uses: actions/setup-python@v5
-              with:
-                  python-version: "3.11"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
 
-            - name: Install build dependencies
-              run: |
-                  python -m pip install --upgrade pip
-                  pip install build twine
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build twine
 
-            - name: Extract version from tag (if release)
-              if: github.event_name == 'release'
-              id: version
-              run: |
-                  TAG_NAME="${{ github.event.release.tag_name }}"
-                  # Remove 'v' prefix if exists
-                  VERSION=${TAG_NAME#v}
-                  echo "version=$VERSION" >> $GITHUB_OUTPUT
-                  echo "📦 Tag: $TAG_NAME"
-                  echo "📦 Version: $VERSION"
+      - name: Extract version from tag (if release)
+        if: github.event_name == 'release'
+        id: version
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          # Remove 'v' prefix if exists
+          VERSION=${TAG_NAME#v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Tag: $TAG_NAME"
+          echo "📦 Version: $VERSION"
 
-            - name: Update version in files (if release)
-              if: github.event_name == 'release'
-              run: |
-                  VERSION="${{ steps.version.outputs.version }}"
-                  # Update setup.py
-                  sed -i "s/version=\"[^\"]*\"/version=\"$VERSION\"/" setup.py
-                  # Update pyproject.toml
-                  sed -i "s/version = \"[^\"]*\"/version = \"$VERSION\"/" pyproject.toml
-                  echo "✅ Updated version to $VERSION"
+      - name: Update version in files (if release)
+        if: github.event_name == 'release'
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          # Update setup.py
+          sed -i "s/version=\"[^\"]*\"/version=\"$VERSION\"/" setup.py
+          # Update pyproject.toml
+          sed -i "s/version = \"[^\"]*\"/version = \"$VERSION\"/" pyproject.toml
+          echo "✅ Updated version to $VERSION"
 
-            - name: Build package
-              run: |
-                  python -m build
-                  echo "✅ Package built successfully"
+      - name: Build package
+        run: |
+          python -m build
+          echo "✅ Package built successfully"
 
-            - name: Check package
-              run: |
-                  twine check dist/*
-                  echo "✅ Package check passed"
+      - name: Check package
+        run: |
+          twine check dist/*
+          echo "✅ Package check passed"
 
-            - name: Publish to PyPI
-              env:
-                  TWINE_USERNAME: __token__
-                  TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-              run: |
-                  if [ -z "$TWINE_PASSWORD" ]; then
-                    echo "❌ Error: PYPI_API_TOKEN secret is not set"
-                    echo "Please add your PyPI API token as a secret named PYPI_API_TOKEN"
-                    exit 1
-                  fi
-                  twine upload dist/*
-                  echo "✅ Package published to PyPI successfully!"
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          if [ -z "$TWINE_PASSWORD" ]; then
+            echo "❌ Error: PYPI_API_TOKEN secret is not set"
+            echo "Please add your PyPI API token as a secret named PYPI_API_TOKEN"
+            exit 1
+          fi
+          twine upload dist/*
+          echo "✅ Package published to PyPI successfully!"
 
-            - name: Summary
-              if: success()
-              run: |
-                  echo "## ✅ Package Published Successfully!" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
-                  echo "Version **${{ steps.version.outputs.version || 'latest' }}** has been published to PyPI!" >> $GITHUB_STEP_SUMMARY
-                  echo "" >> $GITHUB_STEP_SUMMARY
+      - name: Summary
+        if: success()
+        run: |
+          echo "## ✅ Package Published Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version **${{ steps.version.outputs.version || 'latest' }}** has been published to PyPI!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
                   echo "### Installation" >> $GITHUB_STEP_SUMMARY
                   echo "\`\`\`bash" >> $GITHUB_STEP_SUMMARY
-                  echo "pip install orca" >> $GITHUB_STEP_SUMMARY
+                  echo "pip install orcapt-sdk" >> $GITHUB_STEP_SUMMARY
                   echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                  echo "**Note:** Import still uses \`from orca import ...\`" >> $GITHUB_STEP_SUMMARY

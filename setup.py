@@ -26,7 +26,7 @@ def read_requirements():
         ]
 
 setup(
-    name="orca",
+    name="orcapt-sdk",
     version="2.0.0",
     author="Orca Team",
     author_email="support@orcapt.com",
