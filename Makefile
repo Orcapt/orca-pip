@@ -108,10 +108,14 @@ dev: venv
 # Show package info
 info:
 	@echo "📋 Package Information:"
-	@echo "  Name: orca"
-	@echo "  Version: 1.2.13"
+	@echo "  Name: orcapt-sdk (PyPI)"
+	@echo "  Module: orca (Python import)"
+	@echo "  Version: 2.0.0"
 	@echo "  Description: Clean, minimal package for Orca platform integration"
 	@echo "  Python: >=3.8"
 	@echo "  Dependencies: requests, pydantic"
 	@echo "  Optional: fastapi, uvicorn (web), pytest, black, flake8 (dev)"
+	@echo ""
+	@echo "  Install: pip install orcapt-sdk"
+	@echo "  Import:  from orca import OrcaHandler"
 

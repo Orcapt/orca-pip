@@ -3,6 +3,7 @@ include LICENSE
 include orca/requirements.txt
 include orca/*.md
 include orca/*.txt
+include orca/patterns/builder.py
 recursive-include orca *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

@@ -111,7 +111,7 @@ class ErrorHandler(IErrorHandler):
             'message': truncated_message,
             'trace': truncated_trace,
             'level': 'error',
-            'where': 'orca-sdk',
+            'where': 'orcapt-sdk',
             'additional': {
                 'uuid': response_uuid,
                 'conversation_id': conversation_id,

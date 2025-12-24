@@ -5,7 +5,7 @@ Fast API reference for Orca SDK with common usage patterns.
 ## 📦 Installation
 
 ```bash
-pip install orca
+pip install orcapt-sdk
 ```
 
 ## 🚀 Quick Start
@@ -513,7 +513,7 @@ print(f"Full response: {response}")
 
 | Task               | Code                                                          |
 | ------------------ | ------------------------------------------------------------- |
-| Initialize handler | `handler = OrcaHandler(dev_mode=True)`                       |
+| Initialize handler | `handler = OrcaHandler(dev_mode=True)`                        |
 | Start session      | `session = handler.begin(data)`                               |
 | Stream text        | `session.stream("Hello")`                                     |
 | Close session      | `session.close()`                                             |

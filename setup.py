@@ -27,7 +27,7 @@ def read_requirements():
 
 setup(
     name="orcapt-sdk",
-    version="2.0.0",
+    version="1.0.0",
     author="Orca Team",
     author_email="support@orcapt.com",
     description="Clean, minimal package for Orca platform integration",
@@ -69,6 +69,7 @@ setup(
     include_package_data=True,
     package_data={
         "orca": ["*.txt", "*.md"],
+        "orca.patterns": ["*.py"],
     },
     keywords="orca, ai, chatbot, platform, integration, fastapi, real-time",
     project_urls={
