@@ -29,7 +29,7 @@ def add_standard_endpoints(
     Add standard Orca endpoints to a FastAPI application.
     
     Args:
-        app: FastAPI application instance
+        app: FastAPI application instance (will read title and version from app)
         conversation_manager: Optional conversation manager for history endpoints
         orca_handler: Optional OrcaHandler instance for communication
         process_message_func: Optional function to process messages (custom AI logic)
@@ -39,9 +39,13 @@ def add_standard_endpoints(
         
     Example:
         >>> from fastapi import FastAPI
-        >>> app = FastAPI()
+        >>> app = FastAPI(title="My Agent", version="1.0.0")
         >>> add_standard_endpoints(app, orca_handler=handler)
     """
+    
+    # Read service name and version from app (with fallback defaults)
+    service_name = getattr(app, 'title', "Orca AI Agent")
+    service_version = getattr(app, 'version', "1.1.0")
     
     # Create router for standard endpoints
     router = APIRouter(prefix="/api/v1", tags=["standard"])
@@ -51,8 +55,8 @@ def add_standard_endpoints(
         """Health check endpoint."""
         return {
             "status": "healthy", 
-            "service": "Orca AI Agent",
-            "version": "1.1.0"
+            "service": service_name,
+            "version": service_version
         }
     
     @router.get("/test_stream")
@@ -79,7 +83,7 @@ def add_standard_endpoints(
     async def root():
         """Root endpoint with service information."""
         return {
-            "message": "Orca AI Agent - Ready",
+            "message": f"{service_name} - Ready",
             "endpoints": [
                 "/api/v1/health",
                 "/api/v1/send_message",
