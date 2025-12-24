@@ -35,6 +35,8 @@ setup(
     long_description_content_type="text/markdown",
     url="https://github.com/Orcapt/orca-pip",
     packages=find_packages(),
+    # Explicitly ensure builder.py is included
+    py_modules=[],
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",

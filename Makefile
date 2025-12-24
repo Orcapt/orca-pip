@@ -55,7 +55,11 @@ clean-all: clean
 # Build the package
 build: clean
 	@echo "🔨 Building package..."
-	python -m build
+	@if [ -d "build_env" ]; then \
+		build_env/bin/python -m build; \
+	else \
+		python3 -m venv build_env && build_env/bin/pip install build wheel && build_env/bin/python -m build; \
+	fi
 	@echo "✅ Package built successfully"
 
 # Install locally for development
@@ -67,12 +71,12 @@ install: build
 # Test package import
 test:
 	@echo "🧪 Testing package import..."
-	python -c "import orca; from orca import OrcaHandler; print('✅ Import successful')"
+	python3 -c "import orca; from orca import OrcaHandler; print('✅ Import successful')"
 
 # Run full test suite
 test-full:
 	@echo "🧪 Running full test suite..."
-	python -m pytest tests/ -v
+	python3 -m pytest tests/ -v
 
 # Format code
 format:
@@ -110,7 +114,7 @@ info:
 	@echo "📋 Package Information:"
 	@echo "  Name: orcapt-sdk (PyPI)"
 	@echo "  Module: orca (Python import)"
-	@echo "  Version: 2.0.0"
+	@echo "  Version: 1.0.0"
 	@echo "  Description: Clean, minimal package for Orca platform integration"
 	@echo "  Python: >=3.8"
 	@echo "  Dependencies: requests, pydantic"
