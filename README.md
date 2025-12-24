@@ -31,6 +31,8 @@ from orca import OrcaHandler  # ✅ Correct
 
 ### Basic Usage
 
+**Direct Session (Real-time Streaming):**
+
 ```python
 from orca import OrcaHandler
 
@@ -40,11 +42,30 @@ handler = OrcaHandler(dev_mode=True)
 # Create session
 session = handler.begin(data)
 
-# Stream response
+# Stream response (real-time)
 session.stream("Hello, world!")
+session.image.send("https://example.com/image.jpg")
+session.button.link("Click", "https://example.com")
 
 # Close session
 session.close()
+```
+
+**SessionBuilder (Queued Operations):**
+
+```python
+from orca import OrcaHandler
+from orca.patterns import SessionBuilder
+
+handler = OrcaHandler(dev_mode=True)
+
+# All operations are queued until execute() or complete() is called
+builder = SessionBuilder(handler).start_session(data)
+builder.add_stream("Hello, world!")
+builder.add_image("https://example.com/image.jpg")
+builder.add_button("Click", "https://example.com")
+builder.execute()  # Execute all queued operations
+result = builder.complete()  # Execute remaining + close session
 ```
 
 ### Lambda Deployment

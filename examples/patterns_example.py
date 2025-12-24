@@ -43,6 +43,40 @@ def main():
     print(f"✅ Handler created: {type(handler).__name__}")
     print()
     
+    # SessionBuilder example
+    print("📦 SessionBuilder - Queued Operations Example...")
+    from orca import ChatMessage
+    
+    # Create mock data
+    mock_data = ChatMessage(
+        message="Test",
+        response_uuid="test-uuid",
+        thread_id="test-thread",
+        model="gpt-4",
+        conversation_id=1,
+        message_uuid="msg-uuid",
+        channel="test-channel",
+        variables=[],
+        stream_url="",
+        stream_token="",
+        url=""
+    )
+    
+    # All operations are queued until execute() or complete() is called
+    builder = SessionBuilder(handler).start_session(mock_data)
+    builder.add_stream("Step 1: Processing...")
+    builder.add_image("https://example.com/image.jpg")
+    builder.execute()  # Execute first batch
+    
+    builder.add_stream("Step 2: Adding buttons...")
+    builder.add_button("Button 1", "https://example.com/1")
+    builder.add_button("Button 2", "https://example.com/2")
+    builder.execute()  # Execute second batch (buttons grouped automatically)
+    
+    result = builder.complete()  # Execute remaining + close session
+    print(f"✅ SessionBuilder workflow completed: {len(result)} chars")
+    print()
+    
     # ============================================
     # 2. Context Manager Pattern
     # ============================================

@@ -156,7 +156,6 @@ class SessionBuilder:
             self._session = None
         
         self._operations: List[Dict[str, Any]] = []
-        self._executed: bool = False  # Track if operations have been executed
     
     def start_session(self, data: Any) -> 'SessionBuilder':
         """
@@ -203,10 +202,10 @@ class SessionBuilder:
     
     def add_stream(self, content: str) -> 'SessionBuilder':
         """
-        Add stream operation.
+        Add stream operation (queued, not real-time).
         
-        If session is already available, streams immediately (real-time).
-        Otherwise, queues the operation for later execution.
+        All operations are queued and executed together when execute() or complete() is called.
+        This ensures proper grouping and ordering of operations.
         
         Args:
             content: Content to stream
@@ -214,15 +213,11 @@ class SessionBuilder:
         Returns:
             Self for chaining
         """
-        # If session is available, stream immediately (real-time)
-        if self._session is not None:
-            self._session.stream(content)
-        else:
-            # Queue for later execution
-            self._operations.append({
-                "type": "stream",
-                "content": content,
-            })
+        # Always queue - no real-time streaming
+        self._operations.append({
+            "type": "stream",
+            "content": content,
+        })
         return self
     
     def stream(self, content: str) -> 'SessionBuilder':
@@ -444,20 +439,24 @@ class SessionBuilder:
         Execute all queued operations on the session.
         
         This method runs all operations that were added via the builder.
-        Operations are only executed once, even if execute() is called multiple times.
+        Operations are executed and removed from the queue, so execute() can be called multiple times
+        to execute new operations as they are added.
         
         Raises:
             ValueError: If session is not available (neither set directly nor started)
         """
-        if self._executed:
-            # Already executed, skip to avoid duplicate execution
-            logger.debug("Operations already executed, skipping")
-            return
-        
         if self._session is None:
             raise ValueError("Session not available. Either provide session in constructor or call start_session(data) first.")
         
-        for op in self._operations:
+        if not self._operations:
+            # No operations to execute
+            return
+        
+        # Execute all queued operations
+        operations_to_execute = self._operations.copy()
+        self._operations = []  # Clear operations after copying
+        
+        for op in operations_to_execute:
             op_type = op["type"]
             
             if op_type == "loading":
@@ -517,8 +516,7 @@ class SessionBuilder:
             elif op_type == "process":
                 op["func"](self._session)
         
-        self._executed = True  # Mark as executed
-        logger.info(f"Executed {len(self._operations)} operations")
+        logger.info(f"Executed {len(operations_to_execute)} operations")
     
     def build(self) -> 'SessionBuilder':
         """

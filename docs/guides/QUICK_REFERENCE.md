@@ -313,13 +313,21 @@ response = create_success_response(
 ### Builder Pattern
 
 ```python
-from orca.patterns import OrcaBuilder
+from orca.patterns import OrcaBuilder, SessionBuilder
 
 # Build handler with fluent interface
 handler = (OrcaBuilder()
     .with_dev_mode(True)
     .with_buffer_manager(custom_buffer)
     .build())
+
+# Build session workflow (all operations are queued)
+builder = SessionBuilder(handler).start_session(data)
+builder.add_stream("Hello")
+builder.add_image("https://example.com/image.jpg")
+builder.add_button("Click", "https://example.com")
+builder.execute()  # Execute all queued operations
+result = builder.complete()  # Execute remaining + close session
 ```
 
 ### Context Manager

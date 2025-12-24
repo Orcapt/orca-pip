@@ -65,7 +65,9 @@ handler = (OrcaBuilder()
 
 ### SessionBuilder
 
-Build session workflows with fluent interface:
+Build session workflows with fluent interface. All operations are queued and executed together when `execute()` or `complete()` is called.
+
+**Important:** All operations (including `add_stream()`) are queued, not executed immediately. This ensures proper grouping and ordering.
 
 ```python
 from orca.patterns import SessionBuilder
@@ -77,49 +79,78 @@ builder = SessionBuilder(handler)
 result = (builder
     .start_session(data)
     .show_loading("thinking")
-    .process(lambda s: s.stream("Processing..."))
+    .add_stream("Processing...")
     .hide_loading("thinking")
     .add_button("Click", "https://example.com")
-    .complete())  # Execute operations AND send to frontend
+    .complete())  # Execute all queued operations AND send to frontend
 ```
 
-### Multi-step Workflow
+**Key Points:**
+
+- All `add_*` methods queue operations (no real-time streaming)
+- Use `execute()` to execute queued operations (can be called multiple times)
+- Use `complete()` or `close()` to execute remaining operations and close session
+- Multiple consecutive buttons/audio/cards are automatically grouped
+
+### Multi-step Workflow with Execute
+
+You can call `execute()` multiple times to execute operations in batches:
 
 ```python
-builder = SessionBuilder(handler)
+builder = SessionBuilder(handler).start_session(data)
 
-# Complex workflow
-result = (builder
-    .start_session(data)
+# Step 1: Analysis
+builder.show_loading("analyzing")
+builder.add_stream("Analyzing input...")
+builder.track_trace("Analyzing input", "all")
+builder.hide_loading("analyzing")
+builder.execute()  # Execute first batch
 
-    # Step 1: Analysis
-    .show_loading("analyzing")
-    .track_trace("Analyzing input", "all")
-    .process(analyze_input)
-    .hide_loading("analyzing")
+# Step 2: Media content
+builder.add_video("https://example.com/video.mp4")
+builder.add_youtube("https://www.youtube.com/watch?v=...")
+builder.add_location_coordinates(35.6892, 51.3890)
+builder.execute()  # Execute second batch
 
-    # Step 2: Media content
-    .add_video("https://example.com/video.mp4")
-    .add_youtube("https://www.youtube.com/watch?v=...")
-    .add_location_coordinates(35.6892, 51.3890)
-    .add_card_list([
-        {"photo": "https://example.com/card.jpg", "header": "Title", "text": "Content"}
-    ])
-    .add_audio_single("https://example.com/audio.mp3", label="Track")
+# Step 3: Cards and Audio (grouped automatically)
+builder.add_card_list([
+    {"photo": "https://example.com/card.jpg", "header": "Title", "text": "Content"}
+])
+builder.add_audio_single("https://example.com/audio.mp3", label="Track")
+builder.execute()  # Execute third batch
 
-    # Step 2: Processing
-    .show_loading("processing")
-    .track_trace("Processing data", "all")
-    .process(process_data)
-    .hide_loading("processing")
+# Step 4: Buttons (grouped automatically)
+builder.add_button("Regenerate", "regenerate")
+builder.add_button("Learn More", "https://docs.example.com")
+builder.track_usage(tokens=1500, token_type="gpt4", cost="0.03")
+builder.execute()  # Execute fourth batch
 
-    # Step 3: Response
-    .add_button("Regenerate", "regenerate")
-    .add_button("Learn More", "https://docs.example.com")
-    .track_usage(tokens=1500, token_type="gpt4", cost="0.03")
+# Complete - Execute any remaining operations AND send to frontend
+result = builder.complete()
+```
 
-    # Complete - Execute operations AND send to frontend
-    .complete())
+### Automatic Grouping
+
+Multiple consecutive operations of the same type are automatically grouped:
+
+```python
+builder = SessionBuilder(handler).start_session(data)
+
+# Multiple buttons - grouped into single button block
+builder.add_button("Button 1", "https://example.com/1")
+builder.add_button("Button 2", "https://example.com/2")
+builder.add_button("Button 3", "https://example.com/3")
+builder.execute()  # All 3 buttons sent as one group ✅
+
+# Multiple audio tracks - grouped into single audio block
+builder.add_audio([{"url": "track1.mp3", "label": "Track 1"}])
+builder.add_audio([{"url": "track2.mp3", "label": "Track 2"}])
+builder.execute()  # All tracks sent as one group ✅
+
+# Multiple cards - grouped into single card list
+builder.add_card_list([{"header": "Card 1"}])
+builder.add_card_list([{"header": "Card 2"}])
+builder.execute()  # All cards sent as one group ✅
 ```
 
 ### Custom Processing Steps
@@ -136,6 +167,32 @@ result = (builder
     .complete())  # Execute and send to frontend
 ```
 
+### Executing Operations
+
+**`execute()` - Execute Queued Operations**
+
+Execute all currently queued operations. Can be called multiple times to execute operations in batches:
+
+```python
+builder = SessionBuilder(handler).start_session(data)
+
+builder.add_stream("Step 1")
+builder.add_image("image1.jpg")
+builder.execute()  # Executes: stream + image
+
+builder.add_stream("Step 2")
+builder.add_button("Click", "https://example.com")
+builder.execute()  # Executes: stream + button
+
+# Operations are removed from queue after execution
+```
+
+**Important:** Operations are queued until `execute()` or `complete()` is called. This allows you to:
+
+- Group related operations together
+- Execute operations in batches
+- Control when content is streamed to frontend
+
 ### Completing and Sending to Frontend
 
 After building your workflow, you need to send the content to the frontend:
@@ -143,7 +200,7 @@ After building your workflow, you need to send the content to the frontend:
 **Option 1: `complete()` - Recommended**
 
 ```python
-# Executes all operations AND closes session (sends to frontend)
+# Executes all remaining queued operations AND closes session (sends to frontend)
 response = (builder
     .start_session(data)
     .show_loading("thinking")
@@ -163,18 +220,17 @@ response = (builder
     .close())  # Same as complete()
 ```
 
-**Option 3: `finalize()` + Manual close**
+**Option 3: `execute()` + Manual close**
 
 ```python
-# finalize() only executes operations, doesn't close session
+# execute() only executes operations, doesn't close session
 builder = (SessionBuilder(handler)
     .start_session(data)
     .add_stream("Processing...")
-    .finalize())
+    .execute())  # Executes operations
 
 # Manually close session to send to frontend
-session = builder._session  # Access session directly
-response = session.close()
+response = builder._session.close()
 ```
 
 **Option 4: `acomplete()` / `aclose()` - For Async Contexts**
@@ -183,15 +239,18 @@ response = session.close()
 # Async version for use in async functions (FastAPI, async handlers, etc.)
 async def handler(data):
     builder = SessionBuilder(handler).start_session(data)
+    builder.add_stream("Response")
     response = await builder.acomplete()  # Non-blocking!
     return response
 ```
 
 **⚠️ Important:**
 
-- Use `complete()` or `close()` for synchronous contexts
+- All operations are **queued** (not executed immediately)
+- Use `execute()` to execute queued operations (can be called multiple times)
+- Use `complete()` or `close()` to execute remaining operations and close session
 - Use `acomplete()` or `aclose()` for async contexts (FastAPI, async handlers, etc.)
-- Use `finalize()` only if you need to execute operations without closing the session yet
+- Multiple consecutive buttons/audio/cards are automatically grouped
 
 ## Middleware Pattern
 
