@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orcapt-sdk"
-version = "1.0.0"
+version = "1.0.2"
 description = "Clean, minimal package for Orca platform integration"
 readme = "README.md"
 license = {text = "MIT"}
