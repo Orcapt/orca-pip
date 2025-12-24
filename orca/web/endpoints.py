@@ -94,7 +94,7 @@ def add_standard_endpoints(
         SSE (Server-Sent Events) endpoint for dev mode streaming.
         Frontend can connect to this to receive real-time updates.
         """
-        from ..dev_stream_client import DevStreamClient
+        from ..infrastructure.dev_stream_client import DevStreamClient
         
         async def event_generator():
             """Generate SSE events from DevStreamClient."""
@@ -142,7 +142,7 @@ def add_standard_endpoints(
         Simple polling endpoint for dev mode (alternative to SSE).
         Returns current stream state.
         """
-        from ..dev_stream_client import DevStreamClient
+        from ..infrastructure.dev_stream_client import DevStreamClient
         
         stream_data = DevStreamClient.get_stream(channel)
         return {
@@ -155,8 +155,8 @@ def add_standard_endpoints(
     
     # Add the main send_message endpoint if orca_handler is provided
     if orca_handler and process_message_func:
-        from ..models import ChatMessage, ChatResponse
-        from ..response_handler import create_success_response
+        from ..domain.models import ChatMessage, ChatResponse
+        from ..utils.response_handler import create_success_response
         
         @router.post("/send_message")
         async def send_message(data: ChatMessage):
@@ -166,7 +166,7 @@ def add_standard_endpoints(
             
             # DEV MODE: Handle base64 file upload
             if orca_handler.dev_mode and data.file_base64 and not data.file_url:
-                from ..utils import decode_base64_file
+                from ..utils.files import decode_base64_file
                 import urllib.parse
                 
                 logger.info("🔧 Dev mode: Converting file_base64 to file_url")
@@ -210,7 +210,7 @@ def add_standard_endpoints(
                 
                 async def stream_generator():
                     """Generate streaming response directly from processing using async queue."""
-                    from ..dev_stream_client import DevStreamClient
+                    from ..infrastructure.dev_stream_client import DevStreamClient
                     
                     # Clear any existing stream data for this channel
                     DevStreamClient.clear_stream(data.channel)
