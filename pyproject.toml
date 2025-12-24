@@ -7,7 +7,7 @@ name = "orca"
 version = "2.0.0"
 description = "Clean, minimal package for Orca platform integration"
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT"}
 authors = [
     {name = "Orca Team", email = "support@orcapt.com"}
 ]

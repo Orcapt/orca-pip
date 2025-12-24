@@ -3,7 +3,7 @@ include LICENSE
 include orca/requirements.txt
 include orca/*.md
 include orca/*.txt
-recursive-include orca/web *
+recursive-include orca *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]
 recursive-exclude * .DS_Store
