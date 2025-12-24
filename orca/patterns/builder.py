@@ -205,16 +205,46 @@ class SessionBuilder:
         """
         Add stream operation.
         
+        If session is already available, streams immediately (real-time).
+        Otherwise, queues the operation for later execution.
+        
         Args:
             content: Content to stream
             
         Returns:
             Self for chaining
         """
-        self._operations.append({
-            "type": "stream",
-            "content": content,
-        })
+        # If session is available, stream immediately (real-time)
+        if self._session is not None:
+            self._session.stream(content)
+        else:
+            # Queue for later execution
+            self._operations.append({
+                "type": "stream",
+                "content": content,
+            })
+        return self
+    
+    def stream(self, content: str) -> 'SessionBuilder':
+        """
+        Stream content immediately (real-time).
+        
+        This method streams content directly to the session without queuing.
+        Requires session to be available (either set directly or via start_session()).
+        
+        Args:
+            content: Content to stream
+            
+        Returns:
+            Self for chaining
+            
+        Raises:
+            ValueError: If session is not available
+        """
+        if self._session is None:
+            raise ValueError("Session not available. Either provide session in constructor or call start_session(data) first.")
+        
+        self._session.stream(content)
         return self
     
     def add_button_link(

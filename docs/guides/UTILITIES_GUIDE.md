@@ -225,14 +225,32 @@ Measure and log execution time.
 ```python
 from orca.common.decorators import measure_time
 
-@measure_time("data_processing")
+# Without label (uses function name)
+@measure_time
 def process_large_dataset(data):
     # Processing time will be logged
     return [item * 2 for item in data]
 
 # Output:
+# process_large_dataset took 0.234s
+
+# With custom label
+@measure_time("data_processing")
+def process_large_dataset(data):
+    # Processing time will be logged with custom label
+    return [item * 2 for item in data]
+
+# Output:
 # data_processing took 0.234s
 ```
+
+**Parameters:**
+
+| Parameter | Type  | Default | Description              |
+| --------- | ----- | ------- | ------------------------ |
+| `label`   | `str` | `None`  | Custom label for logging |
+
+If no label is provided, the function name is used automatically.
 
 ### @handle_errors
 
@@ -568,7 +586,7 @@ from orca.common.decorators import retry, log_execution, measure_time
 
 @retry(max_attempts=3)
 @log_execution(logger)
-@measure_time("api_call")
+@measure_time
 def call_external_api():
     # This will retry, log, and measure time
     return requests.get("https://api.example.com")

@@ -62,3 +62,4 @@ include = ["orca*"]
 
 [tool.setuptools.package-data]
 orca = ["*.txt", "*.md"]
+"*" = ["*.md", "LICENSE", "CHANGELOG.md", "CONTRIBUTING.md", "SECURITY.md"]

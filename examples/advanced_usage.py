@@ -47,7 +47,7 @@ def generate_response(handler, data) -> str:
     session.usage.track(200, TokenType.COMPLETION.value, label="output")
     
     # Add tracing
-    session.tracing("Processing completed successfully", visibility="dev")
+    session.tracing.send("Processing completed successfully", visibility="dev")
     
     # Add action buttons
     session.button.begin(default_color=ButtonColor.PRIMARY.value)

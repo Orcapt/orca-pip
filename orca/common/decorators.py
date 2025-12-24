@@ -138,12 +138,14 @@ def log_execution(
     return decorator
 
 
-def measure_time(func: F) -> F:
+def measure_time(label_or_func: Any = None) -> Any:
     """
     Measure and log execution time.
     
+    Supports both @measure_time and @measure_time("label") syntax.
+    
     Args:
-        func: Function to measure
+        label_or_func: Optional label string, or function if called without parentheses
         
     Returns:
         Decorated function
@@ -152,16 +154,44 @@ def measure_time(func: F) -> F:
         >>> @measure_time
         ... def slow_operation():
         ...     time.sleep(1)
+        # Output: slow_operation took 1.000s
+        
+        >>> @measure_time("data_processing")
+        ... def process_data():
+        ...     pass
+        # Output: data_processing took 0.234s
     """
-    @functools.wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        start_time = time.time()
-        result = func(*args, **kwargs)
-        duration = time.time() - start_time
-        logger.info(f"{func.__name__} took {duration:.3f}s")
-        return result
+    def create_decorator(label: Optional[str] = None) -> Callable[[F], F]:
+        """Create decorator with optional label."""
+        def decorator(func: F) -> F:
+            @functools.wraps(func)
+            def wrapper(*args: Any, **kwargs: Any) -> Any:
+                start_time = time.time()
+                result = func(*args, **kwargs)
+                duration = time.time() - start_time
+                log_label = label if label is not None else func.__name__
+                logger.info(f"{log_label} took {duration:.3f}s")
+                return result
+            
+            return cast(F, wrapper)
+        return decorator
     
-    return cast(F, wrapper)
+    # Support both @measure_time and @measure_time("label")
+    if label_or_func is None:
+        # Called as @measure_time (without parentheses)
+        # Return decorator that will receive function
+        return create_decorator(label=None)
+    elif isinstance(label_or_func, str):
+        # Called as @measure_time("label")
+        # Return decorator with label
+        return create_decorator(label=label_or_func)
+    elif callable(label_or_func):
+        # Called as @measure_time (function passed directly, rare case)
+        # Apply decorator immediately
+        return create_decorator(label=None)(label_or_func)
+    else:
+        # Invalid argument type
+        raise TypeError(f"measure_time expects str or callable, got {type(label_or_func)}")
 
 
 def handle_errors(
