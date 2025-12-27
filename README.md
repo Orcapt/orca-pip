@@ -31,24 +31,19 @@ from orca import OrcaHandler  # ✅ Correct
 
 ### Basic Usage
 
-**Direct Session (Real-time Streaming):**
+**FastAPI / Web App (Standard Factory):**
 
 ```python
-from orca import OrcaHandler
+from orca import create_agent_app, ChatMessage, OrcaHandler
 
-# Initialize handler
-handler = OrcaHandler(dev_mode=True)
+async def process_msg(data: ChatMessage):
+    handler = OrcaHandler()
+    session = handler.begin(data)
+    session.stream(f"Echo: {data.message}")
+    session.close()
 
-# Create session
-session = handler.begin(data)
-
-# Stream response (real-time)
-session.stream("Hello, world!")
-session.image.send("https://example.com/image.jpg")
-session.button.link("Click", "https://example.com")
-
-# Close session
-session.close()
+app = create_agent_app(process_message_func=process_msg)
+# Run with: uvicorn main:app
 ```
 
 **SessionBuilder (Queued Operations):**
@@ -71,19 +66,16 @@ result = builder.complete()  # Execute remaining + close session
 ### Lambda Deployment
 
 ```python
-from orca import OrcaHandler, LambdaAdapter
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
 
-handler = OrcaHandler()
-adapter = LambdaAdapter()
-
-@adapter.message_handler
-async def process_message(data):
+async def my_agent_logic(data: ChatMessage):
+    handler = OrcaHandler()
     session = handler.begin(data)
     session.stream("Response from Lambda!")
     session.close()
 
-def handler(event, context):
-    return adapter.handle(event, context)
+# Unified handler for HTTP (FastAPI), SQS, and Cron
+handler = create_hybrid_handler(process_message_func=my_agent_logic)
 ```
 
 ## Documentation

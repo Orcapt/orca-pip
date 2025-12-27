@@ -44,75 +44,37 @@ That's it! No starter kit or complex structure needed.
 
 ## 3. Create Lambda Handler
 
-Create `lambda_handler.py` in your project root. Using `LambdaAdapter` from the orca SDK makes this incredibly simple:
+The simplest way to create a production-ready Lambda handler is using the `create_hybrid_handler` factory. This single function sets up:
+- **FastAPI + Mangum** for standard HTTP requests.
+- **LambdaAdapter** for SQS and Cron events.
+- **Automatic SQS Offloading** (if `SQS_QUEUE_URL` is set).
+
+Create `lambda_handler.py` in your project root:
 
 ```python
-from orca import OrcaHandler, LambdaAdapter, ChatMessage
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
 
-# Initialize handler
-handler = OrcaHandler(dev_mode=False)
-
-# Initialize adapter (automatically handles HTTP, SQS, and cron events!)
-adapter = LambdaAdapter()
-
-
-@adapter.message_handler
-async def process_message(data: ChatMessage):
-    """
-    Your agent logic - exactly the same as local development!
-    """
+# 1. Define your agent logic
+async def my_agent_logic(data: ChatMessage):
+    handler = OrcaHandler()
     session = handler.begin(data)
+    
+    session.loading.start("thinking")
+    # ... call LLM, tools, etc ...
+    session.stream("Hello from Lambda!")
+    session.close()
 
-    try:
-        session.loading.start("thinking")
-
-        # Your agent logic here (OpenAI, LangChain, custom tools, etc.)
-        response = await your_agent_logic(data.message)
-
-        session.loading.end("thinking")
-        session.stream(response)
-        session.close()
-
-    except Exception as e:
-        session.error("An error occurred", exception=e)
-
-
-@adapter.cron_handler
-async def scheduled_task(event):
-    """
-    Optional: scheduled maintenance tasks
-    """
-    print("[CRON] Running scheduled task...")
-    # Your scheduled logic here
-
-
-# Lambda entry point
-def handler(event, context):
-    """
-    That's it! LambdaAdapter handles everything:
-    - HTTP requests (Function URL)
-    - SQS events (async processing)
-    - EventBridge (cron jobs)
-    - Event loop management
-    - Automatic queuing if SQS_QUEUE_URL exists
-    """
-    return adapter.handle(event, context)
+# 2. Create the unified handler
+# This returns a standard lambda handler(event, context)
+handler = create_hybrid_handler(process_message_func=my_agent_logic)
 ```
 
-**What LambdaAdapter does for you:**
+### Why use `create_hybrid_handler`?
 
-✅ **Automatic event detection** - HTTP, SQS, or cron  
-✅ **SQS queuing** - If `SQS_QUEUE_URL` exists, HTTP requests are queued automatically  
-✅ **Direct processing** - If no queue, processes immediately  
-✅ **Event loop management** - Fixes Python 3.11+ asyncio issues  
-✅ **Error handling** - Proper logging and error responses
-
-**No need to:**
-
-- ❌ Write SQS parsing logic
-- ❌ Handle HTTP request/response manually
-- ❌ Manage event loops
-- ❌ Write separate handlers for different event sources
+✅ **One-line setup** - No need to manually initialize FastAPI or Mangum.  
+✅ **Hybrid Routing** - Automatically detects if the event is HTTP, SQS, or Cron.  
+✅ **Auto-Offloading** - When a POST request hits `/api/v1/send_message`, it automatically sends it to SQS if configured.  
+✅ **Production Ready** - Handles event loops (Python 3.11+) and standard logging out of the box.
 
 ---
 
@@ -138,8 +100,8 @@ CMD ["lambda_handler.handler"]
 **requirements-lambda.txt:**
 
 ```txt
-# Core
-orca>=2.0.0
+# Core (Package name is orcapt-sdk, import is orca)
+orcapt-sdk>=1.0.4
 boto3>=1.34.0
 
 # Your providers
@@ -147,9 +109,9 @@ openai>=1.0.0
 # anthropic>=0.7.0
 # langchain>=0.1.0
 
-# Optional: only if you need FastAPI endpoints
-# fastapi>=0.104.0
-# mangum>=0.17.0
+# Required for create_hybrid_handler (HTTP Mode)
+fastapi>=0.104.0
+mangum>=0.17.0
 ```
 
 Tips:
@@ -342,110 +304,67 @@ Once all boxes are checked, your agent is production-ready on AWS Lambda! 🚀
 
 ## 12. Complete Example
 
-Here's a complete, production-ready `lambda_handler.py` using `LambdaAdapter`:
+Here's a complete, production-ready `lambda_handler.py` using `create_hybrid_handler`. This is the recommended way to bootstrap your agent:
 
 ```python
 """
 Lambda Handler - Production-Ready Example
 ==========================================
 
-Simplest possible Lambda handler using OrcaAdapter.
-Handles HTTP, SQS, and cron events automatically.
+Unified Lambda handler using Orca SDK factory.
+Handles HTTP (FastAPI), SQS, and Cron events automatically.
 """
 
-from orca import OrcaHandler, LambdaAdapter, ChatMessage
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
 import os
 
-# Initialize Orca handler
-handler = OrcaHandler(dev_mode=False)
-
-# Initialize adapter (handles ALL event types!)
-adapter = LambdaAdapter()
-
-
-@adapter.message_handler
+# 1. Define your agent processing logic
 async def process_message(data: ChatMessage):
     """
     Your agent logic - same as local development!
-    Replace this with your actual agent implementation.
     """
+    handler = OrcaHandler(dev_mode=False)
     session = handler.begin(data)
 
     try:
         session.loading.start("thinking")
 
         # ==========================================
-        # YOUR AGENT LOGIC HERE
+        # YOUR AI LOGIC HERE (OpenAI, LangChain, etc)
         # ==========================================
-
-        # Example: Simple echo
-        response = f"You said: {data.message}"
-
-        # Example with OpenAI:
-        # from openai import OpenAI
-        # client = OpenAI()
-        # response = client.chat.completions.create(
-        #     model="gpt-4",
-        #     messages=[{"role": "user", "content": data.message}]
-        # )
-        # response_text = response.choices[0].message.content
+        response = f"Orca Agent received: {data.message}"
 
         session.loading.end("thinking")
 
-        # Stream response
+        # Stream and close
         session.stream(response)
-
-        # Optional: Add buttons
-        session.button.link("Learn More", "https://example.com")
-
-        # Close session
         session.close()
 
     except Exception as e:
-        # Automatic error handling and user notification
-        session.error("An error occurred while processing your request", exception=e)
+        session.error("An error occurred", exception=e)
         raise
 
+# 2. Add an optional cron handler if needed
+async def my_cron_logic(event):
+    print(f"[CRON] Running maintenance: {event}")
 
-@adapter.cron_handler
-async def scheduled_task(event):
-    """
-    Optional: Handle scheduled/cron events
-    """
-    print("[CRON] Running maintenance task...")
+# 3. Create the unified handler
+# This single 'handler' variable is what AWS Lambda calls.
+handler = create_hybrid_handler(
+    process_message_func=process_message,
+    # cron_handler=my_cron_logic,  # Optional
+    app_title="Orca Production Agent"
+)
 
-    # Example: Database cleanup, report generation, etc.
-    # your_maintenance_logic()
-
-    print("[CRON] Task completed!")
-
-
-# Lambda entry point
-def handler(event, context):
-    """
-    Main entry point - LambdaAdapter does ALL the work!
-
-    Automatically handles:
-    - HTTP requests (Function URL)
-    - SQS events (async processing)
-    - EventBridge (cron jobs)
-    """
-    return adapter.handle(event, context)
-
-
-# Optional: Print configuration on cold start
-print(f"[INIT] Lambda function ready!")
-print(f"[INIT] SQS queue: {os.environ.get('SQS_QUEUE_URL', 'Not configured (direct mode)')}")
+# Optional: Helpful startup logs
+print(f"[INIT] Lambda ready. SQS: {os.environ.get('SQS_QUEUE_URL', 'Direct Mode')}")
 ```
 
-**That's it!** No need for:
+**What this gives you:**
 
-- ❌ Manual SQS parsing
-- ❌ Manual HTTP handling
-- ❌ Separate handler files
-- ❌ Event loop management
-- ❌ FastAPI/Mangum (unless you need custom endpoints)
-
-The `LambdaAdapter` handles everything automatically! 🚀
+✅ **FastAPI Endpoint** - Standard POST `/api/v1/send_message` available immediately.  
+✅ **Automatic SQS** - If `SQS_QUEUE_URL` is in env, HTTP requests are offloaded to SQS automatically.  
+✅ **Cron Support** - Just pass `cron_handler` to enable scheduled tasks.  
+✅ **Production Hardened** - Built-in logging, event loop mgmt, and dependency checks.
 
 Happy shipping! 🚀

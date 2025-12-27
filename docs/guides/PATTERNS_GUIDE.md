@@ -604,7 +604,26 @@ with timed_operation("request_processing"):
 
 ## Integration Examples
 
-### With Lambda
+### With Lambda (Recommended Simplicity)
+
+The unified factory makes integration extremely easy while still supporting custom handlers:
+
+```python
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
+
+async def process_message(data: ChatMessage):
+    handler = OrcaHandler()
+    session = handler.begin(data)
+    # ... logic ...
+    session.close()
+
+# Created handler supports HTTP (FastAPI), SQS, and Cron
+handler = create_hybrid_handler(process_message_func=process_message)
+```
+
+### Manual Lambda Integration (Advanced)
+
+If you need full control over the adapter or builder:
 
 ```python
 from orca import LambdaAdapter
@@ -618,19 +637,18 @@ handler = (OrcaBuilder()
 # Setup middleware
 manager = MiddlewareManager()
 manager.use(LoggingMiddleware())
-manager.use(ValidationMiddleware())
 
 adapter = LambdaAdapter()
 
 @adapter.message_handler
 async def process_message(data):
-    def handler_func(d):
+    def core_logic(d):
         session = handler.begin(d)
         session.stream("Response")
         session.close()
 
     # Execute through middleware
-    manager.execute(handler_func, data)
+    manager.execute(core_logic, data)
 
 def lambda_handler(event, context):
     return adapter.handle(event, context)

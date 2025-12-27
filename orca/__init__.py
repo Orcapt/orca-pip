@@ -35,7 +35,10 @@ from .utils import (
     MemoryHelper,
     ForceToolsHelper,
     decode_base64_file,
-    create_success_response
+    create_success_response,
+    create_agent_app,
+    create_hybrid_handler,
+    simulate_lambda_handler
 )
 
 # Infrastructure (for advanced usage)
@@ -110,6 +113,9 @@ __all__ = [
     'create_link_button_block',
     'create_action_button_block',
     'create_success_response',
+    'create_agent_app',
+    'create_hybrid_handler',
+    'simulate_lambda_handler',
     'get_variable_value',
     'get_openai_api_key',
     'Variables',

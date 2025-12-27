@@ -35,6 +35,8 @@ from .files import decode_base64_file
 
 # Response (legacy, kept for backwards compatibility)
 from .response_handler import create_success_response
+from .lambda_utils import create_hybrid_handler, simulate_lambda_handler
+from .app_utils import create_agent_app
 
 __all__ = [
     # Variables
@@ -49,4 +51,9 @@ __all__ = [
     'decode_base64_file',
     # Response (legacy)
     'create_success_response',
+    # Lambda
+    'create_hybrid_handler',
+    'simulate_lambda_handler',
+    # App
+    'create_agent_app',
 ]

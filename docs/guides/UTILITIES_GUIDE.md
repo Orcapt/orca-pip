@@ -9,6 +9,7 @@ Complete guide to common utilities, exceptions, decorators, and logging in Orca 
 - [Logging](#logging)
 - [Type Guards](#type-guards)
 - [Utility Functions](#utility-functions)
+- [App & Lambda Factories](#app--lambda-factories)
 
 ## Exceptions
 
@@ -556,6 +557,59 @@ success = format_success_response(
 # Parse JSON response
 data = parse_json_response(response_text)
 ```
+## App & Lambda Factories
+
+Orca SDK provides factory functions to quickly bootstrap your agent for different environments.
+
+### create_agent_app
+
+Creates a standard FastAPI application for your agent. Ideal for local development, Docker/Kubernetes, or simple HTTP servers.
+
+```python
+from orca import create_agent_app, ChatMessage, OrcaHandler
+
+# 1. Define your processing logic
+async def process_msg(data: ChatMessage):
+    handler = OrcaHandler()
+    session = handler.begin(data)
+    session.stream(f"Echo: {data.message}")
+    session.close()
+
+# 2. Create the app
+app = create_agent_app(
+    process_message_func=process_msg,
+    app_title="My Agent API"
+)
+
+# Run with: uvicorn main:app
+```
+
+### create_hybrid_handler
+
+Creates a unified handler for AWS Lambda that supports multiple event sources (HTTP, SQS, and Cron).
+
+```python
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
+
+# 1. Define your processing logic
+async def process_msg(data: ChatMessage):
+    handler = OrcaHandler()
+    session = handler.begin(data)
+    # ... logic ...
+    session.close()
+
+# 2. Create the Lambda handler
+# Automatically handles FastAPI (HTTP), SQS, and Cron routing
+handler = create_hybrid_handler(
+    process_message_func=process_msg,
+    app_title="My Lambda Agent"
+)
+```
+
+**Key Features:**
+- **Centralized Event Detection**: Routes events to the right handler automatically.
+- **SQS Offloading**: If `SQS_QUEUE_URL` is set, HTTP requests are automatically queued for async processing.
+- **Event Loop Fixes**: Solves common asyncio issues in Lambda environments.
 
 ## Best Practices
 

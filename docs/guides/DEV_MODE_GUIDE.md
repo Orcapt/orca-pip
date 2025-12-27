@@ -138,56 +138,44 @@ async function pollStream(channel) {
 
 ## Example: Complete AI Agent
 
+The simplest way to build and test your agent locally is using the `create_agent_app` factory combined with `dev_mode=True`.
+
 ```python
 #!/usr/bin/env python3
 import sys
 from openai import OpenAI
-from orca import OrcaHandler, create_orca_app, add_standard_endpoints, Variables
+from orca import create_agent_app, ChatMessage, OrcaHandler
 
-# Detect dev/prod mode from CLI
-if '--dev' in sys.argv:
-    dev_mode = True
-elif '--prod' in sys.argv:
-    dev_mode = False
-else:
-    dev_mode = None  # Auto-detect from ORCA_DEV_MODE env var
+# 1. Initialize Orca handler in dev mode
+# (Or set ORCA_DEV_MODE=true in your environment)
+orca = OrcaHandler(dev_mode=True)
 
-# Initialize Orca handler
-orca = OrcaHandler(dev_mode=dev_mode)
-
-# Create FastAPI app
-app = create_orca_app(title="My AI Agent", version="1.0.0")
-
-async def process_message(data):
-    """Process message - identical code for dev and prod!"""
-    # Get API key
-    vars = Variables(data.variables)
-    api_key = vars.get("OPENAI_API_KEY")
+# 2. Define your agent processing logic
+async def process_message(data: ChatMessage):
+    """Identical code for dev and prod!"""
+    session = orca.begin(data)
     
-    # Call OpenAI (same code in dev/prod)
-    client = OpenAI(api_key=api_key)
-    stream = client.chat.completions.create(
-        model=data.model,
-        messages=[{"role": "user", "content": data.message}],
-        stream=True
-    )
-    
-    full_response = ""
-    for chunk in stream:
-        if chunk.choices[0].delta.content:
-            content = chunk.choices[0].delta.content
-            full_response += content
-            # orca handles dev/prod internally!
-            orca.stream_chunk(data, content)
-    
-    # Complete (same in both modes)
-    orca.complete_response(data, full_response)
+    try:
+        session.loading.start("thinking")
+        
+        # Example: Simple response
+        session.stream(f"Dev Mode active! You said: {data.message}")
+        
+        session.loading.end("thinking")
+        session.close()
+        
+    except Exception as e:
+        session.error("Error", exception=e)
 
-# Add endpoints
-add_standard_endpoints(app, orca_handler=orca, process_message_func=process_message)
+# 3. Create the FastAPI app
+app = create_agent_app(
+    process_message_func=process_message,
+    app_title="Dev Agent"
+)
 
 if __name__ == "__main__":
     import uvicorn
+    # In dev mode, orca-sdk provides /api/v1/stream/{channel} automatically
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 

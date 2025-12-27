@@ -11,6 +11,7 @@ Version: 1.2.7 | Python: >=3.8 | License: MIT
 - [Introduction](#introduction)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Simplified App Factories](#simplified-app-factories)
 - [Core Concepts](#core-concepts)
 - [API Reference](#api-reference)
 - [Usage Examples](#usage-examples)
@@ -239,9 +240,52 @@ curl -X POST http://localhost:8000/api/v1/send_message \
 
 ---
 
+## Simplified App Factories
+
+For the fastest development experience, Orca provides factory functions that handle logging, dev mode detection, and FastAPI/Lambda boilerplate automatically.
+
+### 1. Web Agent Factory (`create_agent_app`)
+Ideal for standalone servers or Docker containers using FastAPI.
+
+```python
+from orca import create_agent_app, ChatMessage
+
+async def process_message(data: ChatMessage):
+    session = orca.begin(data)
+    try:
+        session.stream(f"Echo: {data.message}")
+        session.close()
+    except Exception as e:
+        session.error("Failed to process message", exception=e)
+
+# Bootstraps FastAPI, OrcaHandler, and Registration
+app, orca = create_agent_app(process_message)
+```
+
+### 2. AWS Lambda Factory (`create_hybrid_handler`)
+Creates a single entry point for AWS Lambda that supports HTTP, SQS (async), and Cron events.
+
+```python
+from orca import create_hybrid_handler
+
+# This single handler works for API Gateway, SQS triggers, and EventBridge
+handler = create_hybrid_handler(process_message_func=process_message)
+```
+
+---
+
 ## Core Concepts
 
 ### Architecture Overview
+
+```mermaid
+graph TD
+    User([User]) -->|Interaction| Orca[Orca Platform]
+    Orca -->|ChatMessage| Agent[Your AI Agent]
+    Agent -->|Session API| Stream[Centrifugo / SSE]
+    Stream -->|Real-time| User
+    Agent -->|session.close| Backend[Orca API]
+```
 
 ```
 ┌─────────────────┐
@@ -1468,6 +1512,7 @@ async def process_message(data: ChatMessage):
 
 The only difference is the `dev_mode` flag during initialization!
 
+
 **Session API methods work identically in both modes:**
 
 - `session.stream()` - Streams to frontend in both modes
@@ -1479,6 +1524,43 @@ The only difference is the `dev_mode` flag during initialization!
 - `session.location.send()` / `session.location.send_coordinates()` - Location handling
 - `session.card.send()` - Card list handling
 - `session.audio.send()` / `session.audio.send_single()` - Audio handling
+
+### Finalizing and Cleanup
+At the end of your processing logic, always call `session.close()` to ensure all buffers are flushed and the final response is persisted to the database.
+
+---
+
+## 🧪 Testing & Simulation
+
+Testing Lambda functions locally can be difficult. Orca provides a built-in simulation utility that mocks API Gateway, SQS, and Cron events to verify your `hybrid_handler`.
+
+### Using `simulate_lambda_handler`
+
+Create a `simulate_lambda.py` file in your agent's root:
+
+```python
+import os
+# Force DEV MODE to see streaming in console
+os.environ["ORCA_DEV_MODE"] = "true"
+
+from orca import simulate_lambda_handler
+from lambda_handler import handler
+
+if __name__ == "__main__":
+    # Tests HTTP, SQS, and Cron flows in one go
+    simulate_lambda_handler(handler, message="Tell me a joke!")
+```
+
+Run it with:
+```bash
+python3 simulate_lambda.py
+```
+
+This utility will:
+1.  **Simulate HTTP**: Sends a mock POST request to `/api/v1/send_message`.
+2.  **Simulate SQS**: Triggers the handler with a mock SQS record.
+3.  **Simulate Cron**: Triggers the handler with a mock scheduled event.
+4.  **Live Output**: In `dev_mode`, it prints LLM streaming chunks directly to your terminal.
 
 ---
 

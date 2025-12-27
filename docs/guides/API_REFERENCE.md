@@ -6,6 +6,7 @@ Complete API reference for Orca SDK domain models and interfaces.
 
 - [Domain Models](#domain-models)
 - [Core Classes](#core-classes)
+- [Factories](#factories)
 - [Interfaces](#interfaces)
 - [Configuration](#configuration)
 
@@ -487,6 +488,60 @@ Add action button.
 session.button.action("Regenerate", "regenerate")
 session.button.action("Delete", "delete", color="danger")
 ```
+
+## Factories
+
+Higher-level functions to quickly bootstrap AI agents.
+
+### create_agent_app
+
+Creates a standard FastAPI application with Orca endpoints.
+
+```python
+from orca import create_agent_app
+
+app = create_agent_app(
+    process_message_func=my_logic,
+    app_title="My Agent API",
+    app_version="1.0.0",
+    dev_mode=False
+)
+```
+
+**Parameters:**
+
+| Parameter              | Type       | Default      | Description                     |
+| ---------------------- | ---------- | ------------ | ------------------------------- |
+| `process_message_func` | `Callable` | **Required** | Async function to handle msg    |
+| `app_title`            | `str`      | `Orca Agent` | FastAPI app title               |
+| `app_version`          | `str`      | `1.0.0`      | FastAPI app version             |
+| `dev_mode`             | `bool`     | `False`      | Development mode flag           |
+
+---
+
+### create_hybrid_handler
+
+Creates a unified handler for AWS Lambda environment.
+
+```python
+from orca import create_hybrid_handler
+
+handler = create_hybrid_handler(
+    process_message_func=my_logic,
+    app_title="My Lambda Agent",
+    dev_mode=False
+)
+```
+
+**Parameters:**
+
+| Parameter              | Type       | Default | Description                  |
+| ---------------------- | ---------- | ------- | ---------------------------- |
+| `process_message_func` | `Callable` | **Required** | Async function to handle msg |
+| `app_title`            | `str`      | `Orca Hybrid Agent` | App title (for HTTP mode) |
+| `dev_mode`             | `bool`     | `False` | Development mode flag        |
+
+---
 
 ## Interfaces
 

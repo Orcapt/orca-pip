@@ -22,25 +22,24 @@ handler = OrcaHandler(dev_mode=False)
 
 ## 💬 Basic Usage
 
-### Simple Message Flow
+### Simplified Agent (Recommended)
+
+The easiest way to build a production-ready agent API:
 
 ```python
-from orca import OrcaHandler
+from orca import create_agent_app, ChatMessage, OrcaHandler
 
-handler = OrcaHandler(dev_mode=True)
-
-def process_message(data):
-    # Start session
+async def process_msg(data: ChatMessage):
+    handler = OrcaHandler()
     session = handler.begin(data)
+    session.stream(f"Echo: {data.message}")
+    session.close()
 
-    # Stream response
-    session.stream("Hello! ")
-    session.stream("How can I help you?")
-
-    # Close session
-    full_response = session.close()
-    return full_response
+app = create_agent_app(process_msg)
+# Run with: uvicorn main:app
 ```
+
+### Manual Message Flow
 
 ### With Loading Indicators
 
@@ -364,23 +363,22 @@ manager.execute(process, data)
 
 ## 🚀 Lambda Deployment
 
-### Basic Lambda Handler
+### Unified Lambda (Recommended)
 
 ```python
-from orca import OrcaHandler, LambdaAdapter
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
 
-handler = OrcaHandler(dev_mode=False)
-adapter = LambdaAdapter()
-
-@adapter.message_handler
-async def process_message(data):
+async def process_message(data: ChatMessage):
+    handler = OrcaHandler()
     session = handler.begin(data)
     session.stream("Response from Lambda!")
     session.close()
 
-def lambda_handler(event, context):
-    return adapter.handle(event, context)
+# Handles HTTP, SQS, and Cron automatically
+handler = create_hybrid_handler(process_message)
 ```
+
+### Manual Lambda Adapter
 
 ## 📦 Storage SDK
 
