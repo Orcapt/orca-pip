@@ -11,6 +11,7 @@ from ..domain import ChatMessage
 from ..adapters import LambdaAdapter
 from ..core import OrcaHandler
 from ..infrastructure.dev_stream_client import DevStreamClient
+from ..config import VERSION
 
 # Optional dependencies for Lambda environment
 try:
@@ -24,6 +25,7 @@ except ImportError:
 def create_hybrid_handler(
     process_message_func: Callable,
     app_title: str = "Orca Hybrid Agent",
+    version: str = None,
     dev_mode: bool = False,
     level: int = logging.INFO
 ):
@@ -32,6 +34,10 @@ def create_hybrid_handler(
     
     Delegates event routing and SQS offloading to the centralized LambdaAdapter.
     """
+    # Resolve version
+    if version is None:
+        version = os.getenv("ORCA_APP_VERSION") or os.getenv("APP_VERSION") or VERSION
+        
     setup_logging(level=level)
     logger = get_logger("orca.lambda")
 
@@ -54,7 +60,7 @@ def create_hybrid_handler(
         return {"status": "success"}
 
     # Initialize FastAPI
-    app = FastAPI(title=app_title)
+    app = FastAPI(title=app_title, version=version)
 
     @app.get("/health")
     async def health_check():

@@ -18,8 +18,8 @@ By participating in this project, you agree to maintain a respectful and inclusi
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/orca-sdk
-cd orca-sdk
+git clone https://github.com/orcapt/orca-pip
+cd orca-pip
 
 # Create virtual environment
 python -m venv venv

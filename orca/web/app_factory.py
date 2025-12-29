@@ -9,10 +9,12 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import logging
+import os
+from ..config import VERSION
 
 def create_orca_app(
     title: str = "Orca AI Agent",
-    version: str = "1.1.0",
+    version: str = None,
     description: str = "AI agent with Orca platform integration",
     debug: bool = False
 ) -> FastAPI:
@@ -21,13 +23,17 @@ def create_orca_app(
     
     Args:
         title: Application title
-        version: Application version
+        version: Application version (defaults to ORCA_APP_VERSION or APP_VERSION env var, then SDK version)
         description: Application description
         debug: Enable debug mode
         
     Returns:
         Configured FastAPI application
     """
+    
+    # Resolve version
+    if version is None:
+        version = os.getenv("ORCA_APP_VERSION") or os.getenv("APP_VERSION") or VERSION
     
     # Create the app
     app = FastAPI(

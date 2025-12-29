@@ -2,7 +2,7 @@
 
 **Official Python SDK for building AI agents on the Orca platform**
 
-Version: 1.2.7 | Python: >=3.8 | License: MIT
+Version: 1.0.4 | Python: >=3.8 | License: MIT
 
 ---
 
@@ -129,7 +129,7 @@ pip install -e .
 ```python
 import orca
 print(f"Orca SDK version: {orca.__version__}")
-# Output: Orca SDK version: 1.2.7
+# Output: Orca SDK version: 1.0.4
 ```
 
 ---
@@ -2630,12 +2630,12 @@ logging.getLogger('orca').setLevel(logging.DEBUG)
 
 ## Package Information
 
-- **Package Name**: `orca`
-- **Current Version**: 1.2.7
+- **Package Name**: `orcapt-sdk`
+- **Current Version**: 1.0.4
 - **Python Support**: >=3.8, <4.0
 - **License**: MIT
 - **Repository**: https://github.com/Orcapt/orca-pip
-- **PyPI**: https://pypi.org/project/orca/
+- **PyPI**: https://pypi.org/project/orcapt-sdk/
 
 ### Dependencies
 

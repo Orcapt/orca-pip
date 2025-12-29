@@ -14,7 +14,7 @@ from orca.web import create_orca_app, add_standard_endpoints
 def create_agent_app(
     process_message_func: Callable,
     title: str = "Orca AI Agent",
-    version: str = "1.0.0",
+    version: str = None,
     description: str = "AI agent with Orca platform integration",
     level: int = logging.INFO
 ):
@@ -40,6 +40,10 @@ def create_agent_app(
     
     # Determine dev mode from environment (defaults to False)
     dev_mode = os.getenv("ORCA_DEV_MODE", "false").lower() == "true"
+    
+    # Resolve version
+    if version is None:
+        version = os.getenv("ORCA_APP_VERSION") or os.getenv("APP_VERSION") or "1.0.4"
     
     # Initialize the core Orca handler
     orca_handler = OrcaHandler(dev_mode=dev_mode)

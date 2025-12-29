@@ -196,8 +196,8 @@ orca/
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/orca-sdk
-cd orca-sdk
+git clone https://github.com/orcapt/orca-pip
+cd orca-pip
 
 # Install dependencies
 pip install -r requirements.txt
@@ -254,10 +254,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- 📧 Email: support@orca.ai
+- 📧 Email: [support@orcapt.com](mailto:support@orcapt.com)
 - 💬 Discord: [Join our community](https://discord.gg/orca)
 - 📚 Docs: [docs.orca.ai](https://docs.orca.ai)
-- 🐛 Issues: [GitHub Issues](https://github.com/your-org/orca-sdk/issues)
+- 🐛 Issues: [GitHub Issues](https://github.com/orcapt/orca-pip/issues)
 
 ## Contributing
 
@@ -269,4 +269,4 @@ Built with ❤️ by the Orca team.
 
 ---
 
-**Made with 🚀 by [Orca](https://orca.ai)**
+**Made with 🚀 by [Orca](https://orcaplatform.com)**

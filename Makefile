@@ -114,7 +114,7 @@ info:
 	@echo "📋 Package Information:"
 	@echo "  Name: orcapt-sdk (PyPI)"
 	@echo "  Module: orca (Python import)"
-	@echo "  Version: 1.0.0"
+	@echo "  Version: 1.0.4"
 	@echo "  Description: Clean, minimal package for Orca platform integration"
 	@echo "  Python: >=3.8"
 	@echo "  Dependencies: requests, pydantic"

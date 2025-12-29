@@ -30,42 +30,26 @@ python examples/error_handling.py
 
 ## Deployment Examples
 
-### 4. `lambda_deployment_simple.py` - Lambda Deployment ⚡
+### 4. `lambda_factory_usage.py` - Modern Lambda Factory ⭐
 
-**Production-ready Lambda handler template.** Copy this as your `lambda_handler.py`!
+**The recommended way to build Lambda Agents.** Uses `create_hybrid_handler` for zero-config routing.
 
 Features:
+- ✅ **One-line setup** for HTTP, SQS, and Cron.
+- ✅ **Automatic SQS Offloading** (just set `SQS_QUEUE_URL`).
+- ✅ **Built-in FastAPI** for health checks and API access.
 
-- ✅ HTTP, SQS, and Cron event handling
-- ✅ Automatic error handling
-- ✅ Ready to customize with your agent logic
-- ✅ Includes OpenAI examples (commented out)
+### 5. `simulate_factory.py` - One-Click Testing 🧪
 
-Deploy:
-
-```bash
-# 1. Copy to your project
-cp examples/lambda_deployment_simple.py lambda_handler.py
-
-# 2. Customize your logic
-# Edit lambda_handler.py
-
-# 3. Build Docker image
-docker build -f Dockerfile.lambda -t my-agent:latest .
-
-# 4. Deploy with orca-cli
-orca ship my-agent --image my-agent:latest --env-file .env
-```
-
-See `LAMBDA_DEPLOY_GUIDE.md` for complete deployment guide.
-
-### 5. `lambda_usage_example.py` - Lambda Advanced Examples
-
-Advanced Lambda examples with different patterns and use cases.
+Demonstrates how to test your hybrid handler locally using `simulate_lambda_handler`.
 
 ```bash
-python examples/lambda_usage_example.py
+python examples/simulate_factory.py
 ```
+
+### 6. `lambda_deployment_simple.py` - Manual Lambda Handler
+
+Classic adapter-based approach for more granular control.
 
 ## Feature Examples
 

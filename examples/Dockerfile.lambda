@@ -22,5 +22,5 @@ COPY lambda_handler.py .
 COPY . .
 
 # Set the Lambda handler
-CMD ["lambda_handler.handler"]
+CMD ["lambda_factory_usage.handler"]
 

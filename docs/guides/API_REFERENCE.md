@@ -503,7 +503,7 @@ from orca import create_agent_app
 app = create_agent_app(
     process_message_func=my_logic,
     app_title="My Agent API",
-    app_version="1.0.0",
+    app_version="1.0.4",
     dev_mode=False
 )
 ```
@@ -514,7 +514,7 @@ app = create_agent_app(
 | ---------------------- | ---------- | ------------ | ------------------------------- |
 | `process_message_func` | `Callable` | **Required** | Async function to handle msg    |
 | `app_title`            | `str`      | `Orca Agent` | FastAPI app title               |
-| `app_version`          | `str`      | `1.0.0`      | FastAPI app version             |
+| `app_version`          | `str`      | `1.0.4`      | FastAPI app version             |
 | `dev_mode`             | `bool`     | `False`      | Development mode flag           |
 
 ---

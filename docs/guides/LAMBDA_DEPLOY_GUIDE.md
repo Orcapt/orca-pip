@@ -278,6 +278,7 @@ The handler prints every key (value masked) on cold start so you can confirm the
 | Function URL returns 403            | Permission missing                                | Re-run `orca ship`; it re-applies `lambda:InvokeFunctionUrl` policy                               |
 | Env vars missing                    | Incorrect `--env` syntax or missing `.env.lambda` | Use `KEY=value` pairs; CLI prints final map—double-check before confirming                         |
 | Centrifugo points to internal URL   | `stream_url` in payload was `null`                | Ensure the invoking service sends `stream_url`/`stream_token`; fallback env can be set             |
+| `InvalidParameterValueException`    | Docker Buildx default attestations (provenance) are not supported by Lambda | Build with: `BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker buildx build --platform linux/amd64 --provenance=false -f Dockerfile.lambda -t my-agent:latest .` |
 | SQS never triggers                  | Event source mapping disabled                     | `orca ship` recreates it; or run `aws lambda list-event-source-mappings --function-name my-agent` |
 
 Need more help? Collect the latest CloudWatch log stream and open a ticket with the Function name + timestamp.
@@ -288,7 +289,7 @@ Need more help? Collect the latest CloudWatch log stream and open a ticket with 
 
 - [ ] `lambda_handler.py` created with `LambdaAdapter`
 - [ ] `@adapter.message_handler` decorator wraps your agent logic
-- [ ] `requirements-lambda.txt` includes `orca>=2.0.0` and your providers
+- [ ] `requirements-lambda.txt` includes `orcapt-sdk>=1.0.4` and your providers
 - [ ] `Dockerfile.lambda` builds successfully locally
 - [ ] `.env.lambda` created with all required variables (never commit!)
 - [ ] Docker image built: `docker build -f Dockerfile.lambda -t my-agent:latest .`

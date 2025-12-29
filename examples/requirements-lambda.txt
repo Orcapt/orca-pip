@@ -5,8 +5,10 @@
 # Keep this minimal for faster cold starts!
 
 # Core (REQUIRED)
-orca>=2.0.0
+orcapt-sdk>=1.0.4
 boto3>=1.34.0
+fastapi>=0.100.0
+mangum>=0.17.0
 
 # Your AI Provider (choose one or more)
 openai>=1.0.0

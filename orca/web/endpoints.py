@@ -39,13 +39,16 @@ def add_standard_endpoints(
         
     Example:
         >>> from fastapi import FastAPI
-        >>> app = FastAPI(title="My Agent", version="1.0.0")
+        >>> app = FastAPI(title="My Agent", version="1.0.4")
         >>> add_standard_endpoints(app, orca_handler=handler)
     """
     
     # Read service name and version from app (with fallback defaults)
     service_name = getattr(app, 'title', "Orca AI Agent")
-    service_version = getattr(app, 'version', "1.1.0")
+    
+    # Resolve version
+    default_version = os.getenv("ORCA_APP_VERSION") or os.getenv("APP_VERSION") or "1.0.4"
+    service_version = getattr(app, 'version', default_version)
     
     # Create router for standard endpoints
     router = APIRouter(prefix="/api/v1", tags=["standard"])

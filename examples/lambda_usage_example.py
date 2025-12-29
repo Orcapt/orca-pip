@@ -1,174 +1,79 @@
 """
-Lambda Usage Example
-====================
+Comprehensive Lambda Guide
+==========================
 
-نحوه استفاده از Orca SDK روی AWS Lambda.
-
-این مثال نشون میده که چطور خیلی راحت agent خودتون رو Lambda-ready کنید.
+This example serves as a complete guide for building and deploying Orca Agents 
+on AWS Lambda using the high-level factory patterns.
 """
 
-# ================== مثال 1: استفاده از Decorator ==================
+import logging
+import asyncio
+from orca import create_hybrid_handler, ChatMessage, OrcaHandler
 
-from orca import OrcaHandler, LambdaAdapter, ChatMessage
+# 1. Initialize Orca Core (Global instance for efficiency)
+orca = OrcaHandler()
 
-# Initialize handler
-handler = OrcaHandler(dev_mode=False)
-
-# Initialize adapter
-adapter = LambdaAdapter()
-
-
-@adapter.message_handler
+# 2. Define Advanced Agent Logic
 async def process_message(data: ChatMessage):
     """
-    Agent logic شما - دقیقاً همون چیزی که روی Docker معمولی مینویسید.
+    A more comprehensive agent logic example with multi-step streaming.
     """
-    # Start session
-    session = handler.begin(data)
+    session = orca.begin(data)
     
     try:
-        # Loading
-        session.loading.start("thinking")
+        # Step 1: Analyzing
+        session.loading.start("analyzing")
+        await asyncio.sleep(0.5)
+        session.stream("I'm analyzing your request...\n\n")
+        session.loading.end("analyzing")
         
-        # Your agent logic here
-        response = f"پاسخ به: {data.message}"
+        # Step 2: Generating
+        session.loading.start("thinking")
+        await asyncio.sleep(1)
+        response = f"Analysis complete for: '{data.message}'.\n"
+        response += "The Orca SDK makes Lambda deployment seamless."
         
         session.loading.end("thinking")
-        
-        # Stream result
         session.stream(response)
         
-        # Add button (optional)
-        session.button.link("مشاهده بیشتر", "https://example.com")
-        
-        # Close session
-        session.close()
-        
-    except Exception as e:
-        session.error("متأسفانه خطایی رخ داد", exception=e)
-
-
-@adapter.cron_handler
-async def scheduled_task(event):
-    """
-    Scheduled task (optional) - برای کارهای دوره‌ای.
-    """
-    print("[CRON] Running maintenance task...")
-    # Your scheduled logic here
-
-
-# Lambda handler
-def lambda_handler(event, context):
-    """
-    این تنها چیزی است که نیاز دارید!
-    Adapter خودش همه چیز رو handle میکنه:
-    - HTTP requests (Function URL)
-    - SQS events
-    - Cron events
-    """
-    return adapter.handle(event, context)
-
-
-# ================== مثال 2: استفاده از Helper Function ==================
-
-"""
-from orca import OrcaHandler, create_lambda_handler, ChatMessage
-
-handler = OrcaHandler(dev_mode=False)
-
-
-async def process_message(data: ChatMessage):
-    session = handler.begin(data)
-    session.stream("Hello from Lambda!")
-    session.close()
-
-
-# یک خطی!
-handler_func = create_lambda_handler(process_message)
-
-
-def lambda_handler(event, context):
-    return handler_func(event, context)
-"""
-
-
-# ================== مثال 3: با OpenAI ==================
-
-"""
-from orca import OrcaHandler, LambdaAdapter, ChatMessage
-from openai import OpenAI
-
-handler = OrcaHandler(dev_mode=False)
-adapter = LambdaAdapter()
-client = OpenAI()
-
-
-@adapter.message_handler
-async def process_message(data: ChatMessage):
-    session = handler.begin(data)
-    
-    try:
-        session.loading.start("thinking")
-        
-        # Call OpenAI
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[{"role": "user", "content": data.message}],
-            stream=True
-        )
-        
-        session.loading.end("thinking")
-        
-        # Stream response
-        for chunk in response:
-            if chunk.choices[0].delta.content:
-                session.stream(chunk.choices[0].delta.content)
+        # Step 3: Interaction
+        session.button.link("API Reference", "https://docs.orcapt.com/api")
         
         session.close()
         
     except Exception as e:
-        session.error("خطا در پردازش درخواست", exception=e)
+        session.error("An error occurred during processing", exception=e)
 
+# 3. Dedicated Cron/Scheduled Handler (Optional)
+# The factory runs this automatically for 'Scheduled Event' sources
+# if it's decorated or part of the internal adapter state.
+# For simplicity, create_hybrid_handler uses a default success logger for cron.
 
-def lambda_handler(event, context):
-    return adapter.handle(event, context)
-"""
+# 4. Create the Universal Handler
+# This factory simplifies setup by wrapping FastAPI, Mangum, and SQS routing.
+handler = create_hybrid_handler(
+    process_message_func=process_message,
+    app_title="Comprehensive Orca Agent",
+    level=logging.INFO,
+    dev_mode=True  # Enables verbose logging and direct streaming in dev
+)
 
+# ============================================================================
+# DEPLOYMENT SUMMARY
+# ============================================================================
+#
+# 1. Dockerfile:
+#    CMD ["lambda_usage_example.handler"]
+#
+# 2. Environment Variables:
+#    - SQS_QUEUE_URL: Set this to enable async offloading
+#    - APP_VERSION: Overrides the default health check version
+#
+# 3. orca ship:
+#    $ orca ship my-agent --image my-agent-tag
+#
+# ============================================================================
 
-# ================== نکات مهم ==================
-
-"""
-1️⃣  Agent logic شما دقیقاً مثل قبل است!
-   فقط باید async باشه.
-
-2️⃣  Adapter خودش handle میکنه:
-   - HTTP → direct یا queue to SQS
-   - SQS → process message
-   - Cron → scheduled task
-
-3️⃣  Environment variables:
-   - SQS_QUEUE_URL: اگر set باشه، requests به SQS میرن
-   - اگر نباشه، direct process میشن
-
-4️⃣  Deploy با orca-cli:
-   $ orca ship my-agent --image my-agent:latest
-   
-   orca-cli خودش:
-   - Image رو push میکنه
-   - Lambda function رو create/update میکنه
-   - SQS queue رو configure میکنه
-   - Function URL رو create میکنه
-
-5️⃣  Dockerfile.lambda:
-   FROM public.ecr.aws/lambda/python:3.11
-   
-   COPY requirements.txt .
-   RUN pip install -r requirements.txt
-   
-   COPY lambda_handler.py .
-   
-   CMD ["lambda_handler.lambda_handler"]
-"""
-
-print(__doc__)
-
+if __name__ == "__main__":
+    print(__doc__)
+    print("Use 'simulate_factory.py' to test this handler locally.")
