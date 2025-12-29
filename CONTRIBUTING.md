@@ -269,7 +269,7 @@ Releases are handled by maintainers:
 
 - Open an issue for bugs or feature requests
 - Join our Discord for discussions
-- Email support@orca.ai for other questions
+- Email support@orcaolatform.ai for other questions
 
 ## License
 

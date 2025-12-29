@@ -315,7 +315,7 @@ If you suspect a security breach:
 
 1. **Contain**: Isolate affected systems
 2. **Assess**: Determine scope and impact
-3. **Notify**: Contact security@orcapt.com
+3. **Notify**: Contact support@orcaolatform.ai
 4. **Remediate**: Apply fixes
 5. **Review**: Conduct post-incident review
 
@@ -323,4 +323,4 @@ If you suspect a security breach:
 
 This security policy is updated regularly. Last update: December 2025
 
-For questions: security@orcapt.com
+For questions: support@orcaolatform.ai

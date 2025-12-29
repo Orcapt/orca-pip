@@ -2631,7 +2631,7 @@ logging.getLogger('orca').setLevel(logging.DEBUG)
 ## Package Information
 
 - **Package Name**: `orcapt-sdk`
-- **Current Version**: 1.0.4
+- **Current Version**: 1.0.5
 - **Python Support**: >=3.8, <4.0
 - **License**: MIT
 - **Repository**: https://github.com/Orcapt/orca-pip
@@ -2661,16 +2661,16 @@ logging.getLogger('orca').setLevel(logging.DEBUG)
 
 ```bash
 # Basic
-pip install orca
+pip install orca-sdk
 
 # With web support
-pip install orca[web]
+pip install orca-sdk[web]
 
 # With dev tools
-pip install orca[dev]
+pip install orca-sdk[dev]
 
 # Everything
-pip install orca[web,dev]
+pip install orca-sdk[web,dev]
 ```
 
 ---

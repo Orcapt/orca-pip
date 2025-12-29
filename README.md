@@ -254,9 +254,8 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## Support
 
-- 📧 Email: [support@orcapt.com](mailto:support@orcapt.com)
-- 💬 Discord: [Join our community](https://discord.gg/orca)
-- 📚 Docs: [docs.orca.ai](https://docs.orca.ai)
+- 📧 Email: [support@orcaolatform.ai](mailto:support@orcaolatform.ai)
+- 📚 Docs: [docs.orcaplatform.ai](https://docs.orcaplatform.ai)
 - 🐛 Issues: [GitHub Issues](https://github.com/orcapt/orca-pip/issues)
 
 ## Contributing

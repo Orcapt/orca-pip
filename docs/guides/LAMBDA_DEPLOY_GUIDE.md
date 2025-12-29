@@ -17,12 +17,12 @@ Nothing in this guide depends on any internal repositories or starter kits. Foll
 | Docker 24+ with BuildKit enabled           | Build the Lambda container image              |
 | AWS account + IAM user/role                | Push to ECR and create Lambda/SQS resources   |
 | AWS CLI v2 (`aws --version`)               | Login to ECR, test SQS, inspect Lambda        |
-| `orca-cli ≥ 1.12.0`                       | Runs `orca ship` which talks to platform API |
-| `orca` PyPI package (`pip install orca`) | Provides `ChatMessage`, `OrcaHandler`, etc.  |
+| `orcapt-cli ≥ 1.12.0`                       | Runs `orcapt ship` which talks to platform API |
+| `orcapt-sdk` PyPI package (`pip install orcapt-sdk`) | Provides `ChatMessage`, `OrcaHandler`, etc.  |
 | `jq` (optional)                            | Formatting JSON for curl/SQS tests            |
 | Text editor + git                          | Modify starter kit and track your changes     |
 
-> **AWS Permissions:** The IAM principal used by `orca ship` must have `ecr:*`, `lambda:*`, `sqs:*`, `iam:PassRole`, and CloudWatch Logs access. Your platform admin can scope this via IAM policies.
+> **AWS Permissions:** The IAM principal used by `orcapt ship` must have `ecr:*`, `lambda:*`, `sqs:*`, `iam:PassRole`, and CloudWatch Logs access. Your platform admin can scope this via IAM policies.
 
 ---
 
@@ -101,7 +101,7 @@ CMD ["lambda_handler.handler"]
 
 ```txt
 # Core (Package name is orcapt-sdk, import is orca)
-orcapt-sdk>=1.0.4
+orcapt-sdk>=1.0.5
 boto3>=1.34.0
 
 # Your providers
@@ -130,7 +130,7 @@ Tips:
 docker build -f Dockerfile.lambda -t my-agent:latest .
 ```
 
-**Note:** You don't need to push to ECR manually! `orca ship` will handle the ECR push automatically.
+**Note:** You don't need to push to ECR manually! `orcapt ship` will handle the ECR push automatically.
 
 ---
 
@@ -146,28 +146,28 @@ STREAM_TOKEN=ST_xxx
 LOG_LEVEL=info
 ```
 
-The Orca CLI will also inject:
+The orcapt CLI will also inject:
 
 - `SQS_QUEUE_URL` (auto-created per function)
 - Any flags you pass via repeated `--env KEY=value`
 
 ---
 
-## 7. Deploy with `orca ship`
+## 7. Deploy with `orcapt ship`
 
 ```bash
 # Login to orca-cli
-orca login --api-url https://platform.orca.ai --token <personal-access-token>
+orcapt login --api-url https://platform.orca.ai --token <personal-access-token>
 
 # Deploy (orca-cli handles EVERYTHING!)
-orca ship my-agent \
+orcapt ship my-agent \
   --image my-agent:latest \
   --memory 2048 \
   --timeout 300 \
   --env-file ./.env.lambda
 ```
 
-**What `orca ship` does automatically:**
+**What `orcapt ship` does automatically:**
 
 1. ✅ **Pushes image to ECR** - No manual ECR login/push needed
 2. ✅ **Creates/updates Lambda function** - Using your image
@@ -189,7 +189,7 @@ orca ship my-agent \
 Deploy complete! 🚀
 ```
 
-You can re-run `orca ship` any time to update code or environment variables.
+You can re-run `orcapt ship` any time to update code or environment variables.
 
 ---
 
@@ -229,7 +229,7 @@ curl -XPOST https://<function-url>/ \
 **View logs:**
 
 ```bash
-orca lambda logs my-agent --tail
+orcapt lambda logs my-agent --tail
 
 # Or use AWS CLI
 aws logs tail /aws/lambda/my-agent --follow
@@ -273,13 +273,13 @@ The handler prints every key (value masked) on cold start so you can confirm the
 
 | Symptom                             | Root cause                                        | Fix                                                                                                |
 | ----------------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `TLS handshake timeout` during push | Slow network / ECR region mismatch                | Re-run `orca ship` (retries enabled) or push from an EC2 builder in the same region               |
+| `TLS handshake timeout` during push | Slow network / ECR region mismatch                | Re-run `orcapt ship` (retries enabled) or push from an EC2 builder in the same region               |
 | `Runtime.ExitError` right away      | Wrong base image or missing handler               | Use `public.ecr.aws/lambda/python:3.11` and `CMD ["lambda_handler.handler"]`                       |
-| Function URL returns 403            | Permission missing                                | Re-run `orca ship`; it re-applies `lambda:InvokeFunctionUrl` policy                               |
+| Function URL returns 403            | Permission missing                                | Re-run `orcapt ship`; it re-applies `lambda:InvokeFunctionUrl` policy                               |
 | Env vars missing                    | Incorrect `--env` syntax or missing `.env.lambda` | Use `KEY=value` pairs; CLI prints final map—double-check before confirming                         |
 | Centrifugo points to internal URL   | `stream_url` in payload was `null`                | Ensure the invoking service sends `stream_url`/`stream_token`; fallback env can be set             |
 | `InvalidParameterValueException`    | Docker Buildx default attestations (provenance) are not supported by Lambda | Build with: `BUILDX_NO_DEFAULT_ATTESTATIONS=1 docker buildx build --platform linux/amd64 --provenance=false -f Dockerfile.lambda -t my-agent:latest .` |
-| SQS never triggers                  | Event source mapping disabled                     | `orca ship` recreates it; or run `aws lambda list-event-source-mappings --function-name my-agent` |
+| SQS never triggers                  | Event source mapping disabled                     | `orcapt ship` recreates it; or run `aws lambda list-event-source-mappings --function-name my-agent` |
 
 Need more help? Collect the latest CloudWatch log stream and open a ticket with the Function name + timestamp.
 
@@ -293,10 +293,10 @@ Need more help? Collect the latest CloudWatch log stream and open a ticket with 
 - [ ] `Dockerfile.lambda` builds successfully locally
 - [ ] `.env.lambda` created with all required variables (never commit!)
 - [ ] Docker image built: `docker build -f Dockerfile.lambda -t my-agent:latest .`
-- [ ] `orca ship my-agent --image my-agent:latest --env-file .env.lambda` executed
-- [ ] Function URL received from `orca ship` output
+- [ ] `orcapt ship my-agent --image my-agent:latest --env-file .env.lambda` executed
+- [ ] Function URL received from `orcapt ship` output
 - [ ] Test HTTP request works: `curl -XPOST <function-url> ...`
-- [ ] Check logs: `orca lambda logs my-agent --tail`
+- [ ] Check logs: `orcapt lambda logs my-agent --tail`
 - [ ] Verify SQS processing in logs: `[SQS] Processing ... Message completed ✓`
 
 Once all boxes are checked, your agent is production-ready on AWS Lambda! 🚀

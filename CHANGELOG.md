@@ -92,6 +92,5 @@ The old flat session API still works but is deprecated and will be removed in fu
 
 For questions or issues:
 
-- Email: [support@orcapt.com](mailto:support@orcapt.com)
-- Discord: [Join our community](https://discord.gg/orca)
+- Email: [support@orcaolatform.ai](mailto:support@orcaolatform.ai)
 - GitHub: [orcapt/orca-pip](https://github.com/orcapt/orca-pip/issues)

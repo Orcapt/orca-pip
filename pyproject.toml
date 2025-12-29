@@ -4,15 +4,15 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orcapt-sdk"
-version = "1.0.4"
+version = "1.0.5"
 description = "Clean, minimal package for Orca platform integration"
 readme = "README.md"
 license = {text = "MIT"}
 authors = [
-    {name = "Orca Team", email = "support@orcapt.com"}
+    {name = "Orca Team", email = "support@orcaolatform.ai"}
 ]
 maintainers = [
-    {name = "Orca Team", email = "support@orcapt.com"}
+    {name = "Orca Team", email = "support@orcaolatform.ai"}
 ]
 keywords = ["orca", "ai", "chatbot", "platform", "integration", "fastapi", "real-time"]
 classifiers = [

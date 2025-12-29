@@ -52,6 +52,5 @@ Orca SDK follows clean architecture with these layers:
 
 For questions or issues:
 
-- Email: [support@orcapt.com](mailto:support@orcapt.com)
-- Discord: [Join our community](https://discord.gg/orca)
+- Email: [support@orcaolatform.ai](mailto:support@orcaolatform.ai)
 - GitHub: [orcapt/orca-pip](https://github.com/orcapt/orca-pip/issues)
