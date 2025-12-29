@@ -393,9 +393,6 @@ storage = OrcaStorage(
     base_url="https://api.example.com/storage"
 )
 
-# Create bucket
-storage.create_bucket("my-bucket", visibility="private")
-
 # Upload file
 file = storage.upload_file("my-bucket", "local/file.jpg")
 
