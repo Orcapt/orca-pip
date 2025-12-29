@@ -310,11 +310,27 @@ def add_standard_endpoints(
                     }
                 )
             
-            # PRODUCTION MODE: Return immediate response, process in background
+            # PRODUCTION MODE: Return immediate response, process in background thread
             else:
-                logger.info("🚀 Production mode: Processing in background")
-                # Start processing in background
-                asyncio.create_task(process_message_func(data))
+                logger.info("🚀 Production mode: Processing in background thread")
+                
+                # Start processing in a background thread to avoid blocking event loop
+                def _run_in_thread():
+                    try:
+                        # Create a new event loop for this thread since process_message_func is async
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        loop.run_until_complete(process_message_func(data))
+                    except Exception as e:
+                        logger.error(f"Production background thread error: {e}")
+                    finally:
+                        try:
+                            loop.close()
+                        except Exception:
+                            pass
+                            
+                bg_thread = threading.Thread(target=_run_in_thread, daemon=True)
+                bg_thread.start()
                 
                 # Return immediate success response
                 return create_success_response(
