@@ -9,6 +9,7 @@ Complete documentation for the Orca SDK.
 - [Quick Reference](guides/QUICK_REFERENCE.md) - API reference and examples
 - [Developer Guide](guides/DEVELOPER_GUIDE.md) - Complete development guide
 - [Dev Mode Guide](guides/DEV_MODE_GUIDE.md) - Local development setup
+- [AI Agent Guide](AI_AGENT_GUIDE.md) - **Comprehensive guide for AI coding assistants**
 
 ### Core Documentation
 
