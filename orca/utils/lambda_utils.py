@@ -51,6 +51,10 @@ def create_hybrid_handler(
     @adapter.message_handler
     async def handle_message(data: ChatMessage):
         """Processes messages via SQS or Direct Adapter trigger."""
+        # Wait for sleep_time before starting to stream
+        if data.sleep_time and data.sleep_time > 0:
+            logger.info(f"⏳ Waiting {data.sleep_time} seconds before starting stream...")
+            await asyncio.sleep(data.sleep_time)
         return await process_message_func(data)
 
     @adapter.cron_handler
@@ -76,6 +80,10 @@ def create_hybrid_handler(
             return adapter.offload_to_sqs(data, queue_url)
 
         logger.info("SQS not configured, processing message synchronously...")
+        # Wait for sleep_time before starting to stream
+        if data.sleep_time and data.sleep_time > 0:
+            logger.info(f"⏳ Waiting {data.sleep_time} seconds before starting stream...")
+            await asyncio.sleep(data.sleep_time)
         await process_message_func(data)
         return {"status": "processed", "response_uuid": data.response_uuid}
 

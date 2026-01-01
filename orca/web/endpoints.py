@@ -241,6 +241,10 @@ def add_standard_endpoints(
                         try:
                             loop = asyncio.new_event_loop()
                             asyncio.set_event_loop(loop)
+                            # Wait for sleep_time before starting to stream
+                            if data.sleep_time and data.sleep_time > 0:
+                                logger.info(f"⏳ Waiting {data.sleep_time} seconds before starting stream...")
+                                time.sleep(data.sleep_time)
                             loop.run_until_complete(process_message_func(data))
                         except Exception as e:
                             logger.error(f"Background thread error: {e}")
@@ -320,6 +324,10 @@ def add_standard_endpoints(
                         # Create a new event loop for this thread since process_message_func is async
                         loop = asyncio.new_event_loop()
                         asyncio.set_event_loop(loop)
+                        # Wait for sleep_time before starting to stream
+                        if data.sleep_time and data.sleep_time > 0:
+                            logger.info(f"⏳ Waiting {data.sleep_time} seconds before starting stream...")
+                            time.sleep(data.sleep_time)
                         loop.run_until_complete(process_message_func(data))
                     except Exception as e:
                         logger.error(f"Production background thread error: {e}")

@@ -53,6 +53,7 @@ class ChatMessage(BaseModel):
     stream_token: Optional[str] = None
     headers: Optional[Dict[str, str]] = None
     sleep_time: Optional[int] = None
+    isData: Optional[bool] = False
 
 
 class ChatResponse(BaseModel):
