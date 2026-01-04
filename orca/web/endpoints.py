@@ -278,12 +278,30 @@ def add_standard_endpoints(
                                     # SSE format forces browsers to process immediately
                                     # IMPORTANT: We send plain text, frontend will trim leading spaces (BUG!)
                                     # Workaround: Prepend zero-width space (\u200b) to preserve spacing
-                                    preserved_content = content if not content.startswith(' ') else '\u200b' + content
-                                    sse_chunk = f"data: {preserved_content}\n\n"
-                                    chunk_data = sse_chunk.encode('utf-8')
-                                    logger.info(f"🔴 [13-ENDPOINT] About to yield SSE chunk: {len(chunk_data)} bytes")
-                                    yield chunk_data
-                                    logger.info(f"🔴 [14-ENDPOINT] Yielded SSE chunk to HTTP response!")
+                                    
+                                    # For SSE format, if content contains newlines, send as multi-line event
+                                    # SSE spec: multi-line data = each line prefixed with "data:", event ends with "\n\n"
+                                    if '\n' in content:
+                                        # Content has newlines - send as single multi-line SSE event
+                                        lines = content.split('\n')
+                                        sse_chunk = ""
+                                        for line in lines:
+                                            # Preserve indentation by prepending zero-width space if starts with space
+                                            preserved_line = line if not line.startswith(' ') else '\u200b' + line
+                                            sse_chunk += f"data: {preserved_line}\n"
+                                        # Add final newline to complete the SSE event
+                                        sse_chunk += "\n"
+                                        chunk_data = sse_chunk.encode('utf-8')
+                                        logger.info(f"🔴 [13-ENDPOINT] Yielding multi-line SSE chunk ({len(lines)} lines): {repr(content[:50])}")
+                                        yield chunk_data
+                                    else:
+                                        # Single line - send as-is with spacing preservation
+                                        preserved_content = content if not content.startswith(' ') else '\u200b' + content
+                                        sse_chunk = f"data: {preserved_content}\n\n"
+                                        chunk_data = sse_chunk.encode('utf-8')
+                                        logger.info(f"🔴 [13-ENDPOINT] Yielding single-line SSE chunk: {len(chunk_data)} bytes, content: {repr(content[:50])}")
+                                        yield chunk_data
+                                    logger.info(f"🔴 [14-ENDPOINT] Yielded SSE chunk(s) to HTTP response!")
                                     
                                 elif event_type == 'complete':
                                     # Streaming finished
