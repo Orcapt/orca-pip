@@ -23,6 +23,8 @@ class Variable(BaseModel):
     """Variable model for environment variables from Orca request."""
     name: str
     value: str
+    id : str = ""
+    type: str = ""
 
 
 class ChatMessage(BaseModel):
