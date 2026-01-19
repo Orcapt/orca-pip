@@ -20,10 +20,10 @@ Professional Python SDK for building real-time AI agents with streaming and prod
 ### Installation
 
 ```bash
-pip install orcapt-sdk
+pip install orca-platform-sdk-ui
 ```
 
-**Note:** The package name on PyPI is `orcapt-sdk`, but imports still use `orca`:
+**Note:** The package name on PyPI is `orca-platform-sdk-ui`, but imports still use `orca`:
 
 ```python
 from orca import OrcaHandler  # ✅ Correct

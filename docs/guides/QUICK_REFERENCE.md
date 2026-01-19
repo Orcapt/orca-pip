@@ -5,7 +5,7 @@ Fast API reference for Orca SDK with common usage patterns.
 ## 📦 Installation
 
 ```bash
-pip install orcapt-sdk
+pip install orca-platform-sdk-ui
 ```
 
 ## 🚀 Quick Start

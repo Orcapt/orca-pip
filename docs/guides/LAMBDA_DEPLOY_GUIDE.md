@@ -18,7 +18,7 @@ Nothing in this guide depends on any internal repositories or starter kits. Foll
 | AWS account + IAM user/role                | Push to ECR and create Lambda/SQS resources   |
 | AWS CLI v2 (`aws --version`)               | Login to ECR, test SQS, inspect Lambda        |
 | `orcapt-cli ≥ 1.12.0`                       | Runs `orcapt ship` which talks to platform API |
-| `orcapt-sdk` PyPI package (`pip install orcapt-sdk`) | Provides `ChatMessage`, `OrcaHandler`, etc.  |
+| `orca-platform-sdk-ui` PyPI package (`pip install orca-platform-sdk-ui`) | Provides `ChatMessage`, `OrcaHandler`, etc.  |
 | `jq` (optional)                            | Formatting JSON for curl/SQS tests            |
 | Text editor + git                          | Modify starter kit and track your changes     |
 
@@ -100,8 +100,8 @@ CMD ["lambda_handler.handler"]
 **requirements-lambda.txt:**
 
 ```txt
-# Core (Package name is orcapt-sdk, import is orca)
-orcapt-sdk>=1.0.5
+# Core (Package name is orca-platform-sdk-ui, import is orca)
+orca-platform-sdk-ui>=1.0.5
 boto3>=1.34.0
 
 # Your providers
@@ -289,7 +289,7 @@ Need more help? Collect the latest CloudWatch log stream and open a ticket with 
 
 - [ ] `lambda_handler.py` created with `LambdaAdapter`
 - [ ] `@adapter.message_handler` decorator wraps your agent logic
-- [ ] `requirements-lambda.txt` includes `orcapt-sdk>=1.0.4` and your providers
+- [ ] `requirements-lambda.txt` includes `orca-platform-sdk-ui>=1.0.4` and your providers
 - [ ] `Dockerfile.lambda` builds successfully locally
 - [ ] `.env.lambda` created with all required variables (never commit!)
 - [ ] Docker image built: `docker build -f Dockerfile.lambda -t my-agent:latest .`

@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "orcapt-sdk"
-version = "1.0.5"
+name = "orca-platform-sdk-ui"
+version = "1.0.6"
 description = "Clean, minimal package for Orca platform integration"
 readme = "README.md"
 license = {text = "MIT"}

@@ -18,6 +18,7 @@ from .audio_ops import AudioOperations
 from .tracing_ops import TracingOperations
 from .usage_ops import UsageOperations
 from .button_ops import ButtonOperations
+from .escalation_ops import EscalationOperations
 from ...helpers.button_helper import ButtonHelper
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,7 @@ class Session:
         self.audio = AudioOperations(self._stream_wrapper)
         self.tracing = TracingOperations(handler, self._stream_wrapper)
         self.usage = UsageOperations(handler, data)
+        self.escalation = EscalationOperations(handler, data)
         
         # Button helper (public namespace)
         self.button = ButtonHelper(self)
@@ -85,6 +87,32 @@ class Session:
     def error(self, error_message: str, exception: Exception = None, trace: str = None) -> None:
         """Send error."""
         self._handler.send_error(self._data, error_message, trace=trace, exception=exception)
+    
+    def escalate(
+        self, 
+        action: str = "human_handoff", 
+        # summary: Optional[str] = None,  # Deactivated for now
+        reason: Optional[str] = None
+    ) -> bool:
+        """
+        Escalate conversation for human review.
+        
+        Args:
+            action: Escalation action type (default: "human_handoff")
+            # summary: Optional AI-generated summary  # Deactivated for now
+            reason: Optional categorization/reason
+            
+        Returns:
+            True if escalation succeeded, False otherwise
+            
+        Example:
+            session.escalate(
+                action="human_handoff",
+                # summary="Customer needs refund assistance",  # Deactivated for now
+                reason="refund_request"
+            )
+        """
+        return self.escalation.escalate(action=action, reason=reason)
     
     # ==================== Wrapper for Delegation ====================
     

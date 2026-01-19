@@ -2630,12 +2630,12 @@ logging.getLogger('orca').setLevel(logging.DEBUG)
 
 ## Package Information
 
-- **Package Name**: `orcapt-sdk`
+- **Package Name**: `orca-platform-sdk-ui`
 - **Current Version**: 1.0.5
 - **Python Support**: >=3.8, <4.0
 - **License**: MIT
 - **Repository**: https://github.com/Orcapt/orca-pip
-- **PyPI**: https://pypi.org/project/orcapt-sdk/
+- **PyPI**: https://pypi.org/project/orca-platform-sdk-ui/
 
 ### Dependencies
 

@@ -14,7 +14,7 @@ from typing import Final
 
 # ==================== Version ====================
 
-VERSION: Final[str] = "1.0.4"
+VERSION: Final[str] = "1.0.6"
 
 
 # ==================== Default Values ====================

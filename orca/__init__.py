@@ -55,7 +55,8 @@ from .services import (
     UsageTracker,
     TracingService,
     ErrorHandler,
-    ResponseBuilder
+    ResponseBuilder,
+    EscalationService
 )
 
 # Patterns (for advanced usage)
@@ -135,6 +136,7 @@ __all__ = [
     'TracingService',
     'ErrorHandler',
     'ResponseBuilder',
+    'EscalationService',
     # Patterns
     'OrcaBuilder',
     'SessionBuilder',

@@ -12,6 +12,7 @@ from .usage_tracker import UsageTracker
 from .tracing_service import TracingService
 from .error_handler import ErrorHandler
 from .response_builder import ResponseBuilder
+from .escalation_service import EscalationService
 
 __all__ = [
     'BufferManager',
@@ -21,5 +22,6 @@ __all__ = [
     'TracingService',
     'ErrorHandler',
     'ResponseBuilder',
+    'EscalationService',
 ]
 

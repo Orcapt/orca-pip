@@ -21,7 +21,7 @@ from ..domain.interfaces import (
 from ..factories import StreamClientFactory
 from ..services import (
     BufferManager, ButtonRenderer, LoadingMarkerProvider, UsageTracker,
-    TracingService, ErrorHandler, ResponseBuilder
+    TracingService, ErrorHandler, ResponseBuilder, EscalationService
 )
 from ..infrastructure.api_client import APIClient
 from .session import Session
@@ -70,6 +70,7 @@ class OrcaHandler:
         self._tracing_service = tracing_service or TracingService()
         self._error_handler = error_handler or ErrorHandler()
         self._response_builder = response_builder or ResponseBuilder()
+        self._escalation_service = EscalationService(self._api_client)
         
         mode = "DEV" if self.dev_mode else "PRODUCTION"
         logger.info(f"🚀 OrcaHandler initialized in {mode} mode")
