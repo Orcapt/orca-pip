@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "orca-platform-sdk-ui"
-version = "1.0.7"
+version = "1.0.8"
 description = "Clean, minimal package for Orca platform integration"
 readme = "README.md"
 license = {text = "MIT"}
