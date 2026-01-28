@@ -31,6 +31,18 @@ Guidelines:
 
 # ==================== Loading Markers ====================
 
+class ResponseMode(str, Enum):
+    """Response processing mode - controls how the API handles the request."""
+    SYNC = "sync"    # Wait for complete response before returning (blocking)
+    ASYNC = "async"  # Return immediately, process in background (non-blocking)
+
+
+class StreamMode(str, Enum):
+    """Stream output mode - controls real-time token streaming."""
+    ENABLED = "true"   # Stream tokens in real-time via Centrifugo
+    DISABLED = "false" # No streaming, response sent only on completion
+
+
 class LoadingKind(str, Enum):
     """Types of loading indicators."""
     THINKING = "thinking"
@@ -252,6 +264,8 @@ __all__ = [
     # Version
     'VERSION',
     # Enums
+    'ResponseMode',
+    'StreamMode',
     'LoadingKind',
     'ButtonColor',
     'ButtonType',

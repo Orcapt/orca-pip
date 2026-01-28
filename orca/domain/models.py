@@ -56,6 +56,9 @@ class ChatMessage(BaseModel):
     headers: Optional[Dict[str, str]] = None
     sleep_time: Optional[int] = None
     isData: Optional[bool] = False
+    # Request processing modes (per-request configuration)
+    response_mode: str = "async"  # "sync" (blocking) or "async" (non-blocking, default)
+    stream_mode: bool = True      # True = stream tokens in real-time, False = no streaming
 
 
 class ChatResponse(BaseModel):

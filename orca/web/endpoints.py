@@ -211,7 +211,125 @@ def add_standard_endpoints(
                     logger.error(f"Failed to convert base64 to file: {e}")
                     raise HTTPException(status_code=400, detail=f"Failed to process file: {e}")
             
-            # DEV MODE: Return streaming response directly
+            # SYNC MODE: Process synchronously and return complete response
+            # This is used by webhooks that need to wait for the full response
+            if data.response_mode == "sync" and not data.stream_mode:
+                logger.info("🔄 Sync mode: Processing synchronously (no streaming)")
+                from ..infrastructure.dev_stream_client import DevStreamClient
+                
+                try:
+                    # Wait for sleep_time if specified
+                    if data.sleep_time and data.sleep_time > 0:
+                        logger.info(f"⏳ Sync mode: Waiting {data.sleep_time} seconds before processing...")
+                        await asyncio.sleep(data.sleep_time)
+                    
+                    # Clear any existing stream data for this channel
+                    DevStreamClient.clear_stream(data.channel)
+                    
+                    # Process message synchronously (await directly, not in background thread)
+                    await process_message_func(data)
+                    
+                    # Get the complete response from DevStreamClient
+                    stream_data = DevStreamClient.get_stream(data.channel)
+                    full_response = stream_data.get('full_response', '')
+                    
+                    logger.info(f"✅ Sync mode: Processing complete, response length: {len(full_response)} chars")
+                    
+                    # Clean up
+                    DevStreamClient.clear_stream(data.channel)
+                    
+                    return {
+                        "status": "success",
+                        "response_uuid": data.response_uuid,
+                        "thread_id": data.thread_id,
+                        "content": full_response,
+                        "streaming": False
+                    }
+                except Exception as e:
+                    logger.error(f"❌ Sync mode processing error: {e}")
+                    # Clean up on error
+                    DevStreamClient.clear_stream(data.channel)
+                    return {
+                        "status": "error",
+                        "response_uuid": data.response_uuid,
+                        "thread_id": data.thread_id,
+                        "error": str(e),
+                        "streaming": False
+                    }
+            
+            # ASYNC + NO STREAM: Return immediately, process in background, NO Centrifugo streaming
+            # Only send final response via backend callback URL (data.url)
+            # This is useful when you want background processing but no real-time streaming
+            if data.response_mode == "async" and not data.stream_mode:
+                logger.info("🔇 Async + No Stream: Processing in background, no streaming")
+                
+                def _run_in_thread():
+                    try:
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        if data.sleep_time and data.sleep_time > 0:
+                            logger.info(f"⏳ Waiting {data.sleep_time} seconds before processing...")
+                            time.sleep(data.sleep_time)
+                        loop.run_until_complete(process_message_func(data))
+                    except Exception as e:
+                        logger.error(f"Async no-stream background thread error: {e}")
+                    finally:
+                        try:
+                            loop.close()
+                        except Exception:
+                            pass
+                
+                bg_thread = threading.Thread(target=_run_in_thread, daemon=True)
+                bg_thread.start()
+                
+                return create_success_response(
+                    response_uuid=data.response_uuid,
+                    thread_id=data.thread_id
+                )
+            
+            # SYNC + STREAM: In dev mode, allow SSE streaming. In production, fall back to sync + no stream.
+            # Rationale: sync + stream doesn't make sense in production because:
+            # - Sync means the HTTP response waits for completion
+            # - Stream means push to Centrifugo (which requires async HTTP return)
+            # In dev mode, we can stream via SSE in the HTTP response itself.
+            if data.response_mode == "sync" and data.stream_mode:
+                if not orca_handler.dev_mode:
+                    # In production, sync + stream is not practical, fall back to sync + no stream
+                    logger.warning("⚠️ Sync + Stream requested in production - falling back to sync + no stream")
+                    from ..infrastructure.dev_stream_client import DevStreamClient
+                    
+                    try:
+                        if data.sleep_time and data.sleep_time > 0:
+                            await asyncio.sleep(data.sleep_time)
+                        
+                        DevStreamClient.clear_stream(data.channel)
+                        await process_message_func(data)
+                        
+                        stream_data = DevStreamClient.get_stream(data.channel)
+                        full_response = stream_data.get('full_response', '')
+                        DevStreamClient.clear_stream(data.channel)
+                        
+                        return {
+                            "status": "success",
+                            "response_uuid": data.response_uuid,
+                            "thread_id": data.thread_id,
+                            "content": full_response,
+                            "streaming": False
+                        }
+                    except Exception as e:
+                        logger.error(f"❌ Sync + Stream fallback error: {e}")
+                        DevStreamClient.clear_stream(data.channel)
+                        return {
+                            "status": "error",
+                            "response_uuid": data.response_uuid,
+                            "thread_id": data.thread_id,
+                            "error": str(e),
+                            "streaming": False
+                        }
+                # In dev mode, fall through to SSE streaming below
+                logger.info("🔧 Sync + Stream in dev mode: Using SSE streaming")
+            
+            # DEV MODE: Return streaming response directly (async + stream in dev)
             if orca_handler.dev_mode:
                 logger.info("🔧 Dev mode: Streaming response directly")
                 
