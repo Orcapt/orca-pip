@@ -27,7 +27,7 @@ def read_requirements():
 
 setup(
     name="orca-platform-sdk-ui",
-    version="1.0.8",
+    version="1.0.9",
     author="Orca Team",
     author_email="support@orcapt.com",
     description="Clean, minimal package for Orca platform integration",
