@@ -19,6 +19,7 @@ from .tracing_ops import TracingOperations
 from .usage_ops import UsageOperations
 from .button_ops import ButtonOperations
 from .escalation_ops import EscalationOperations
+from .html_ops import HtmlOperations
 from ...helpers.button_helper import ButtonHelper
 
 logger = logging.getLogger(__name__)
@@ -57,6 +58,7 @@ class Session:
         self.location = LocationOperations(self._stream_wrapper)
         self.card = CardListOperations(self._stream_wrapper)
         self.audio = AudioOperations(self._stream_wrapper)
+        self.html = HtmlOperations(self._stream_wrapper)
         self.tracing = TracingOperations(handler, self._stream_wrapper)
         self.usage = UsageOperations(handler, data)
         self.escalation = EscalationOperations(handler, data)

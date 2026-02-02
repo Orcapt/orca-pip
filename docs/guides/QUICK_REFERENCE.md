@@ -125,6 +125,7 @@ User session interface returned by `handler.begin(data)`.
 - `location` - Location operations
 - `card` - Card list operations
 - `audio` - Audio operations
+- `html` - HTML/chart rendering operations
 - `tracing` - Tracing operations
 - `usage` - Usage tracking operations
 - `button` - Button management
@@ -218,6 +219,23 @@ session.tracing.append("Step 2: Validating")
 
 # End tracing
 session.tracing.end("Processing complete")
+```
+
+### HTML/Chart Rendering
+
+```python
+# Send raw HTML (rendered in sandboxed iframe)
+session.html.send("<div style='padding:20px'>Custom HTML</div>")
+
+# Send matplotlib figure
+import matplotlib.pyplot as plt
+plt.plot([1, 2, 3], [1, 4, 9])
+session.html.send_figure(plt)
+
+# Send Plotly interactive chart
+import plotly.express as px
+fig = px.bar(x=['A', 'B'], y=[10, 20])
+session.html.send_plotly(fig)
 ```
 
 ### Usage Tracking
@@ -531,6 +549,9 @@ print(f"Full response: {response}")
 | Send location      | `session.location.send("35.6892, 51.3890")`                   |
 | Send cards         | `session.card.send([{"header": "Title", "text": "Content"}])` |
 | Send audio         | `session.audio.send([{"url": "...", "label": "Track"}])`      |
+| Send HTML          | `session.html.send("<div>Custom HTML</div>")`                 |
+| Send matplotlib    | `session.html.send_figure(plt)`                               |
+| Send Plotly        | `session.html.send_plotly(fig)`                               |
 | Trace              | `session.tracing.begin("Step", visibility="all")`             |
 
 ## 🔗 See Also

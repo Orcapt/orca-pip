@@ -38,6 +38,7 @@ The Orca Python SDK (`orca-pip`) is a professional, production-ready package tha
 - ✅ **Error handling and logging** to Orca backend
 - ✅ **Dev mode** for local development without Centrifugo
 - ✅ **FastAPI integration** with standard endpoints
+- ✅ **HTML/Chart rendering** with matplotlib, Plotly, and custom HTML
 
 ### Design Philosophy
 
@@ -85,12 +86,17 @@ async def process_message(data: ChatMessage):
         # 7. Send images (optional)
         session.image.send("https://example.com/image.png")
 
-        # 8. Complete response
+        # 8. Send charts/HTML (optional)
+        import matplotlib.pyplot as plt
+        plt.plot([1, 2, 3], [1, 4, 9])
+        session.html.send_figure(plt)
+
+        # 9. Complete response
         usage = {'prompt_tokens': 100, 'completion_tokens': 50, 'total_tokens': 150}
         session.close(usage_info=usage)  # usage_info is optional
 
     except Exception as e:
-        # 9. Handle errors
+        # 10. Handle errors
         session.error("Something went wrong", exception=e)
 ```
 
@@ -714,6 +720,94 @@ session.audio.send_single(
 )
 ```
 
+#### `session.html.send(html)` - Send HTML Content
+
+Send raw HTML content for display in the chat. HTML is rendered in a sandboxed iframe for security.
+
+```python
+session.html.send(html: str) -> None
+```
+
+**Parameters:**
+
+- `html`: HTML content string
+
+**Example:**
+
+```python
+# Send custom HTML content
+session.html.send("""
+<div style="padding: 20px; background: #f0f0f0; border-radius: 8px;">
+    <h2>Custom Widget</h2>
+    <p>This is rendered HTML content.</p>
+</div>
+""")
+```
+
+#### `session.html.send_figure(figure, format)` - Send Matplotlib Figure
+
+Send a matplotlib figure as HTML. Converts the figure to SVG (default) or PNG.
+
+```python
+session.html.send_figure(
+    figure: Any,  # matplotlib figure or pyplot module
+    format: str = "svg"  # "svg" or "png"
+) -> None
+```
+
+**Parameters:**
+
+- `figure`: matplotlib figure object or pyplot module
+- `format`: Output format - `"svg"` (vector, default) or `"png"` (raster)
+
+**Example:**
+
+```python
+import matplotlib.pyplot as plt
+
+# Create a plot
+plt.figure(figsize=(10, 6))
+plt.plot([1, 2, 3, 4], [1, 4, 9, 16], 'b-', linewidth=2)
+plt.xlabel('X Axis')
+plt.ylabel('Y Axis')
+plt.title('My Plot')
+
+# Send to chat (auto-converts to SVG)
+session.html.send_figure(plt)
+
+# Or with a figure object
+fig, ax = plt.subplots()
+ax.bar(['A', 'B', 'C'], [10, 20, 30])
+session.html.send_figure(fig, format="png")  # Send as PNG
+```
+
+#### `session.html.send_plotly(figure)` - Send Plotly Figure
+
+Send a Plotly figure as interactive HTML.
+
+```python
+session.html.send_plotly(figure: Any) -> None
+```
+
+**Parameters:**
+
+- `figure`: Plotly figure object
+
+**Example:**
+
+```python
+import plotly.express as px
+
+# Create interactive chart
+fig = px.bar(x=['A', 'B', 'C'], y=[10, 20, 30], title="Sales Data")
+session.html.send_plotly(fig)
+
+# Or with scatter plot
+df = px.data.gapminder().query("year == 2007")
+fig = px.scatter(df, x="gdpPercap", y="lifeExp", size="pop", color="continent")
+session.html.send_plotly(fig)
+```
+
 ---
 
 ### Complete Session Example
@@ -989,6 +1083,7 @@ All examples below use the **Session API** which is the recommended approach for
 - `session.location.send(coordinates)` / `session.location.send_coordinates(lat, lng)` - Send locations
 - `session.card.send(cards)` - Send card lists
 - `session.audio.send(tracks)` / `session.audio.send_single(url, label, mime_type)` - Send audio
+- `session.html.send(html)` / `session.html.send_figure(plt)` / `session.html.send_plotly(fig)` - Send HTML/charts
 
 ---
 
@@ -1315,6 +1410,136 @@ async def process_message(data: ChatMessage):
         session.error(f"Image generation failed: {str(e)}", exception=e)
 ```
 
+### Example 8: Data Visualization with Matplotlib
+
+```python
+import matplotlib.pyplot as plt
+import numpy as np
+from orca import OrcaHandler, ChatMessage
+
+orca = OrcaHandler()
+
+async def process_message(data: ChatMessage):
+    session = orca.begin(data)
+
+    try:
+        # Show loading
+        session.loading.start("analyzing")
+
+        # Generate sample data visualization
+        x = np.linspace(0, 10, 100)
+        y = np.sin(x)
+
+        # Create the plot
+        plt.figure(figsize=(10, 6))
+        plt.plot(x, y, 'b-', linewidth=2, label='sin(x)')
+        plt.fill_between(x, y, alpha=0.3)
+        plt.xlabel('X Axis')
+        plt.ylabel('Y Axis')
+        plt.title('Sine Wave Analysis')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+
+        # Hide loading
+        session.loading.end("analyzing")
+
+        # Send the plot to chat (renders in sandboxed iframe)
+        session.html.send_figure(plt)
+
+        # Add explanation
+        session.stream("\n\nHere's the sine wave visualization you requested!")
+
+        session.close()
+
+    except Exception as e:
+        session.error(f"Visualization failed: {str(e)}", exception=e)
+```
+
+### Example 9: Interactive Charts with Plotly
+
+```python
+import plotly.express as px
+from orca import OrcaHandler, ChatMessage
+
+orca = OrcaHandler()
+
+async def process_message(data: ChatMessage):
+    session = orca.begin(data)
+
+    try:
+        # Show loading
+        session.loading.start("analyzing")
+
+        # Create interactive Plotly chart
+        df = px.data.gapminder().query("year == 2007")
+        fig = px.scatter(
+            df,
+            x="gdpPercap",
+            y="lifeExp",
+            size="pop",
+            color="continent",
+            hover_name="country",
+            log_x=True,
+            title="GDP vs Life Expectancy (2007)"
+        )
+
+        # Hide loading
+        session.loading.end("analyzing")
+
+        # Send interactive chart (fully interactive in chat!)
+        session.html.send_plotly(fig)
+
+        session.stream("\n\nThis chart is fully interactive - hover over points to see details!")
+
+        session.close()
+
+    except Exception as e:
+        session.error(f"Chart creation failed: {str(e)}", exception=e)
+```
+
+### Example 10: Custom HTML Content
+
+```python
+from orca import OrcaHandler, ChatMessage
+
+orca = OrcaHandler()
+
+async def process_message(data: ChatMessage):
+    session = orca.begin(data)
+
+    try:
+        # Create custom HTML widget
+        html_content = """
+        <div style="padding: 20px; font-family: system-ui; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; color: white;">
+            <h2 style="margin: 0 0 16px 0;">Dashboard Summary</h2>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold;">1,234</div>
+                    <div style="opacity: 0.8;">Total Users</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold;">$45.2K</div>
+                    <div style="opacity: 0.8;">Revenue</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: bold;">89%</div>
+                    <div style="opacity: 0.8;">Satisfaction</div>
+                </div>
+            </div>
+        </div>
+        """
+
+        # Send custom HTML (rendered in sandboxed iframe)
+        session.html.send(html_content)
+
+        session.stream("\n\nHere's your dashboard summary!")
+
+        session.close()
+
+    except Exception as e:
+        session.error(f"Failed to generate dashboard: {str(e)}", exception=e)
+```
+
 ---
 
 ## Dev Mode vs Production
@@ -1524,6 +1749,7 @@ The only difference is the `dev_mode` flag during initialization!
 - `session.location.send()` / `session.location.send_coordinates()` - Location handling
 - `session.card.send()` - Card list handling
 - `session.audio.send()` / `session.audio.send_single()` - Audio handling
+- `session.html.send()` / `session.html.send_figure()` / `session.html.send_plotly()` - HTML/chart rendering
 
 ### Finalizing and Cleanup
 At the end of your processing logic, always call `session.close()` to ensure all buffers are flushed and the final response is persisted to the database.
