@@ -47,6 +47,7 @@ class ChatMessage(BaseModel):
     force_tools: Optional[List[str]] = None
     system_message: Optional[str] = None
     memory: Union[Memory, Dict[str, Any], List] = Memory()
+    chat_history: List[Dict[str, str]] = []  # Conversation history in LangChain format
     project_system_message: Optional[str] = None
     first_message: bool = False
     project_id: str = ""

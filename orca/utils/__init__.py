@@ -21,6 +21,9 @@ from .variables import Variables, get_variable_value, get_openai_api_key
 # Memory
 from .memory import MemoryHelper
 
+# Chat History
+from .chat_history import ChatHistoryHelper
+
 # Tools
 from .tools import ForceToolsHelper
 
@@ -45,6 +48,8 @@ __all__ = [
     'get_openai_api_key',
     # Memory
     'MemoryHelper',
+    # Chat History
+    'ChatHistoryHelper',
     # Tools
     'ForceToolsHelper',
     # Files

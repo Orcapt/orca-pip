@@ -33,6 +33,7 @@ from .utils import (
     get_openai_api_key,
     Variables,
     MemoryHelper,
+    ChatHistoryHelper,
     ForceToolsHelper,
     decode_base64_file,
     create_success_response,
@@ -121,6 +122,7 @@ __all__ = [
     'get_openai_api_key',
     'Variables',
     'MemoryHelper',
+    'ChatHistoryHelper',
     'ForceToolsHelper',
     'decode_base64_file',
     # Infrastructure
