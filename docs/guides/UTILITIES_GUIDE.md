@@ -9,6 +9,7 @@ Complete guide to common utilities, exceptions, decorators, and logging in Orca 
 - [Logging](#logging)
 - [Type Guards](#type-guards)
 - [Utility Functions](#utility-functions)
+- [Chat History Helper](#chat-history-helper)
 - [App & Lambda Factories](#app--lambda-factories)
 
 ## Exceptions
@@ -557,6 +558,338 @@ success = format_success_response(
 # Parse JSON response
 data = parse_json_response(response_text)
 ```
+
+## Chat History Helper
+
+### ChatHistoryHelper
+
+Helper class for working with conversation history in LangChain-compatible format.
+
+```python
+from orca import ChatHistoryHelper, ChatMessage
+
+def process_message(data: ChatMessage):
+    # Initialize helper with chat history from request
+    history = ChatHistoryHelper(data.chat_history)
+    
+    # Check if history exists
+    if not history.is_empty():
+        print(f"Found {history.count()} previous messages")
+    
+    # Convert to LangChain messages
+    messages = history.to_langchain_messages(
+        include_system="You are a helpful assistant."
+    )
+    
+    # Use with your LLM
+    # ...
+```
+
+**Key Methods:**
+
+#### `to_langchain_messages(include_system=None)`
+
+Convert history to LangChain message objects (HumanMessage, AIMessage, SystemMessage).
+
+```python
+from orca import ChatHistoryHelper
+from langchain_openai import ChatOpenAI
+
+history = ChatHistoryHelper(data.chat_history)
+
+# Convert to LangChain messages
+messages = history.to_langchain_messages(
+    include_system="You are a helpful assistant."
+)
+
+# Add current message
+from langchain_core.messages import HumanMessage
+messages.append(HumanMessage(content=data.message))
+
+# Use with LangChain
+model = ChatOpenAI(model="gpt-4")
+response = model.invoke(messages)
+```
+
+#### `get_last_n_messages(n)`
+
+Get the most recent N messages from history.
+
+```python
+# Get last 10 messages
+recent = history.get_last_n_messages(10)
+
+for msg in recent:
+    print(f"{msg['role']}: {msg['content']}")
+```
+
+#### `get_last_n_langchain_messages(n, include_system=None)`
+
+Get last N messages as LangChain objects.
+
+```python
+# Get last 10 messages as LangChain objects
+recent_messages = history.get_last_n_langchain_messages(
+    10,
+    include_system="You are a helpful assistant."
+)
+```
+
+#### `get_user_messages()` / `get_assistant_messages()`
+
+Filter messages by role.
+
+```python
+# Get all user messages
+user_msgs = history.get_user_messages()
+print(f"User asked {len(user_msgs)} questions")
+
+# Get all assistant responses
+assistant_msgs = history.get_assistant_messages()
+print(f"Assistant provided {len(assistant_msgs)} responses")
+```
+
+#### `get_last_user_message()` / `get_last_assistant_message()`
+
+Quick access to the most recent message by role.
+
+```python
+# Get the last thing the user said
+last_user_msg = history.get_last_user_message()
+
+# Get the last assistant response
+last_response = history.get_last_assistant_message()
+```
+
+#### `get_context_string(max_messages=None)`
+
+Format history as a readable string.
+
+```python
+# Get entire history as string
+context = history.get_context_string()
+
+# Get last 5 messages as string
+recent_context = history.get_context_string(max_messages=5)
+
+print(recent_context)
+# Output:
+# User: What is Python?
+# Assistant: Python is a programming language...
+# User: How do I install it?
+# Assistant: You can install Python by...
+```
+
+#### `count()` / `is_empty()`
+
+Check history status.
+
+```python
+# Check message count
+total = history.count()
+print(f"Conversation has {total} messages")
+
+# Check if empty
+if history.is_empty():
+    print("This is a new conversation")
+else:
+    print("Continuing existing conversation")
+```
+
+#### `filter_by_role(role)`
+
+Filter messages by specific role.
+
+```python
+# Get all system messages
+system_msgs = history.filter_by_role("system")
+
+# Get all user messages
+user_msgs = history.filter_by_role("user")
+
+# Get all assistant messages
+assistant_msgs = history.filter_by_role("assistant")
+```
+
+### LangGraph Integration
+
+Working with LangGraph state and conversation history:
+
+```python
+from orca import ChatHistoryHelper, ChatMessage
+from langgraph.graph import StateGraph, MessagesState, END
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+
+def create_agent_with_history(data: ChatMessage):
+    """Create a LangGraph agent with conversation history."""
+    
+    # Initialize history
+    history = ChatHistoryHelper(data.chat_history)
+    
+    # Create graph
+    workflow = StateGraph(MessagesState)
+    
+    def agent_node(state):
+        messages = state["messages"]
+        model = ChatOpenAI(model=data.model)
+        response = model.invoke(messages)
+        return {"messages": [response]}
+    
+    # Build graph
+    workflow.add_node("agent", agent_node)
+    workflow.set_entry_point("agent")
+    workflow.add_edge("agent", END)
+    
+    # Compile
+    app = workflow.compile()
+    
+    # Initialize with history
+    initial_messages = history.to_langchain_messages(
+        include_system=data.system_message
+    )
+    initial_messages.append(HumanMessage(content=data.message))
+    
+    # Run
+    result = app.invoke({"messages": initial_messages})
+    return result
+```
+
+### Conditional Logic Based on History
+
+Adjust agent behavior based on conversation length:
+
+```python
+from orca import ChatHistoryHelper, ChatMessage
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import SystemMessage, HumanMessage
+
+def smart_response(data: ChatMessage):
+    """Adjust response strategy based on conversation history."""
+    
+    history = ChatHistoryHelper(data.chat_history)
+    model = ChatOpenAI(model=data.model)
+    
+    if history.is_empty():
+        # First message - use greeting
+        system_msg = "You are a friendly assistant. Greet the user warmly."
+        messages = [
+            SystemMessage(content=system_msg),
+            HumanMessage(content=data.message)
+        ]
+    elif history.count() < 5:
+        # Early conversation - build rapport
+        messages = history.to_langchain_messages(
+            include_system="You are a friendly assistant."
+        )
+        messages.append(HumanMessage(content=data.message))
+    else:
+        # Ongoing conversation - use recent context only
+        messages = history.get_last_n_langchain_messages(
+            10,
+            include_system="You are a helpful assistant."
+        )
+        messages.append(HumanMessage(content=data.message))
+    
+    response = model.invoke(messages)
+    return response.content
+```
+
+### Example: Complete Agent with History
+
+```python
+from orca import (
+    ChatMessage, 
+    ChatHistoryHelper, 
+    OrcaHandler, 
+    Variables
+)
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage
+
+async def process_with_history(data: ChatMessage):
+    """Complete example with chat history support."""
+    
+    # Get variables
+    variables = Variables(data.variables)
+    openai_key = variables.get("OPENAI_API_KEY")
+    
+    # Initialize Orca handler
+    handler = OrcaHandler()
+    session = handler.begin(data)
+    
+    try:
+        # Get conversation history
+        history = ChatHistoryHelper(data.chat_history)
+        
+        # Log conversation state
+        session.stream(f"📚 Conversation has {history.count()} previous messages\n\n")
+        
+        # Convert to LangChain messages
+        messages = history.to_langchain_messages(
+            include_system=data.system_message or "You are a helpful assistant."
+        )
+        
+        # Add current message
+        messages.append(HumanMessage(content=data.message))
+        
+        # Process with LLM
+        model = ChatOpenAI(api_key=openai_key, model=data.model)
+        response = model.invoke(messages)
+        
+        # Stream response
+        session.stream(response.content)
+        
+    except Exception as e:
+        session.stream(f"Error: {str(e)}")
+    finally:
+        session.close()
+```
+
+### Best Practices
+
+**1. Use Recent History for Long Conversations**
+
+For long conversations, use only recent messages to avoid exceeding token limits:
+
+```python
+history = ChatHistoryHelper(data.chat_history)
+
+# Use last 20 messages only
+messages = history.get_last_n_langchain_messages(20, include_system=system_msg)
+```
+
+**2. Check History Before Processing**
+
+Always check if history exists to handle first messages correctly:
+
+```python
+history = ChatHistoryHelper(data.chat_history)
+
+if history.is_empty():
+    # Handle first message differently
+    greet_user()
+else:
+    # Continue conversation
+    process_with_context()
+```
+
+**3. Separate Long-term Memory from Chat History**
+
+Remember that `memory` field is for long-term user information (name, preferences), while `chat_history` is for conversation context:
+
+```python
+from orca import MemoryHelper, ChatHistoryHelper
+
+# Long-term memory (user profile)
+memory = MemoryHelper(data.memory)
+user_name = memory.get_name()
+
+# Short-term context (conversation)
+history = ChatHistoryHelper(data.chat_history)
+recent_context = history.get_last_n_messages(10)
+```
+
 ## App & Lambda Factories
 
 Orca SDK provides factory functions to quickly bootstrap your agent for different environments.

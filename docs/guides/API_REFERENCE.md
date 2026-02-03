@@ -50,6 +50,12 @@ message = ChatMessage(
 | `stream_token`    | `str`            | Yes      | Streaming auth token       |
 | `url`             | `str`            | Yes      | Backend API URL            |
 | `headers`         | `Dict`           | No       | Optional HTTP headers      |
+| `chat_history`    | `List[Dict]`     | No       | Conversation history (LangChain format) |
+| `memory`          | `Memory/Dict`    | No       | Long-term user memory      |
+
+**Note:** The `chat_history` field contains the conversation history in LangChain-compatible format:
+`[{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]`.
+Use `ChatHistoryHelper` to easily work with this data.
 
 ### Variable
 
