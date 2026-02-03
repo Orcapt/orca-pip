@@ -53,7 +53,7 @@ class Session:
         
         # Core operations (public property access)
         self.loading = LoadingOperations(handler, data, self._stream_wrapper)
-        self.image = ImageOperations(self._stream_wrapper)
+        self.image = ImageOperations(self._stream_wrapper, handler, data)
         self.video = VideoOperations(self._stream_wrapper)
         self.location = LocationOperations(self._stream_wrapper)
         self.card = CardListOperations(self._stream_wrapper)

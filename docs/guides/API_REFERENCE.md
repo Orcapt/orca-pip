@@ -256,21 +256,43 @@ session.loading.end("thinking")
 
 ### ImageOperations
 
-Image passing to frontend.
+Image passing to frontend. Supports both image URLs and base64 strings.
 
 ```python
+# With URL
 session.image.send("https://example.com/image.jpg")
+
+# With base64 string
+session.image.send("data:image/png;base64,iVBORw0KGgo...")
 ```
 
 **Methods:**
 
-#### `send(url: str) -> None`
+#### `send(image_input: str) -> None`
 
-Pass image URL to frontend.
+Pass image URL or base64 string to frontend. If a base64 string is provided, it will be automatically uploaded to the media API and the permanent URL will be used.
+
+**Parameters:**
+- `image_input`: Image URL (http/https) or base64 string (with or without `data:image/...` prefix)
+
+**Examples:**
 
 ```python
+# With URL
 session.image.send("https://cdn.example.com/result.png")
+
+# With base64 (data URI format)
+session.image.send("data:image/png;base64,iVBORw0KGgo...")
+
+# With raw base64 string
+session.image.send("iVBORw0KGgo...")
 ```
+
+**Note:** When a base64 string is provided, the function automatically:
+- Uploads the image to `/api/v1/media` endpoint
+- Retrieves the permanent S3 URL
+- Includes `conversation_id` from the request context (if available)
+- Wraps the URL in Orca markers for frontend display
 
 #### `pass_image(url: str) -> None`
 

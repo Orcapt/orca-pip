@@ -156,6 +156,10 @@ session.loading.end("thinking")
 ```python
 # Pass image URL to frontend
 session.image.image("https://example.com/image.jpg")
+
+# Pass base64 string (automatically uploaded to media API)
+session.image.image("data:image/png;base64,iVBORw0KGgo...")
+session.image.image("iVBORw0KGgo...")  # Raw base64 also works
 ```
 
 ### Video Operations
@@ -543,7 +547,7 @@ print(f"Full response: {response}")
 | Stop loading       | `session.loading.end("thinking")`                             |
 | Add button         | `session.button.link("Click", "url")`                         |
 | Track usage        | `session.usage.track(tokens=100, token_type="gpt4")`          |
-| Pass image         | `session.image.image("https://example.com/img.jpg")`          |
+| Pass image         | `session.image.image("https://example.com/img.jpg")` or `session.image.image("data:image/png;base64,...")` |
 | Send video         | `session.video.send("https://example.com/video.mp4")`         |
 | Send YouTube       | `session.video.youtube("https://youtube.com/watch?v=...")`    |
 | Send location      | `session.location.send("35.6892, 51.3890")`                   |

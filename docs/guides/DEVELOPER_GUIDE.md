@@ -512,37 +512,42 @@ session.loading.end(kind: str = "thinking") -> None
 
 - `kind`: Loading type - `"thinking"`, `"image"`, `"code"`, or `"search"`
 
-#### `session.image.send(url)` - Send Image
+#### `session.image.send(image_input)` - Send Image
 
-Send an image URL with Orca-specific markers for proper display.
+Send an image URL or base64 string with Orca-specific markers for proper display. If a base64 string is provided, it will be automatically uploaded to the media API.
 
 ```python
-session.image.send(url: str) -> None
+session.image.send(image_input: str) -> None
 ```
 
 **Parameters:**
 
-- `url`: Image URL
+- `image_input`: Image URL (http/https) or base64 string (with or without `data:image/...` prefix)
 
-**Example:**
+**Examples:**
 
 ```python
 session = orca.begin(data)
 
-# Show loading
+# Example 1: Send image URL
 session.loading.start("image")
-
-# Generate image
 image_url = generate_image(data.message)
-
-# Hide loading
 session.loading.end("image")
-
-# Send image
 session.image.send(image_url)
+
+# Example 2: Send base64 string (automatically uploaded)
+session.loading.start("image")
+base64_image = generate_image_base64(data.message)  # Returns base64 string
+session.loading.end("image")
+session.image.send(base64_image)  # Automatically uploads and gets permanent URL
+
+# Example 3: Send base64 with data URI prefix
+session.image.send("data:image/png;base64,iVBORw0KGgo...")
 
 session.close()
 ```
+
+**Note:** When a base64 string is provided, the function automatically uploads it to `/api/v1/media`, retrieves the permanent S3 URL, and includes the `conversation_id` from the request context.
 
 #### `session.image.image(url)` - Send Image (Alias)
 
