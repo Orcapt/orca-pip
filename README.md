@@ -12,6 +12,7 @@ Professional Python SDK for building real-time AI agents with streaming and prod
 - ⚡ **AWS Lambda Ready** - Deploy to Lambda with one command
 - 🎨 **Design Patterns** - Builder, middleware, context managers
 - 📦 **Storage SDK** - Integrated file storage management
+- 💬 **Conversation SDK** - Create, rename, and manage conversations via external API
 - 🔒 **Production Ready** - Error handling, logging, type safety
 - ⚙️ **Focused Core** - Lean dependency surface for core streaming and deployment
 
@@ -88,6 +89,7 @@ handler = create_hybrid_handler(process_message_func=my_agent_logic)
 | [Patterns Guide](docs/guides/PATTERNS_GUIDE.md)           | Design patterns and best practices  |
 | [Utilities Guide](docs/guides/UTILITIES_GUIDE.md)         | Exceptions, decorators, and logging |
 | [Storage SDK Guide](docs/guides/STORAGE_SDK_GUIDE.md)     | Storage SDK and API reference       |
+| [Conversation SDK Guide](docs/guides/CONVERSATION_SDK_GUIDE.md) | Conversation management SDK   |
 | [Lambda Deploy Guide](docs/guides/LAMBDA_DEPLOY_GUIDE.md) | AWS Lambda deployment guide         |
 | [Dev Mode Guide](docs/guides/DEV_MODE_GUIDE.md)           | Local development setup             |
 | [Contributing](CONTRIBUTING.md)                           | How to contribute                   |
@@ -164,6 +166,20 @@ except Exception as e:
     session.error("An error occurred", exception=e)
 ```
 
+### Conversation Management
+
+```python
+from orca import OrcaConversation
+
+# Inside an agent (auto-derives config from request)
+conv = OrcaConversation(data=data)
+conv.rename(thread_id=data.thread_id, title="New Title")
+
+# Standalone
+conv = OrcaConversation(token="workspace-token", base_url="https://api.example.com/v1/external")
+result = conv.create(project_uuid="abc-123", title="Chat", model="gpt-4", user_id="user-1")
+```
+
 ## Architecture
 
 Orca SDK follows clean architecture principles with 14 distinct layers:
@@ -180,7 +196,8 @@ orca/
 ├── common/         # Cross-cutting concerns
 ├── patterns/       # Design patterns
 ├── adapters/       # Deployment adapters
-└── storage/        # Storage SDK
+├── storage/        # Storage SDK
+└── conversation/   # Conversation SDK
 ```
 
 ## Requirements

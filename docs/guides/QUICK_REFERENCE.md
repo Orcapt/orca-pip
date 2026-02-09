@@ -425,6 +425,55 @@ storage.download_file("my-bucket", "file.jpg", "dest/file.jpg")
 files = storage.list_files("my-bucket")
 ```
 
+## 💬 Conversation SDK
+
+### Create & Rename Conversations
+
+```python
+from orca import OrcaConversation
+
+# Standalone usage
+conv = OrcaConversation(
+    token="workspace-token",
+    base_url="https://api.orcaplatform.ai/v1/external"
+)
+
+# Create a conversation
+result = conv.create(
+    project_uuid="abc-123",
+    title="New Chat",
+    model="gpt-4",
+    user_id="ext-user-1",
+    content="Hello!"  # optional first message
+)
+
+# Rename it
+conv.rename(thread_id=result["data"]["thread_id"], title="Renamed Chat")
+
+# List conversations
+conversations = conv.list(project_uuid="abc-123", search="support")
+
+# Send a message
+conv.send_message(thread_id="abc-thread-id", content="Follow-up question")
+```
+
+### Inside an Agent
+
+```python
+from orca import OrcaConversation, ChatMessage, OrcaHandler
+
+async def process_msg(data: ChatMessage):
+    handler = OrcaHandler()
+    session = handler.begin(data)
+
+    # Auto-derives URL and headers from request data
+    conv = OrcaConversation(data=data)
+    conv.rename(thread_id=data.thread_id, title="Updated Title")
+
+    session.stream("Done!")
+    session.close()
+```
+
 ## 🔗 Common Patterns
 
 ### Complete Agent Flow
@@ -557,6 +606,9 @@ print(f"Full response: {response}")
 | Send matplotlib    | `session.html.send_figure(plt)`                               |
 | Send Plotly        | `session.html.send_plotly(fig)`                               |
 | Trace              | `session.tracing.begin("Step", visibility="all")`             |
+| Create conversation| `OrcaConversation(data=data).create(project_uuid, title, model, user_id)` |
+| Rename conversation| `OrcaConversation(data=data).rename(thread_id, title)`        |
+| Send message       | `OrcaConversation(data=data).send_message(thread_id, content)`|
 
 ## 🔗 See Also
 
@@ -564,6 +616,7 @@ print(f"Full response: {response}")
 - [API Reference](API_REFERENCE.md) - Detailed API documentation
 - [Lambda Deploy Guide](LAMBDA_DEPLOY_GUIDE.md) - AWS Lambda deployment
 - [Patterns Guide](PATTERNS_GUIDE.md) - Design patterns
+- [Conversation SDK Guide](CONVERSATION_SDK_GUIDE.md) - Conversation management
 - [Examples](../../examples/) - Working code examples
 
 ---

@@ -183,6 +183,16 @@ try:
 except ImportError:
     pass
 
+# Conversation SDK
+try:
+    from .conversation import OrcaConversation, ConversationException
+    __all__.extend([
+        'OrcaConversation',
+        'ConversationException',
+    ])
+except ImportError:
+    pass
+
 # Web framework utilities
 try:
     from .web import create_orca_app, add_standard_endpoints

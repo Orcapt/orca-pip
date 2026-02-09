@@ -656,8 +656,123 @@ TokenType.CLAUDE          # "claude"
 TokenType.CUSTOM          # "custom"
 ```
 
+## Conversation SDK
+
+### OrcaConversation
+
+Client for the external conversation API. Supports two initialisation modes: from a `ChatMessage` request (inside an agent) or with explicit token/URL (standalone).
+
+```python
+from orca import OrcaConversation
+
+# Standalone
+conv = OrcaConversation(
+    token="workspace-token",
+    base_url="https://api.orcaplatform.ai/v1/external"
+)
+
+# From ChatMessage (inside an agent)
+conv = OrcaConversation(data=data)
+```
+
+**Parameters:**
+
+| Parameter  | Type          | Required | Description                                     |
+| ---------- | ------------- | -------- | ----------------------------------------------- |
+| `token`    | `str`         | No*      | Workspace token (`X-Workspace` header)          |
+| `base_url` | `str`         | No*      | External API base URL                           |
+| `data`     | `ChatMessage` | No*      | Request data to auto-derive config from         |
+| `timeout`  | `int`         | No       | Request timeout in seconds (default: 30)        |
+
+*At least one of `token` or `data` (with `X-Workspace` in headers) must be provided.
+
+### Conversation Methods
+
+#### `create(project_uuid, title, model, user_id, content=None, force_search=False, active_analysis=False, file=None) -> Dict`
+
+Create a new conversation in a project.
+
+```python
+result = conv.create(
+    project_uuid="abc-123",
+    title="New Chat",
+    model="gpt-4",
+    user_id="ext-user-1",
+    content="Hello!"
+)
+```
+
+#### `rename(thread_id, title) -> Dict`
+
+Rename an existing conversation.
+
+```python
+conv.rename(thread_id="abc-thread-id", title="Updated Title")
+```
+
+#### `list(project_uuid, search=None, model=None, user=None) -> Dict`
+
+List conversations in a project with optional filters.
+
+```python
+result = conv.list(project_uuid="abc-123", search="support")
+```
+
+#### `get(project_uuid, thread_id) -> Dict`
+
+Get a single conversation.
+
+```python
+result = conv.get(project_uuid="abc-123", thread_id="abc-thread-id")
+```
+
+#### `delete(project_uuid, thread_id) -> Dict`
+
+Delete a conversation.
+
+```python
+conv.delete(project_uuid="abc-123", thread_id="abc-thread-id")
+```
+
+### Message Methods
+
+#### `list_messages(thread_id) -> Dict`
+
+List all messages in a conversation.
+
+```python
+result = conv.list_messages(thread_id="abc-thread-id")
+```
+
+#### `send_message(thread_id, content=None, model=None, force_search=None, active_analysis=None, file=None) -> Dict`
+
+Send (inject) a message into an existing conversation.
+
+```python
+result = conv.send_message(
+    thread_id="abc-thread-id",
+    content="Hello!",
+    model="gpt-4"
+)
+```
+
+### ConversationException
+
+Exception raised on API errors.
+
+```python
+from orca.conversation import ConversationException
+
+try:
+    conv.create(...)
+except ConversationException as e:
+    print(e.status_code)  # HTTP status code
+    print(e.response)     # Parsed error response body
+```
+
 ## See Also
 
 - [Quick Reference](QUICK_REFERENCE.md) - Quick examples
 - [Developer Guide](DEVELOPER_GUIDE.md) - Complete guide
 - [Patterns Guide](PATTERNS_GUIDE.md) - Design patterns
+- [Conversation SDK Guide](CONVERSATION_SDK_GUIDE.md) - Full conversation guide
