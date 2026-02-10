@@ -33,6 +33,7 @@ class ChatMessage(BaseModel):
     model: str
     message: str
     conversation_id: int
+    user_id_external: Optional[str] = None
     response_uuid: str
     message_uuid: str
     channel: str
@@ -57,6 +58,8 @@ class ChatMessage(BaseModel):
     headers: Optional[Dict[str, str]] = None
     sleep_time: Optional[int] = None
     isData: Optional[bool] = False
+    url_error: str = ""            # Error logging endpoint
+    url_user_show: str = ""        # User info endpoint
     # Request processing modes (per-request configuration)
     response_mode: str = "async"  # "sync" (blocking) or "async" (non-blocking, default)
     stream_mode: bool = True      # True = stream tokens in real-time, False = no streaming

@@ -443,7 +443,7 @@ result = conv.create(
     project_uuid="abc-123",
     title="New Chat",
     model="gpt-4",
-    user_id="ext-user-1",
+    user_id_external="ext-user-1",
     content="Hello!"  # optional first message
 )
 
@@ -606,7 +606,7 @@ print(f"Full response: {response}")
 | Send matplotlib    | `session.html.send_figure(plt)`                               |
 | Send Plotly        | `session.html.send_plotly(fig)`                               |
 | Trace              | `session.tracing.begin("Step", visibility="all")`             |
-| Create conversation| `OrcaConversation(data=data).create(project_uuid, title, model, user_id)` |
+| Create conversation| `OrcaConversation(data=data).create(project_uuid, title, model, user_id_external)` |
 | Rename conversation| `OrcaConversation(data=data).rename(thread_id, title)`        |
 | Send message       | `OrcaConversation(data=data).send_message(thread_id, content)`|
 

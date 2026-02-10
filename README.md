@@ -177,7 +177,7 @@ conv.rename(thread_id=data.thread_id, title="New Title")
 
 # Standalone
 conv = OrcaConversation(token="workspace-token", base_url="https://api.example.com/v1/external")
-result = conv.create(project_uuid="abc-123", title="Chat", model="gpt-4", user_id="user-1")
+result = conv.create(project_uuid="abc-123", title="Chat", model="gpt-4", user_id_external="user-1")
 ```
 
 ## Architecture

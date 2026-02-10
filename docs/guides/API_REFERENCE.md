@@ -688,7 +688,7 @@ conv = OrcaConversation(data=data)
 
 ### Conversation Methods
 
-#### `create(project_uuid, title, model, user_id, content=None, force_search=False, active_analysis=False, file=None) -> Dict`
+#### `create(project_uuid, title, model, user_id_external, content=None, force_search=False, active_analysis=False, file=None) -> Dict`
 
 Create a new conversation in a project.
 
@@ -697,7 +697,7 @@ result = conv.create(
     project_uuid="abc-123",
     title="New Chat",
     model="gpt-4",
-    user_id="ext-user-1",
+    user_id_external="ext-user-1",
     content="Hello!"
 )
 ```

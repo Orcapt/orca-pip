@@ -35,7 +35,7 @@ class OrcaConversation:
             project_uuid="abc-123",
             title="Chat",
             model="gpt-4",
-            user_id="ext-user-1",
+            user_id_external="ext-user-1",
         )
     """
 
@@ -104,7 +104,7 @@ class OrcaConversation:
         project_uuid: str,
         title: str,
         model: str,
-        user_id: str,
+        user_id_external: str,
         content: Optional[str] = None,
         force_search: bool = False,
         active_analysis: bool = False,
@@ -117,7 +117,7 @@ class OrcaConversation:
             project_uuid: UUID of the project.
             title: Conversation title.
             model: AI model identifier (e.g. ``gpt-4``).
-            user_id: External user ID (``users.external_id``).
+            user_id_external: External user ID (``users.external_id``).
             content: Optional initial user message.
             force_search: Force knowledge-base search.
             active_analysis: Enable active analysis.
@@ -133,10 +133,12 @@ class OrcaConversation:
             data = {
                 "title": title,
                 "model": model,
-                "user_id": user_id,
-                "force_search": str(force_search).lower(),
-                "active_analysis": str(active_analysis).lower(),
+                "user_id_external": user_id_external,
             }
+            if force_search:
+                data["force_search"] = "true"
+            if active_analysis:
+                data["active_analysis"] = "true"
             if content is not None:
                 data["content"] = content
             return self._client.post(endpoint, data=data, files={"file": file})
@@ -144,7 +146,7 @@ class OrcaConversation:
         payload: Dict[str, Any] = {
             "title": title,
             "model": model,
-            "user_id": user_id,
+            "user_id_external": user_id_external,
             "force_search": force_search,
             "active_analysis": active_analysis,
         }
@@ -248,6 +250,7 @@ class OrcaConversation:
         force_search: Optional[bool] = None,
         active_analysis: Optional[bool] = None,
         file: Optional[Any] = None,
+        is_data: bool = False,
     ) -> Dict[str, Any]:
         """
         Send (inject) a message into an existing conversation.
@@ -259,6 +262,7 @@ class OrcaConversation:
             force_search: Optional force knowledge-base search override.
             active_analysis: Optional active analysis override.
             file: Optional file attachment (file-like object).
+            is_data: Whether the message is a data message (default False).
 
         Returns:
             API response with the created message and streaming info.
@@ -266,7 +270,9 @@ class OrcaConversation:
         endpoint = f"/conversations/{thread_id}/messages"
 
         if file is not None:
-            data: Dict[str, str] = {}
+            data: Dict[str, str] = {
+                "isData": str(is_data).lower(),
+            }
             if content is not None:
                 data["content"] = content
             if model is not None:
@@ -277,7 +283,9 @@ class OrcaConversation:
                 data["active_analysis"] = str(active_analysis).lower()
             return self._client.post(endpoint, data=data, files={"file": file})
 
-        payload: Dict[str, Any] = {}
+        payload: Dict[str, Any] = {
+            "isData": is_data,
+        }
         if content is not None:
             payload["content"] = content
         if model is not None:

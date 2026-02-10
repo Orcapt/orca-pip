@@ -119,7 +119,7 @@ result = conv.create(
     project_uuid="abc-123-def",
     title="Customer Support Chat",
     model="gpt-4",
-    user_id="ext-user-42",
+    user_id_external="ext-user-42",
     content="Hello, I need help with my account",  # optional first message
     force_search=True,                               # optional
     active_analysis=False,                           # optional
@@ -135,7 +135,7 @@ print(f"Thread ID: {result['data']['thread_id']}")
 | `project_uuid`     | `str`  | Yes      | UUID of the project                             |
 | `title`            | `str`  | Yes      | Conversation title                              |
 | `model`            | `str`  | Yes      | AI model identifier (e.g. `gpt-4`)             |
-| `user_id`          | `str`  | Yes      | External user ID (`users.external_id`)          |
+| `user_id_external`  | `str`  | Yes      | External user ID (`users.external_id`)          |
 | `content`          | `str`  | No       | Initial user message                            |
 | `force_search`     | `bool` | No       | Force knowledge-base search (default: `False`)  |
 | `active_analysis`  | `bool` | No       | Enable active analysis (default: `False`)       |
@@ -242,7 +242,7 @@ try:
         project_uuid="abc-123",
         title="Chat",
         model="gpt-4",
-        user_id="user-1",
+        user_id_external="user-1",
     )
 except ConversationException as e:
     print(f"Error: {e}")
