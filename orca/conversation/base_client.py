@@ -34,7 +34,7 @@ class BaseConversationClient:
     def __init__(
         self,
         token: str,
-        base_url: str = "http://localhost:8000/v1/external",
+        base_url: str = "https://api.orcapt.com/v1/external",
         timeout: int = 30,
         extra_headers: Optional[Dict[str, str]] = None,
     ):

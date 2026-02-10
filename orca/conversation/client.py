@@ -82,7 +82,7 @@ class OrcaConversation:
 
         # Fallback defaults
         if base_url is None:
-            base_url = "http://localhost:8000/v1/external"
+            base_url = "https://api.orcapt.com/v1/external"
 
         if not token:
             raise ValueError(
