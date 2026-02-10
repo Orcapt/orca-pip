@@ -608,7 +608,7 @@ print(f"Full response: {response}")
 | Trace              | `session.tracing.begin("Step", visibility="all")`             |
 | Create conversation| `OrcaConversation(data=data).create(project_uuid, title, model, user_id_external)` |
 | Rename conversation| `OrcaConversation(data=data).rename(thread_id, title)`        |
-| Send message       | `OrcaConversation(data=data).send_message(thread_id, content)`|
+| Send message       | `OrcaConversation(data=data).send_message(thread_id, content, is_data=False)` |
 
 ## 🔗 See Also
 

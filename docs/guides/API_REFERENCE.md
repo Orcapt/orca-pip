@@ -36,22 +36,31 @@ message = ChatMessage(
 
 **Fields:**
 
-| Field             | Type             | Required | Description                |
-| ----------------- | ---------------- | -------- | -------------------------- |
-| `message`         | `str`            | Yes      | User message content       |
-| `response_uuid`   | `str`            | Yes      | Unique response identifier |
-| `thread_id`       | `str`            | Yes      | Thread identifier          |
-| `model`           | `str`            | Yes      | AI model identifier        |
-| `conversation_id` | `int`            | Yes      | Conversation ID            |
-| `message_uuid`    | `str`            | Yes      | Message unique ID          |
-| `channel`         | `str`            | Yes      | Communication channel      |
-| `variables`       | `List[Variable]` | Yes      | Context variables          |
-| `stream_url`      | `str`            | Yes      | Streaming endpoint URL     |
-| `stream_token`    | `str`            | Yes      | Streaming auth token       |
-| `url`             | `str`            | Yes      | Backend API URL            |
-| `headers`         | `Dict`           | No       | Optional HTTP headers      |
-| `chat_history`    | `List[Dict]`     | No       | Conversation history (LangChain format) |
-| `memory`          | `Memory/Dict`    | No       | Long-term user memory      |
+| Field                    | Type                    | Required | Description                                  |
+| ------------------------ | ----------------------- | -------- | -------------------------------------------- |
+| `message`                | `str`                   | Yes      | User message content                         |
+| `response_uuid`          | `str`                   | Yes      | Unique response identifier                   |
+| `thread_id`              | `str`                   | Yes      | Thread identifier                            |
+| `model`                  | `str`                   | Yes      | AI model identifier                          |
+| `conversation_id`        | `int`                   | Yes      | Conversation ID                              |
+| `user_id_external`       | `Optional[str]`         | No       | External user ID                             |
+| `message_uuid`           | `str`                   | Yes      | Message unique ID                            |
+| `channel`                | `str`                   | Yes      | Communication channel                        |
+| `variables`              | `List[Variable]`        | Yes      | Context variables                            |
+| `url`                    | `str`                   | Yes      | Backend API URL                              |
+| `headers`                | `Optional[Dict[str,str]]` | No    | Optional HTTP headers                        |
+| `stream_url`             | `Optional[str]`         | No       | Streaming endpoint URL                       |
+| `stream_token`           | `Optional[str]`         | No       | Streaming auth token                         |
+| `chat_history`           | `List[Dict]`            | No       | Conversation history (LangChain format)      |
+| `memory`                 | `Memory/Dict/List`      | No       | Long-term user memory                        |
+| `project_system_message` | `Optional[str]`         | No       | Project-level system instructions            |
+| `project_id`             | `str`                   | No       | Project UUID                                 |
+| `project_files`          | `Any`                   | No       | Project attached files payload               |
+| `isData`                 | `Optional[bool]`        | No       | Data message flag for backend processing     |
+| `url_error`              | `str`                   | No       | Error logging endpoint                       |
+| `url_user_show`          | `str`                   | No       | User info endpoint                           |
+| `response_mode`          | `str`                   | No       | Request mode (`sync` or `async`)             |
+| `stream_mode`            | `bool`                  | No       | Real-time streaming on/off                   |
 
 **Note:** The `chat_history` field contains the conversation history in LangChain-compatible format:
 `[{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]`.
@@ -744,7 +753,7 @@ List all messages in a conversation.
 result = conv.list_messages(thread_id="abc-thread-id")
 ```
 
-#### `send_message(thread_id, content=None, model=None, force_search=None, active_analysis=None, file=None) -> Dict`
+#### `send_message(thread_id, content=None, model=None, force_search=None, active_analysis=None, file=None, is_data=False) -> Dict`
 
 Send (inject) a message into an existing conversation.
 
@@ -752,7 +761,8 @@ Send (inject) a message into an existing conversation.
 result = conv.send_message(
     thread_id="abc-thread-id",
     content="Hello!",
-    model="gpt-4"
+    model="gpt-4",
+    is_data=False
 )
 ```
 

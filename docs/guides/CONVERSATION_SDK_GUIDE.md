@@ -278,7 +278,7 @@ class OrcaConversation:
 
 | Method                                                    | Description                      |
 | --------------------------------------------------------- | -------------------------------- |
-| `create(project_uuid, title, model, user_id, ...)`       | Create a new conversation        |
+| `create(project_uuid, title, model, user_id_external, ...)` | Create a new conversation     |
 | `rename(thread_id, title)`                                | Rename a conversation            |
 | `list(project_uuid, search?, model?, user?)`              | List conversations with filters  |
 | `get(project_uuid, thread_id)`                            | Get a single conversation        |
@@ -289,7 +289,7 @@ class OrcaConversation:
 | Method                                                    | Description                       |
 | --------------------------------------------------------- | --------------------------------- |
 | `list_messages(thread_id)`                                | List all messages in conversation |
-| `send_message(thread_id, content?, model?, ...)`          | Send/inject a message             |
+| `send_message(thread_id, content?, model?, ..., is_data?)` | Send/inject a message            |
 
 ## Best Practices
 
