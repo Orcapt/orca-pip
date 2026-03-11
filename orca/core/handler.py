@@ -111,6 +111,10 @@ class OrcaHandler:
         """Start a streaming session."""
         return Session(self, data)
     
+    def _should_stream(self, data) -> bool:
+        """Check if streaming is enabled for this request. Defaults to True for backward compat."""
+        return not hasattr(data, 'stream_mode') or data.stream_mode
+    
     def update_centrifugo_config(self, stream_url: str, stream_token: str) -> None:
         """Update Centrifugo configuration (production only)."""
         if self.dev_mode:
@@ -135,13 +139,14 @@ class OrcaHandler:
         display = self._error_handler.format_error_display(error_message)
         self._buffer_manager.drain(data.response_uuid)
         
-        self._stream_client.send_delta(data.channel, data.response_uuid, data.thread_id, display)
-        
-        if self.dev_mode:
-            self._stream_client.send_completion(data.channel, data.response_uuid, data.thread_id, display)
+        if self._should_stream(data):
+            self._stream_client.send_delta(data.channel, data.response_uuid, data.thread_id, display)
+            if self.dev_mode:
+                self._stream_client.send_completion(data.channel, data.response_uuid, data.thread_id, display)
+                return
+            self._stream_client.send_error(data.channel, data.response_uuid, data.thread_id, error_message)
+        elif self.dev_mode:
             return
-        
-        self._stream_client.send_error(data.channel, data.response_uuid, data.thread_id, error_message)
         
         if hasattr(data, 'url') and data.url:
             self._persist_error(data, error_message, trace, exception)
@@ -149,17 +154,19 @@ class OrcaHandler:
     # ==================== Internal Methods ====================
     
     def _stream_chunk(self, data, content: str) -> None:
-        """Stream chunk to client."""
+        """Stream chunk to client. Skipped when stream_mode is False."""
+        if not self._should_stream(data):
+            return
         if not self.dev_mode and hasattr(data, 'stream_url') and hasattr(data, 'stream_token'):
             self.update_centrifugo_config(data.stream_url, data.stream_token)
         self._stream_client.send_delta(data.channel, data.response_uuid, data.thread_id, content)
     
     def _complete_response(self, data, full_response: str, usage_info, file_url) -> None:
         """Complete response and persist."""
-        if not self.dev_mode and hasattr(data, 'stream_url') and hasattr(data, 'stream_token'):
-            self.update_centrifugo_config(data.stream_url, data.stream_token)
-        
-        self._stream_client.send_completion(data.channel, data.response_uuid, data.thread_id, full_response)
+        if self._should_stream(data):
+            if not self.dev_mode and hasattr(data, 'stream_url') and hasattr(data, 'stream_token'):
+                self.update_centrifugo_config(data.stream_url, data.stream_token)
+            self._stream_client.send_completion(data.channel, data.response_uuid, data.thread_id, full_response)
         
         backend_data = self._response_builder.build_complete_response(
             data.response_uuid, data.thread_id, full_response, usage_info, file_url
