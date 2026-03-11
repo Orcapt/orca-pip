@@ -27,6 +27,13 @@ class Variable(BaseModel):
     type: str = ""
 
 
+class ConnectedAgent(BaseModel):
+    """An agent available for agent-to-agent communication."""
+    slug: str
+    name: str
+    description: str = ""
+
+
 class ChatMessage(BaseModel):
     """Request model for chat messages matching Orca's expected format."""
     thread_id: str
@@ -63,6 +70,7 @@ class ChatMessage(BaseModel):
     # Request processing modes (per-request configuration)
     response_mode: str = "async"  # "sync" (blocking) or "async" (non-blocking, default)
     stream_mode: bool = True      # True = stream tokens in real-time, False = no streaming
+    connected_agents: List[ConnectedAgent] = []
 
 
 class ChatResponse(BaseModel):

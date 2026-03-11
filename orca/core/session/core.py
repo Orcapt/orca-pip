@@ -7,7 +7,8 @@ Ultra-clean: Delegates to specialized operations classes.
 """
 
 import logging
-from typing import Optional
+from typing import List, Optional
+from urllib.parse import urlparse
 
 from .loading_ops import LoadingOperations
 from .image_ops import ImageOperations
@@ -115,6 +116,70 @@ class Session:
             )
         """
         return self.escalation.escalate(action=action, reason=reason)
+    
+    # ==================== Agent-to-Agent Communication ====================
+    
+    @property
+    def available_agents(self) -> list:
+        """List of connected agents available for agent-to-agent calls."""
+        return getattr(self._data, 'connected_agents', [])
+    
+    def ask_agent(self, slug: str, message: str, timeout: int = 120) -> str:
+        """
+        Ask a connected agent a question and wait for the response.
+        
+        Args:
+            slug: The slug of the target agent
+            message: The question/message to send
+            timeout: Request timeout in seconds (default: 120)
+            
+        Returns:
+            The agent's response content as a string
+            
+        Raises:
+            ValueError: If slug is not in connected_agents list
+            RuntimeError: If the request fails
+        """
+        available = [a.slug for a in self.available_agents]
+        if slug not in available:
+            raise ValueError(
+                f"Agent '{slug}' is not connected. "
+                f"Available agents: {available}"
+            )
+        
+        parsed = urlparse(self._data.url)
+        base_url = f"{parsed.scheme}://{parsed.netloc}"
+        ask_url = f"{base_url}/api/internal/v1/agents/{slug}/ask"
+        
+        payload = {
+            'message': message,
+            'thread_id': self._data.thread_id,
+            'conversation_id': self._data.conversation_id,
+        }
+        
+        headers = getattr(self._data, 'headers', {}) or {}
+        
+        import requests
+        try:
+            logger.info(f"Asking agent '{slug}': {message[:100]}...")
+            resp = requests.post(
+                ask_url,
+                json=payload,
+                headers={
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    **headers,
+                },
+                timeout=timeout,
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            content = data.get('content', '')
+            logger.info(f"Agent '{slug}' responded ({len(content)} chars)")
+            return content
+        except requests.exceptions.RequestException as e:
+            logger.error(f"Agent-to-agent call to '{slug}' failed: {e}")
+            raise RuntimeError(f"Failed to get response from agent '{slug}': {e}") from e
     
     # ==================== Wrapper for Delegation ====================
     

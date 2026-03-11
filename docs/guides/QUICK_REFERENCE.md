@@ -129,12 +129,14 @@ User session interface returned by `handler.begin(data)`.
 - `tracing` - Tracing operations
 - `usage` - Usage tracking operations
 - `button` - Button management
+- `available_agents` - List of connected agents for agent-to-agent calls
 
 **Methods:**
 
 - `stream(content)` - Stream content
 - `close(usage_info, file_url)` - Close session
 - `error(error_message, exception, trace)` - Send error
+- `ask_agent(slug, message, timeout)` - Ask a connected agent a question (see [Agent-to-Agent Guide](AGENT_TO_AGENT_GUIDE.md))
 
 ## 🎨 Advanced Features
 
@@ -171,6 +173,20 @@ session.video.send("https://example.com/video.mp4")
 # Send YouTube video
 session.video.youtube("https://www.youtube.com/watch?v=...")
 ```
+
+### Agent-to-Agent Communication
+
+```python
+# List connected agents
+for agent in session.available_agents:
+    print(f"{agent.slug}: {agent.name}")
+
+# Ask a connected agent a question
+response = session.ask_agent("legal-advisor", "Is this clause valid?")
+session.stream(f"Legal says: {response}")
+```
+
+> Full guide: [Agent-to-Agent Guide](AGENT_TO_AGENT_GUIDE.md)
 
 ### Location Operations
 
