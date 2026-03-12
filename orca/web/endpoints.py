@@ -212,30 +212,38 @@ def add_standard_endpoints(
                     raise HTTPException(status_code=400, detail=f"Failed to process file: {e}")
             
             # SYNC MODE: Process synchronously and return complete response
-            # This is used by webhooks that need to wait for the full response
+            # This is used by agent-to-agent calls and webhooks that need the full response.
+            # We temporarily enable stream_mode and force dev mode so the OrcaHandler
+            # uses DevStreamClient (in-memory) instead of Centrifugo, allowing us to
+            # capture the response content and return it in the HTTP response body.
             if data.response_mode == "sync" and not data.stream_mode:
                 logger.info("🔄 Sync mode: Processing synchronously (no streaming)")
                 from ..infrastructure.dev_stream_client import DevStreamClient
                 
                 try:
-                    # Wait for sleep_time if specified
                     if data.sleep_time and data.sleep_time > 0:
                         logger.info(f"⏳ Sync mode: Waiting {data.sleep_time} seconds before processing...")
                         await asyncio.sleep(data.sleep_time)
                     
-                    # Clear any existing stream data for this channel
+                    # Force stream_mode on and dev mode so OrcaHandler uses DevStreamClient
+                    # which stores content in-memory for us to read back.
+                    data.stream_mode = True
+                    original_dev = os.environ.get('ORCA_DEV_MODE', 'false')
+                    os.environ['ORCA_DEV_MODE'] = 'true'
+                    
                     DevStreamClient.clear_stream(data.channel)
                     
-                    # Process message synchronously (await directly, not in background thread)
-                    await process_message_func(data)
+                    try:
+                        await process_message_func(data)
+                    finally:
+                        os.environ['ORCA_DEV_MODE'] = original_dev
+                        data.stream_mode = False
                     
-                    # Get the complete response from DevStreamClient
                     stream_data = DevStreamClient.get_stream(data.channel)
                     full_response = stream_data.get('full_response', '')
                     
                     logger.info(f"✅ Sync mode: Processing complete, response length: {len(full_response)} chars")
                     
-                    # Clean up
                     DevStreamClient.clear_stream(data.channel)
                     
                     return {
@@ -247,7 +255,8 @@ def add_standard_endpoints(
                     }
                 except Exception as e:
                     logger.error(f"❌ Sync mode processing error: {e}")
-                    # Clean up on error
+                    os.environ['ORCA_DEV_MODE'] = os.environ.get('ORCA_DEV_MODE', 'false')
+                    data.stream_mode = False
                     DevStreamClient.clear_stream(data.channel)
                     return {
                         "status": "error",

@@ -174,7 +174,15 @@ class Session:
             )
             resp.raise_for_status()
             data = resp.json()
-            content = data.get('content', '')
+            logger.info(f"Agent '{slug}' raw response: {resp.text[:500]}")
+
+            content = (
+                data.get('content')
+                or data.get('result', {}).get('content')
+                or data.get('result', {}).get('message', {}).get('content')
+                or data.get('data', {}).get('content')
+                or ''
+            )
             logger.info(f"Agent '{slug}' responded ({len(content)} chars)")
             return content
         except requests.exceptions.RequestException as e:
