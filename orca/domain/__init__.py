@@ -6,7 +6,7 @@ Domain models and interfaces.
 Contains business entities and contracts.
 """
 
-from .models import ChatResponse, ChatMessage, Variable, Memory
+from .models import ChatResponse, ChatMessage, Variable, Memory, KnowledgeStore, ConnectedAgent
 from .interfaces import (
     IStreamClient,
     IBufferManager,
@@ -25,6 +25,8 @@ __all__ = [
     'ChatMessage',
     'Variable',
     'Memory',
+    'KnowledgeStore',
+    'ConnectedAgent',
     # Interfaces
     'IStreamClient',
     'IBufferManager',

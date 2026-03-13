@@ -34,6 +34,13 @@ class ConnectedAgent(BaseModel):
     description: str = ""
 
 
+class KnowledgeStore(BaseModel):
+    """A knowledge store available for RAG retrieval via Google File Search."""
+    store_id: str
+    name: str
+    provider: str = "google_file_search"
+
+
 class ChatMessage(BaseModel):
     """Request model for chat messages matching Orca's expected format."""
     thread_id: str
@@ -71,6 +78,7 @@ class ChatMessage(BaseModel):
     response_mode: str = "async"  # "sync" (blocking) or "async" (non-blocking, default)
     stream_mode: bool = True      # True = stream tokens in real-time, False = no streaming
     connected_agents: List[ConnectedAgent] = []
+    knowledge_stores: List[KnowledgeStore] = []
 
 
 class ChatResponse(BaseModel):

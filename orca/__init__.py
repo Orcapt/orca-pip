@@ -21,7 +21,7 @@ from .config import VERSION as __version__
 from .core import OrcaHandler, Session
 
 # Domain models
-from .domain import ChatResponse, ChatMessage, Variable, Memory
+from .domain import ChatResponse, ChatMessage, Variable, Memory, KnowledgeStore, ConnectedAgent
 
 # Adapters
 from .adapters import LambdaAdapter, create_lambda_handler
@@ -34,6 +34,7 @@ from .utils import (
     Variables,
     MemoryHelper,
     ChatHistoryHelper,
+    KnowledgeStores,
     ForceToolsHelper,
     decode_base64_file,
     create_success_response,
@@ -111,6 +112,8 @@ __all__ = [
     'ChatMessage',
     'Variable',
     'Memory',
+    'KnowledgeStore',
+    'ConnectedAgent',
     # Helpers & Utils
     'create_link_button_block',
     'create_action_button_block',
@@ -123,6 +126,7 @@ __all__ = [
     'Variables',
     'MemoryHelper',
     'ChatHistoryHelper',
+    'KnowledgeStores',
     'ForceToolsHelper',
     'decode_base64_file',
     # Infrastructure

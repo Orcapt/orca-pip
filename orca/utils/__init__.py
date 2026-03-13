@@ -24,6 +24,9 @@ from .memory import MemoryHelper
 # Chat History
 from .chat_history import ChatHistoryHelper
 
+# Knowledge Stores
+from .knowledge import KnowledgeStores
+
 # Tools
 from .tools import ForceToolsHelper
 
@@ -50,6 +53,8 @@ __all__ = [
     'MemoryHelper',
     # Chat History
     'ChatHistoryHelper',
+    # Knowledge Stores
+    'KnowledgeStores',
     # Tools
     'ForceToolsHelper',
     # Files
