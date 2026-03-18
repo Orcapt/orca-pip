@@ -1,788 +1,156 @@
 # API Reference
 
-Complete API reference for Orca SDK domain models and interfaces.
+Current API reference for `orca-platform-sdk-ui` (`import orca`).
 
-## Table of Contents
+## Core Models
 
-- [Domain Models](#domain-models)
-- [Core Classes](#core-classes)
-- [Factories](#factories)
-- [Interfaces](#interfaces)
-- [Configuration](#configuration)
-
-## Domain Models
-
-### ChatMessage
-
-Primary data model for chat interactions.
-
-```python
-from orca import ChatMessage
-
-message = ChatMessage(
-    message="Hello, world!",
-    response_uuid="uuid-123",
-    thread_id="thread-456",
-    model="gpt-4",
-    conversation_id=789,
-    message_uuid="msg-uuid",
-    channel="general",
-    variables=[],
-    stream_url="https://stream.example.com",
-    stream_token="token-xyz",
-    url="https://api.example.com"
-)
-```
-
-**Fields:**
-
-| Field                    | Type                    | Required | Description                                  |
-| ------------------------ | ----------------------- | -------- | -------------------------------------------- |
-| `message`                | `str`                   | Yes      | User message content                         |
-| `response_uuid`          | `str`                   | Yes      | Unique response identifier                   |
-| `thread_id`              | `str`                   | Yes      | Thread identifier                            |
-| `model`                  | `str`                   | Yes      | AI model identifier                          |
-| `conversation_id`        | `int`                   | Yes      | Conversation ID                              |
-| `user_id_external`       | `Optional[str]`         | No       | External user ID                             |
-| `message_uuid`           | `str`                   | Yes      | Message unique ID                            |
-| `channel`                | `str`                   | Yes      | Communication channel                        |
-| `variables`              | `List[Variable]`        | Yes      | Context variables                            |
-| `url`                    | `str`                   | Yes      | Backend API URL                              |
-| `headers`                | `Optional[Dict[str,str]]` | No    | Optional HTTP headers                        |
-| `stream_url`             | `Optional[str]`         | No       | Streaming endpoint URL                       |
-| `stream_token`           | `Optional[str]`         | No       | Streaming auth token                         |
-| `chat_history`           | `List[Dict]`            | No       | Conversation history (LangChain format)      |
-| `memory`                 | `Memory/Dict/List`      | No       | Long-term user memory                        |
-| `project_system_message` | `Optional[str]`         | No       | Project-level system instructions            |
-| `project_id`             | `str`                   | No       | Project UUID                                 |
-| `project_files`          | `Any`                   | No       | Project attached files payload               |
-| `isData`                 | `Optional[bool]`        | No       | Data message flag for backend processing     |
-| `url_error`              | `str`                   | No       | Error logging endpoint                       |
-| `url_user_show`          | `str`                   | No       | User info endpoint                           |
-| `response_mode`          | `str`                   | No       | Request mode (`sync` or `async`)             |
-| `stream_mode`            | `bool`                  | No       | Real-time streaming on/off                   |
-
-**Note:** The `chat_history` field contains the conversation history in LangChain-compatible format:
-`[{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]`.
-Use `ChatHistoryHelper` to easily work with this data.
-
-### Variable
-
-Context variable for agent execution.
+### `Variable`
 
 ```python
 from orca import Variable
 
-var = Variable(
-    key="user_name",
-    value="John Doe",
-    type="string"
-)
+v = Variable(name="OPENAI_API_KEY", value="...", type="secret")
 ```
 
-**Fields:**
+Fields:
+- `name: str`
+- `value: str`
+- `id: str = ""`
+- `type: str = ""`
 
-| Field   | Type  | Required | Description        |
-| ------- | ----- | -------- | ------------------ |
-| `key`   | `str` | Yes      | Variable name/key  |
-| `value` | `Any` | Yes      | Variable value     |
-| `type`  | `str` | No       | Variable type hint |
+### `ConnectedAgent`
 
-### Memory
+Fields:
+- `slug: str`
+- `name: str`
+- `description: str = ""`
 
-Long-term memory storage for agents.
+### `KnowledgeStore`
+
+Fields:
+- `store_id: str`
+- `name: str`
+- `provider: str = "google_file_search"`
+
+### `ChatMessage`
 
 ```python
-from orca import Memory
-
-memory = Memory(
-    key="user_preference",
-    value={"theme": "dark", "language": "en"},
-    timestamp=1234567890,
-    metadata={"source": "settings"}
-)
+from orca import ChatMessage
 ```
 
-**Fields:**
+Common fields used by SDK operations:
+- `thread_id`, `model`, `message`, `conversation_id`
+- `response_uuid`, `message_uuid`, `channel`
+- `variables: list[Variable]`
+- `url`, `url_update`, `url_upload`
+- `headers: dict[str, str] | None`
+- `stream_url`, `stream_token`
+- `chat_history`, `memory`
+- `connected_agents`, `knowledge_stores`
+- `response_mode: "sync" | "async"` (default `async`)
+- `stream_mode: bool` (default `True`)
 
-| Field       | Type   | Required | Description           |
-| ----------- | ------ | -------- | --------------------- |
-| `key`       | `str`  | Yes      | Memory key/identifier |
-| `value`     | `Any`  | Yes      | Stored value          |
-| `timestamp` | `int`  | No       | Creation timestamp    |
-| `metadata`  | `Dict` | No       | Additional metadata   |
-
-## Core Classes
-
-### OrcaHandler
-
-Main handler for Orca communication.
+## `OrcaHandler`
 
 ```python
 from orca import OrcaHandler
 
-handler = OrcaHandler(
-    dev_mode=False,
-    stream_client=None,
-    api_client=None,
-    buffer_manager=None,
-    button_renderer=None,
-    loading_marker_provider=None,
-    usage_tracker=None,
-    tracing_service=None,
-    error_handler=None,
-    response_builder=None
-)
-```
-
-**Parameters:**
-
-| Parameter                 | Type                     | Default | Description             |
-| ------------------------- | ------------------------ | ------- | ----------------------- |
-| `dev_mode`                | `bool`                   | `None`  | Development mode flag   |
-| `stream_client`           | `IStreamClient`          | `None`  | Custom stream client    |
-| `api_client`              | `IAPIClient`             | `None`  | Custom API client       |
-| `buffer_manager`          | `IBufferManager`         | `None`  | Custom buffer manager   |
-| `button_renderer`         | `IButtonRenderer`        | `None`  | Custom button renderer  |
-| `loading_marker_provider` | `ILoadingMarkerProvider` | `None`  | Custom loading provider |
-| `usage_tracker`           | `IUsageTracker`          | `None`  | Custom usage tracker    |
-| `tracing_service`         | `ITracingService`        | `None`  | Custom tracing service  |
-| `error_handler`           | `IErrorHandler`          | `None`  | Custom error handler    |
-| `response_builder`        | `IResponseBuilder`       | `None`  | Custom response builder |
-
-**Methods:**
-
-#### `begin(data: Any) -> Session`
-
-Start a streaming session.
-
-```python
+handler = OrcaHandler(dev_mode=False)
 session = handler.begin(data)
 ```
 
-#### `stream(data: Any, content: str) -> None`
-
-Stream content to client.
-
-```python
-handler.stream(data, "Hello!")
-```
-
-#### `close(data: Any, usage_info=None, file_url=None) -> str`
-
-Close session and finalize response.
-
-```python
-full_response = handler.close(data, usage_info=usage_info)
-```
-
-#### `send_error(data: Any, error_message: str, trace=None, exception=None) -> None`
-
-Send error to client.
-
-```python
-handler.send_error(data, "An error occurred", exception=e)
-```
-
-### Session
-
-Session interface for agent interactions.
-
-```python
-# Get session from handler
-session = handler.begin(data)
-```
-
-**Properties:**
-
-| Property   | Type                 | Description                  |
-| ---------- | -------------------- | ---------------------------- |
-| `loading`  | `LoadingOperations`  | Loading indicator operations |
-| `image`    | `ImageOperations`    | Image passing operations     |
-| `video`    | `VideoOperations`    | Video operations             |
-| `location` | `LocationOperations` | Location operations          |
-| `card`     | `CardListOperations` | Card list operations         |
-| `audio`    | `AudioOperations`    | Audio operations             |
-| `tracing`  | `TracingOperations`  | Tracing operations           |
-| `usage`    | `UsageOperations`    | Usage tracking operations    |
-| `button`   | `ButtonHelper`       | Button management            |
-
-**Methods:**
-
-#### `stream(content: str) -> None`
-
-Stream content to user.
-
-```python
-session.stream("Hello, world!")
-```
-
-#### `close(usage_info=None, file_url=None) -> str`
-
-Close session.
-
-```python
-session.close()
-```
-
-#### `error(error_message: str, exception=None, trace=None) -> None`
-
-Send error message.
-
-```python
-session.error("An error occurred", exception=e)
-```
-
-### LoadingOperations
-
-Loading indicator management.
-
-```python
-# Access via session
-session.loading.start("thinking")
-session.loading.end("thinking")
-```
-
-**Methods:**
-
-#### `start(kind: str = "thinking") -> None`
-
-Start loading indicator.
-
-```python
-session.loading.start("thinking")
-session.loading.start("searching")
-session.loading.start("coding")
-```
-
-#### `end(kind: str = "thinking") -> None`
-
-Stop loading indicator.
-
-```python
-session.loading.end("thinking")
-```
-
-### ImageOperations
-
-Image passing to frontend. Supports both image URLs and base64 strings.
-
-```python
-# With URL
-session.image.send("https://example.com/image.jpg")
-
-# With base64 string
-session.image.send("data:image/png;base64,iVBORw0KGgo...")
-```
-
-**Methods:**
-
-#### `send(image_input: str) -> None`
-
-Pass image URL or base64 string to frontend. If a base64 string is provided, it will be automatically uploaded to the media API and the permanent URL will be used.
-
-**Parameters:**
-- `image_input`: Image URL (http/https) or base64 string (with or without `data:image/...` prefix)
-
-**Examples:**
-
-```python
-# With URL
-session.image.send("https://cdn.example.com/result.png")
-
-# With base64 (data URI format)
-session.image.send("data:image/png;base64,iVBORw0KGgo...")
-
-# With raw base64 string
-session.image.send("iVBORw0KGgo...")
-```
-
-**Note:** When a base64 string is provided, the function automatically:
-- Uploads the image to `/api/v1/media` endpoint
-- Retrieves the permanent S3 URL
-- Includes `conversation_id` from the request context (if available)
-- Wraps the URL in Orca markers for frontend display
-
-#### `pass_image(url: str) -> None`
-
-Alias for `send()`.
-
-```python
-session.image.pass_image("https://cdn.example.com/result.png")
-```
-
-### VideoOperations
-
-Video playback operations.
-
-```python
-session.video.send("https://example.com/video.mp4")
-session.video.youtube("https://www.youtube.com/watch?v=...")
-```
-
-**Methods:**
-
-#### `send(url: str) -> None`
-
-Send video URL for playback.
-
-```python
-session.video.send("https://example.com/video.mp4")
-```
-
-#### `youtube(url: str) -> None`
-
-Send YouTube video URL for embedded playback.
-
-```python
-session.video.youtube("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-```
-
-### LocationOperations
-
-Location and map operations.
-
-```python
-session.location.send("35.6892, 51.3890")
-session.location.send_coordinates(35.6892, 51.3890)
-```
-
-**Methods:**
-
-#### `send(coordinates: str) -> None`
-
-Send location coordinates as string.
-
-```python
-session.location.send("35.6892, 51.3890")
-```
-
-#### `send_coordinates(lat: float, lng: float) -> None`
-
-Send location using latitude and longitude.
-
-```python
-session.location.send_coordinates(35.6892, 51.3890)
-```
-
-### CardListOperations
-
-Card list display operations.
-
-```python
-cards = [
-    {"photo": "https://example.com/img.jpg", "header": "Title", "text": "Content"}
-]
-session.card.send(cards)
-```
-
-**Methods:**
-
-#### `send(cards: List[Dict[str, Any]]) -> None`
-
-Send card list for display.
-
-```python
-cards = [
-    {
-        "photo": "https://example.com/card1.jpg",
-        "header": "Card Title",
-        "subheader": "Subtitle",
-        "text": "Description"
-    }
-]
-session.card.send(cards)
-```
-
-### AudioOperations
-
-Audio playback operations.
-
-```python
-tracks = [{"url": "https://example.com/audio.mp3", "label": "Track 1"}]
-session.audio.send(tracks)
-session.audio.send_single("https://example.com/audio.mp3", label="Track")
-```
-
-**Methods:**
-
-#### `send(tracks: List[Dict[str, str]]) -> None`
-
-Send audio tracks for playback.
-
-```python
-tracks = [
-    {"url": "https://example.com/audio1.mp3", "label": "Track 1", "type": "audio/mpeg"},
-    {"url": "https://example.com/audio2.mp3", "label": "Track 2"}
-]
-session.audio.send(tracks)
-```
-
-#### `send_single(url: str, label: str = None, mime_type: str = None) -> None`
-
-Send single audio track.
-
-```python
-session.audio.send_single(
-    "https://example.com/audio.mp3",
-    label="My Track",
-    mime_type="audio/mpeg"
-)
-```
-
-### TracingOperations
-
-Progressive tracing for transparency.
-
-```python
-session.tracing.begin("Processing", visibility="all")
-session.tracing.append("Step 1...")
-session.tracing.end("Complete")
-```
-
-**Methods:**
-
-#### `begin(message: str, visibility: str = "all") -> None`
-
-Start tracing block.
-
-```python
-session.tracing.begin("Analyzing input", visibility="all")
-```
-
-#### `append(message: str) -> None`
-
-Append to tracing.
-
-```python
-session.tracing.append("Step 1: Parsing data")
-```
-
-#### `end(message: str = None) -> None`
-
-End tracing block.
-
-```python
-session.tracing.end("Analysis complete")
-```
-
-### UsageOperations
-
-Track token usage and costs.
-
-```python
-session.usage.track(
-    tokens=1500,
-    token_type="gpt4",
-    cost="0.03",
-    label="OpenAI GPT-4"
-)
-```
-
-**Methods:**
-
-#### `track(tokens: int, token_type: str, cost: str = None, label: str = None) -> None`
-
-Track usage.
-
-```python
-session.usage.track(
-    tokens=1500,
-    token_type="gpt4",
-    cost="0.03",
-    label="OpenAI GPT-4"
-)
-```
-
-### ButtonHelper
-
-Button management for interactive UI.
-
-```python
-# Link button
-session.button.link("Visit", "https://example.com")
-
-# Action button
-session.button.action("Regenerate", "regenerate")
-```
-
-**Methods:**
-
-#### `link(label: str, url: str, row: int = 1, color: str = None) -> None`
-
-Add link button.
-
-```python
-session.button.link("Learn More", "https://docs.example.com")
-session.button.link("GitHub", "https://github.com/repo", color="primary")
-```
-
-#### `action(label: str, action_id: str, row: int = 1, color: str = None) -> None`
-
-Add action button.
-
-```python
-session.button.action("Regenerate", "regenerate")
-session.button.action("Delete", "delete", color="danger")
-```
+Constructor:
+- `OrcaHandler(dev_mode=None, stream_client=None, api_client=None, buffer_manager=None, button_renderer=None, loading_marker_provider=None, usage_tracker=None, tracing_service=None, error_handler=None, response_builder=None)`
+
+Main methods:
+- `begin(data) -> Session`
+- `stream(data, content: str) -> None`
+- `close(data, usage_info=None, file_url=None) -> str`
+- `send_error(data, error_message: str, trace=None, exception=None) -> None`
+- `update_centrifugo_config(stream_url: str, stream_token: str) -> None`
+
+## `Session`
+
+Created by `handler.begin(data)`.
+
+Core methods:
+- `stream(content: str) -> None`
+- `close(usage_info=None, file_url=None) -> str`
+- `error(error_message: str, exception=None, trace=None) -> None`
+- `escalate(action="human_handoff", reason=None) -> bool`
+- `ask_agent(slug: str, message: str, timeout: int = 120) -> str`
+
+Properties:
+- `loading`, `image`, `video`, `location`, `card`, `audio`, `html`
+- `tracing`, `usage`, `button`, `escalation`
+- `available_agents`
 
 ## Factories
 
-Higher-level functions to quickly bootstrap AI agents.
-
-### create_agent_app
-
-Creates a standard FastAPI application with Orca endpoints.
+### `create_agent_app`
 
 ```python
 from orca import create_agent_app
 
-app = create_agent_app(
-    process_message_func=my_logic,
-    app_title="My Agent API",
-    app_version="1.0.4",
-    dev_mode=False
+app, handler = create_agent_app(
+    process_message_func=my_async_handler,
+    title="My Agent",
 )
 ```
 
-**Parameters:**
+Signature:
+- `create_agent_app(process_message_func, title="Orca AI Agent", version=None, description="AI agent with Orca platform integration", level=logging.INFO) -> tuple[FastAPI, OrcaHandler]`
 
-| Parameter              | Type       | Default      | Description                     |
-| ---------------------- | ---------- | ------------ | ------------------------------- |
-| `process_message_func` | `Callable` | **Required** | Async function to handle msg    |
-| `app_title`            | `str`      | `Orca Agent` | FastAPI app title               |
-| `app_version`          | `str`      | `1.0.4`      | FastAPI app version             |
-| `dev_mode`             | `bool`     | `False`      | Development mode flag           |
-
----
-
-### create_hybrid_handler
-
-Creates a unified handler for AWS Lambda environment.
+### `create_hybrid_handler`
 
 ```python
 from orca import create_hybrid_handler
 
-handler = create_hybrid_handler(
-    process_message_func=my_logic,
-    app_title="My Lambda Agent",
-    dev_mode=False
-)
+handler = create_hybrid_handler(process_message_func=my_async_handler)
 ```
 
-**Parameters:**
-
-| Parameter              | Type       | Default | Description                  |
-| ---------------------- | ---------- | ------- | ---------------------------- |
-| `process_message_func` | `Callable` | **Required** | Async function to handle msg |
-| `app_title`            | `str`      | `Orca Hybrid Agent` | App title (for HTTP mode) |
-| `dev_mode`             | `bool`     | `False` | Development mode flag        |
-
----
-
-## Interfaces
-
-### IStreamClient
-
-Stream client interface.
-
-```python
-from orca.domain.interfaces import IStreamClient
-
-class CustomStreamClient(IStreamClient):
-    def update_config(self, stream_url: str, stream_token: str):
-        pass
-
-    def send_delta(self, channel: str, uuid: str, thread_id: str, delta: str):
-        pass
-
-    def send_completion(self, channel: str, uuid: str, thread_id: str, full_response: str):
-        pass
-
-    def send_error(self, channel: str, uuid: str, thread_id: str, error_message: str):
-        pass
-```
-
-### IAPIClient
-
-API client interface.
-
-```python
-from orca.domain.interfaces import IAPIClient
-
-class CustomAPIClient(IAPIClient):
-    def get(self, url: str, params=None, headers=None):
-        pass
-
-    def post(self, url: str, data=None, headers=None):
-        pass
-```
-
-## Configuration
-
-### LoadingKind
-
-Loading indicator types.
-
-```python
-from orca.config import LoadingKind
-
-LoadingKind.THINKING      # "thinking"
-LoadingKind.SEARCHING     # "searching"
-LoadingKind.CODING        # "coding"
-LoadingKind.ANALYZING     # "analyzing"
-LoadingKind.GENERATING    # "generating"
-LoadingKind.CUSTOM        # "custom"
-```
-
-### ButtonColor
-
-Button colors.
-
-```python
-from orca.config import ButtonColor
-
-ButtonColor.PRIMARY       # "primary"
-ButtonColor.SECONDARY     # "secondary"
-ButtonColor.SUCCESS       # "success"
-ButtonColor.DANGER        # "danger"
-ButtonColor.WARNING       # "warning"
-ButtonColor.INFO          # "info"
-ButtonColor.LIGHT         # "light"
-ButtonColor.DARK          # "dark"
-```
-
-### TokenType
-
-Token types for tracking.
-
-```python
-from orca.config import TokenType
-
-TokenType.GPT4            # "gpt4"
-TokenType.GPT35           # "gpt35"
-TokenType.CLAUDE          # "claude"
-TokenType.CUSTOM          # "custom"
-```
+Returns a Lambda-compatible handler that routes HTTP/SQS/Cron events.
 
 ## Conversation SDK
 
-### OrcaConversation
-
-Client for the external conversation API. Supports two initialisation modes: from a `ChatMessage` request (inside an agent) or with explicit token/URL (standalone).
+### `OrcaConversation`
 
 ```python
 from orca import OrcaConversation
-
-# Standalone
-conv = OrcaConversation(
-    token="workspace-token",
-    base_url="https://api.orcaplatform.ai/v1/external"
-)
-
-# From ChatMessage (inside an agent)
-conv = OrcaConversation(data=data)
 ```
 
-**Parameters:**
+Constructor:
+- `OrcaConversation(token=None, base_url=None, data=None, timeout=30)`
 
-| Parameter  | Type          | Required | Description                                     |
-| ---------- | ------------- | -------- | ----------------------------------------------- |
-| `token`    | `str`         | No*      | Workspace token (`X-Workspace` header)          |
-| `base_url` | `str`         | No*      | External API base URL                           |
-| `data`     | `ChatMessage` | No*      | Request data to auto-derive config from         |
-| `timeout`  | `int`         | No       | Request timeout in seconds (default: 30)        |
+Methods:
+- `create(project_uuid, title, model, user_id_external, content=None, force_search=False, active_analysis=False, file=None)`
+- `rename(thread_id, title)`
+- `list(project_uuid, search=None, model=None, user=None)` *(depends on backend routes)*
+- `get(project_uuid, thread_id)` *(depends on backend routes)*
+- `delete(project_uuid, thread_id)` *(depends on backend routes)*
+- `list_messages(thread_id)`
+- `send_message(thread_id, content=None, model=None, force_search=None, active_analysis=None, file=None, is_data=False)`
 
-*At least one of `token` or `data` (with `X-Workspace` in headers) must be provided.
+Exception:
+- `ConversationException` (status + parsed response payload)
 
-### Conversation Methods
+## Storage SDK
 
-#### `create(project_uuid, title, model, user_id_external, content=None, force_search=False, active_analysis=False, file=None) -> Dict`
-
-Create a new conversation in a project.
+### `OrcaStorage`
 
 ```python
-result = conv.create(
-    project_uuid="abc-123",
-    title="New Chat",
-    model="gpt-4",
-    user_id_external="ext-user-1",
-    content="Hello!"
-)
+from orca import OrcaStorage
 ```
 
-#### `rename(thread_id, title) -> Dict`
+Constructor:
+- `OrcaStorage(workspace, token, base_url="http://localhost:8000/api/v1/storage", mode="dev", timeout=30)`
 
-Rename an existing conversation.
+Bucket methods:
+- `create_bucket`, `list_buckets`, `get_bucket_info`, `delete_bucket`
 
-```python
-conv.rename(thread_id="abc-thread-id", title="Updated Title")
-```
+File methods:
+- `upload_file`, `upload_buffer`, `list_files`, `download_file`
+- `get_download_url`, `get_file_info`, `delete_file`
 
-#### `list(project_uuid, search=None, model=None, user=None) -> Dict`
-
-List conversations in a project with optional filters.
-
-```python
-result = conv.list(project_uuid="abc-123", search="support")
-```
-
-#### `get(project_uuid, thread_id) -> Dict`
-
-Get a single conversation.
-
-```python
-result = conv.get(project_uuid="abc-123", thread_id="abc-thread-id")
-```
-
-#### `delete(project_uuid, thread_id) -> Dict`
-
-Delete a conversation.
-
-```python
-conv.delete(project_uuid="abc-123", thread_id="abc-thread-id")
-```
-
-### Message Methods
-
-#### `list_messages(thread_id) -> Dict`
-
-List all messages in a conversation.
-
-```python
-result = conv.list_messages(thread_id="abc-thread-id")
-```
-
-#### `send_message(thread_id, content=None, model=None, force_search=None, active_analysis=None, file=None, is_data=False) -> Dict`
-
-Send (inject) a message into an existing conversation.
-
-```python
-result = conv.send_message(
-    thread_id="abc-thread-id",
-    content="Hello!",
-    model="gpt-4",
-    is_data=False
-)
-```
-
-### ConversationException
-
-Exception raised on API errors.
-
-```python
-from orca.conversation import ConversationException
-
-try:
-    conv.create(...)
-except ConversationException as e:
-    print(e.status_code)  # HTTP status code
-    print(e.response)     # Parsed error response body
-```
-
-## See Also
-
-- [Quick Reference](QUICK_REFERENCE.md) - Quick examples
-- [Developer Guide](DEVELOPER_GUIDE.md) - Complete guide
-- [Patterns Guide](PATTERNS_GUIDE.md) - Design patterns
-- [Conversation SDK Guide](CONVERSATION_SDK_GUIDE.md) - Full conversation guide
+Permission methods:
+- `add_permission`, `list_permissions`, `remove_permission`

@@ -48,10 +48,10 @@ Orca Storage provides a workspace-scoped API for file storage with S3-compatible
 
 ### Installation
 
-The storage SDK is included with `orca`:
+The storage SDK is included with `orca-platform-sdk-ui`:
 
 ```bash
-pip install orca
+pip install orca-platform-sdk-ui
 ```
 
 ### Quick Start

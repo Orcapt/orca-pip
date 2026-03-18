@@ -176,7 +176,7 @@ async def process_msg(data: ChatMessage):
 
     session.close()
 
-app = create_agent_app(process_msg)
+app, _ = create_agent_app(process_msg)
 ```
 
 ### Example 2: Multi-Agent Pipeline

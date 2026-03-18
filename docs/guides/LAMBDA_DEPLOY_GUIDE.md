@@ -2,7 +2,7 @@
 
 This document is written for external agent developers who have:
 
-- The **`orca` PyPI package** (`pip install orca`)
+- The **`orca-platform-sdk-ui` PyPI package** (`pip install orca-platform-sdk-ui`)
 - Access to the hosted **`orca-cli`** and platform APIs
 - Their agent code (using `OrcaHandler`)
 
@@ -287,9 +287,9 @@ Need more help? Collect the latest CloudWatch log stream and open a ticket with 
 
 ## 11. Deployment Checklist
 
-- [ ] `lambda_handler.py` created with `LambdaAdapter`
-- [ ] `@adapter.message_handler` decorator wraps your agent logic
-- [ ] `requirements-lambda.txt` includes `orca-platform-sdk-ui>=1.0.4` and your providers
+- [ ] `lambda_handler.py` created with `create_hybrid_handler(...)`
+- [ ] Your async `process_message` function is passed into the factory
+- [ ] `requirements-lambda.txt` includes `orca-platform-sdk-ui>=1.0.16` and your providers
 - [ ] `Dockerfile.lambda` builds successfully locally
 - [ ] `.env.lambda` created with all required variables (never commit!)
 - [ ] Docker image built: `docker build -f Dockerfile.lambda -t my-agent:latest .`

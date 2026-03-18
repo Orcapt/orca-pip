@@ -909,7 +909,7 @@ async def process_msg(data: ChatMessage):
     session.close()
 
 # 2. Create the app
-app = create_agent_app(
+app, _ = create_agent_app(
     process_message_func=process_msg,
     app_title="My Agent API"
 )
