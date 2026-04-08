@@ -268,6 +268,19 @@ api_key = vars.get("api_key")
 db_url = vars.get("db_url", default="localhost")
 ```
 
+### Outbound Data
+
+When processing outbound campaign messages, contact data from the uploaded CSV is available:
+
+```python
+if data.outbound_data:
+    name = data.outbound_data.get("name")
+    phone = data.outbound_data.get("phone")
+    # Columns are dynamic based on the uploaded CSV
+```
+
+For normal conversations, `data.outbound_data` is `None`.
+
 ### Memory Helper
 
 ```python

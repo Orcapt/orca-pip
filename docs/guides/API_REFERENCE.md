@@ -50,6 +50,7 @@ message = ChatMessage(
 | `stream_token`    | `str`            | Yes      | Streaming auth token       |
 | `url`             | `str`            | Yes      | Backend API URL            |
 | `headers`         | `Dict`           | No       | Optional HTTP headers      |
+| `outbound_data`   | `Dict[str, Any]` | No       | Outbound campaign contact data (`None` for normal conversations) |
 
 ### Variable
 

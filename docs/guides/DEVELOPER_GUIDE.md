@@ -839,6 +839,7 @@ class ChatMessage(BaseModel):
     stream_url: Optional[str]         # Centrifugo URL
     stream_token: Optional[str]       # Centrifugo token
     headers: Optional[Dict[str, str]] # Request headers (e.g., x-tenant)
+    outbound_data: Optional[Dict[str, Any]] # Outbound campaign contact data (None for normal conversations)
 ```
 
 #### Variable
@@ -1313,6 +1314,52 @@ async def process_message(data: ChatMessage):
 
     except Exception as e:
         session.error(f"Image generation failed: {str(e)}", exception=e)
+```
+
+### Example 8: Outbound Campaign
+
+When a message originates from an outbound campaign, `data.outbound_data` contains the contact's data from the uploaded CSV (dynamic columns). For normal conversations this field is `None`.
+
+```python
+from openai import OpenAI
+from orca import OrcaHandler, ChatMessage, Variables
+
+orca = OrcaHandler()
+
+async def process_message(data: ChatMessage):
+    session = orca.begin(data)
+    vars = Variables(data.variables)
+    client = OpenAI(api_key=vars.get("OPENAI_API_KEY"))
+
+    try:
+        session.loading.start("composing message")
+
+        messages = [{"role": "system", "content": data.system_message or "You are a helpful assistant."}]
+
+        if data.outbound_data:
+            contact_info = "\n".join(f"- {k}: {v}" for k, v in data.outbound_data.items())
+            messages.append({
+                "role": "system",
+                "content": f"This is an outbound campaign message. Contact information:\n{contact_info}\n\nUse this data to personalize your response."
+            })
+
+        messages.append({"role": "user", "content": data.message})
+
+        response = client.chat.completions.create(
+            model=data.model,
+            messages=messages,
+            stream=True
+        )
+
+        session.loading.stop()
+        for chunk in response:
+            if chunk.choices[0].delta.content:
+                session.stream(chunk.choices[0].delta.content)
+
+        session.close()
+
+    except Exception as e:
+        session.error(str(e), exception=e)
 ```
 
 ---
